@@ -205,21 +205,21 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
     (for {
       _ <- Future.successful(())
       _ = log.info(FdrLogConstant.logGeneraPayload(s"${req.primitive} REST"))
-      nifrRequest = InviaFlussoRendicontazioneRequest(
+      nifrRequest = FlowsRequest(
         nodoInviaFlussoRendicontazione.identificativoFlusso,
         nodoInviaFlussoRendicontazione.dataOraFlusso.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME),
         Sender(
-          nodoInviaFlussoRendicontazione.identificativoPSP,
-          nodoInviaFlussoRendicontazione.identificativoIntermediarioPSP,
-          nodoInviaFlussoRendicontazione.identificativoCanale,
-          nodoInviaFlussoRendicontazione.password,
           flussoRiversamento.istitutoMittente.identificativoUnivocoMittente.tipoIdentificativoUnivoco match {
             case scalaxbmodel.flussoriversamento.GValue => SenderTypeEnum.LEGAL_PERSON
             case scalaxbmodel.flussoriversamento.A => SenderTypeEnum.ABI_CODE
             case _ => SenderTypeEnum.BIC_CODE
           },
+          flussoRiversamento.istitutoMittente.identificativoUnivocoMittente.codiceIdentificativoUnivoco,
+          nodoInviaFlussoRendicontazione.identificativoPSP,
           flussoRiversamento.istitutoMittente.denominazioneMittente,
-          flussoRiversamento.istitutoMittente.identificativoUnivocoMittente.codiceIdentificativoUnivoco
+          nodoInviaFlussoRendicontazione.identificativoIntermediarioPSP,
+          nodoInviaFlussoRendicontazione.identificativoCanale,
+          nodoInviaFlussoRendicontazione.password
         ),
         Receiver(
           flussoRiversamento.istitutoRicevente.identificativoUnivocoRicevente.codiceIdentificativoUnivoco,
@@ -228,21 +228,21 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
         ),
         flussoRiversamento.identificativoUnivocoRegolamento,
         flussoRiversamento.dataRegolamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME),
-        flussoRiversamento.codiceBicBancaDiRiversamento,
-        flussoRiversamento.datiSingoliPagamenti.map(p => {
-          Payment(
-            p.identificativoUnivocoVersamento,
-            p.identificativoUnivocoRiscossione,
-            p.indiceDatiSingoloPagamento.map(_.intValue),
-            p.singoloImportoPagato,
-            p.codiceEsitoSingoloPagamento match {
-              case Number0 => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_ESEGUITO
-              case Number3 => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_REVOCATO
-              case _ => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_NO_RPT
-            },
-            p.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
-          )
-        })
+        flussoRiversamento.codiceBicBancaDiRiversamento//,
+//        flussoRiversamento.datiSingoliPagamenti.map(p => {
+//          Payment(
+//            p.identificativoUnivocoVersamento,
+//            p.identificativoUnivocoRiscossione,
+//            p.indiceDatiSingoloPagamento.map(_.intValue),
+//            p.singoloImportoPagato,
+//            p.codiceEsitoSingoloPagamento match {
+//              case Number0 => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_ESEGUITO
+//              case Number3 => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_REVOCATO
+//              case _ => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_NO_RPT
+//            },
+//            p.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
+//          )
+//        })
       ).toJson.toString
 
       nifrResponse <- HttpServiceManagement.createRequestRestAction(
@@ -258,7 +258,7 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
     })
   }
 
-  protected def inviaFlussoRendicontazioneRest2Soap(inviaFlussoRendicontazione: InviaFlussoRendicontazioneRequest)(implicit log: NodoLogger, ec: ExecutionContext) = {
+  protected def inviaFlussoRendicontazioneRest2Soap(inviaFlussoRendicontazione: FlowsRequest)(implicit log: NodoLogger, ec: ExecutionContext) = {
     for {
       _ <- Future.successful(())
       _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
@@ -268,7 +268,7 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
         inviaFlussoRendicontazione.reportingFlowName,
         DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.reportingFlowDate),
         inviaFlussoRendicontazione.regulation,
-        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.dateRegulation),
+        DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.regulationDate),
         CtIstitutoMittente(
           CtIdentificativoUnivoco(
             inviaFlussoRendicontazione.sender._type match {
@@ -288,8 +288,8 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
           ),
           inviaFlussoRendicontazione.receiver.ecName
         ),
-        inviaFlussoRendicontazione.payments.size,
-        inviaFlussoRendicontazione.payments.map(_.singoloImportoPagato).sum
+//        inviaFlussoRendicontazione.payments.size,
+//        inviaFlussoRendicontazione.payments.map(_.singoloImportoPagato).sum
       )
 
       flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
