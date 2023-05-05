@@ -48,7 +48,7 @@ final case class InviaFlussoRendicontazioneActorPerRequest(repositories: Reposit
       val pipeline = for {
         _ <- Future.successful(())
 
-        nifrString <- inviaFlussoRendicontazioneRest2Soap(req.asInstanceOf[InviaFlussoRendicontazioneRequest])
+        nifrString <- inviaFlussoRendicontazioneRest2Soap(req.asInstanceOf[FlowsRequest])
 
         nodoInviaFlussoRendicontazione <- Future.fromTry(parseInput(nifrString, inputXsdValid))
 

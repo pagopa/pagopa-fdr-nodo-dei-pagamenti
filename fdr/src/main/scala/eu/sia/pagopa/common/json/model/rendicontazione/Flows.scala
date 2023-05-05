@@ -4,30 +4,19 @@ import spray.json.{DefaultJsonProtocol, JsArray, JsObject, JsString, JsValue, Ro
 
 import scala.language.implicitConversions
 
-object InviaFlussoRendicontazioneRequest extends DefaultJsonProtocol {
+object FlowsRequest extends DefaultJsonProtocol {
 
-  implicit val format: RootJsonFormat[InviaFlussoRendicontazioneRequest] = new RootJsonFormat[InviaFlussoRendicontazioneRequest] {
-    def write(nifr: InviaFlussoRendicontazioneRequest): JsObject = {
+  implicit val format: RootJsonFormat[FlowsRequest] = new RootJsonFormat[FlowsRequest] {
+    def write(nifr: FlowsRequest): JsObject = {
       var fields: Map[String, JsValue] =
         Map(
           "reportingFlowName" -> JsString(nifr.reportingFlowName),
-          "dateReportingFlow" -> JsString(nifr.reportingFlowDate),
+          "reportingFlowDate" -> JsString(nifr.reportingFlowDate),
           "sender" -> nifr.sender.toJson,
           "receiver" -> nifr.receiver.toJson,
           "regulation" -> JsString(nifr.regulation),
-          "dateRegulation" -> JsString(nifr.dateRegulation),
-          "payments" -> JsArray(nifr.payments.map(_.toJson).toList)
+          "regulationDate" -> JsString(nifr.regulationDate)
         )
-
-      if (nifr.bicCodePouringBank.isDefined) {
-        fields = fields + ("bicCodePouringBank" -> JsString(nifr.bicCodePouringBank.get))
-      }
-      if (nifr.bicCodePouringBank.isDefined) {
-        fields = fields + ("bicCodePouringBank" -> JsString(nifr.bicCodePouringBank.get))
-      }
-      if (nifr.bicCodePouringBank.isDefined) {
-        fields = fields + ("bicCodePouringBank" -> JsString(nifr.bicCodePouringBank.get))
-      }
 
       if (nifr.bicCodePouringBank.isDefined) {
         fields = fields + ("bicCodePouringBank" -> JsString(nifr.bicCodePouringBank.get))
@@ -35,7 +24,7 @@ object InviaFlussoRendicontazioneRequest extends DefaultJsonProtocol {
       JsObject(fields)
     }
 
-    def read(json: JsValue): InviaFlussoRendicontazioneRequest = ???
+    def read(json: JsValue): FlowsRequest = ???
 
 //    def read(json: JsValue): InviaFlussoRendicontazioneRequest = {
 //      val map = json.asJsObject.fields
@@ -70,17 +59,16 @@ object InviaFlussoRendicontazioneRequest extends DefaultJsonProtocol {
   }
 }
 
-case class InviaFlussoRendicontazioneRequest(
+case class FlowsRequest(
                                               reportingFlowName: String,
                                               reportingFlowDate: String,
                                               sender: Sender,
                                               receiver: Receiver,
                                               regulation: String,
-                                              dateRegulation: String,
-                                              bicCodePouringBank: Option[String],
-                                              payments: Seq[Payment]
+                                              regulationDate: String,
+                                              bicCodePouringBank: Option[String]
                                             )
 
-object InviaFlussoRendicontazioneResponse {}
+object FlowsResponse {}
 
-case class InviaFlussoRendicontazioneResponse()
+case class FlowsResponse()
