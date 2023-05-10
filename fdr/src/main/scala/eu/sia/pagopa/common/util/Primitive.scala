@@ -13,10 +13,6 @@ object Primitive {
     "nodoChiediElencoFlussiRendicontazione" -> ("Body/_/identificativoStazioneIntermediarioPA", _ => classOf[NodoChiediElencoFlussiRendicontazioneActorPerRequest])
   )
 
-  val rest: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
-    "inviaFlussoRendicontazione" -> ("inviaFlussoRendicontazione", _ => classOf[InviaFlussoRendicontazioneActorPerRequest])
-  )
-
   val jobs: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
     "ftpUpload" -> ("ftpUpload", _ => classOf[FtpRetryActorPerRequest])
   )

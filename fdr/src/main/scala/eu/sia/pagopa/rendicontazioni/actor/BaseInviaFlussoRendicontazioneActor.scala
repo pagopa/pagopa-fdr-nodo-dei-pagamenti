@@ -287,7 +287,7 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
             inviaFlussoRendicontazione.receiver.id
           ),
           inviaFlussoRendicontazione.receiver.ecName
-        ),
+        ),0,0
 //        inviaFlussoRendicontazione.payments.size,
 //        inviaFlussoRendicontazione.payments.map(_.singoloImportoPagato).sum
       )

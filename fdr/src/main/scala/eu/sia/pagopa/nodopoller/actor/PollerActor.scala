@@ -53,6 +53,8 @@ case class PollerActor(repositories: Repositories, actorProps: ActorProps) exten
       val jobTF = req.job match {
         case Jobs.FTP_UPLOAD_RETRY.name =>
           ftpRetry(req, timeLimit)
+        case Jobs.FLOWS_RECOVER.name =>
+          flowsRecover(req)
         case x =>
           Future.failed(DigitPaException(s"job $x not found", DigitPaErrorCodes.PPT_SYSTEM_ERROR))
       }
@@ -91,6 +93,16 @@ case class PollerActor(repositories: Repositories, actorProps: ActorProps) exten
             _ <- getRouter(req.job).ask(subreq).mapTo[WorkResponse]
           } yield ()
         }
+      _ = log.info("full job completed ")
+    } yield TriggerJobResponse(req.sessionId, SchedulerStatus.OK, None, req.testCaseId)
+  }
+
+  private def flowsRecover(req: TriggerJobRequest): Future[TriggerJobResponse] = {
+    for {
+      _ <- repositories.fdrRepository.insertSchedulerTrace(req.sessionId, req.job, req.cron, SchedulerStatus.OK, None)
+      _ = log.debug(s"Calling FlowRecover")
+      subreq = WorkRequest(req.sessionId, req.testCaseId, req.job)
+      _ <- getRouter(req.job).ask(subreq).mapTo[WorkResponse]
       _ = log.info("full job completed ")
     } yield TriggerJobResponse(req.sessionId, SchedulerStatus.OK, None, req.testCaseId)
   }

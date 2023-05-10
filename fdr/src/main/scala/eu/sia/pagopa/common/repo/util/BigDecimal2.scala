@@ -1,4 +1,4 @@
-package eu.sia.pagopa.common.repo
+package eu.sia.pagopa.common.repo.util
 
 import scala.language.implicitConversions
 

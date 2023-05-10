@@ -2,9 +2,9 @@ package eu.sia.pagopa.common.repo.fdr
 
 import eu.sia.pagopa.common.message.SchedulerStatus
 import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus, SchedulerFire, SchedulerFireCheckStatus}
-import eu.sia.pagopa.common.repo.util.YNBoolean
+import eu.sia.pagopa.common.repo.util.{BigDecimal2, YNBoolean}
 import eu.sia.pagopa.common.repo.util.YNBoolean.YNBoolean
-import eu.sia.pagopa.common.repo.{BigDecimal2, DBComponent}
+import eu.sia.pagopa.common.repo.DBComponent
 import slick.ast.BaseTypedType
 import slick.jdbc.JdbcType
 
