@@ -11,7 +11,7 @@ import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
 import eu.sia.pagopa.common.util.xml.XmlUtil
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActorPerRequest}
+import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoFlussiRendicontazioneActorPerRequest}
 import eu.sia.pagopa.testutil._
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
@@ -272,7 +272,7 @@ abstract class BaseUnitTest()
   ): NodoInviaFlussoRendicontazioneRisposta = {
     val act =
       system.actorOf(
-        Props.create(classOf[NodoInviaFlussoRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "inviaflussorendi", routers = Map("ftp-senderRouter" -> mockActor))),
+        Props.create(classOf[NodoFlussiRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "inviaflussorendi", routers = Map("ftp-senderRouter" -> mockActor))),
         s"inviaflussorendi${Util.now()}"
       )
     val soapres = askActor(

@@ -1,11 +1,12 @@
 package eu.sia.pagopa.rendicontazioni.actor
 
+import eu.sia.pagopa.BootstrapUtil
 import eu.sia.pagopa.Main.ConfigData
-import eu.sia.pagopa.common.actor.{HttpServiceManagement, PerRequestActor}
+import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.json.model.rendicontazione._
-import eu.sia.pagopa.common.message.{SoapReceiverType, SoapRequest}
+import eu.sia.pagopa.common.message.{FTPRequest, FTPResponse}
 import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus}
 import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, FtpFile, Rendicontazione}
 import eu.sia.pagopa.common.repo.re.model.Re
@@ -14,9 +15,8 @@ import eu.sia.pagopa.common.util.xml.{XmlUtil, XsdValid}
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import it.pagopa.config.CreditorInstitution
-import scalaxbmodel.flussoriversamento.{CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number0, Number1u461, Number3}
+import scalaxbmodel.flussoriversamento.{CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number1u461}
 import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
-import spray.json._
 
 import java.io.{File, FileOutputStream}
 import java.nio.file.{Files, Paths}
@@ -26,9 +26,9 @@ import java.time.{LocalDateTime, ZoneId}
 import java.util.zip.{ZipEntry, ZipOutputStream}
 import javax.xml.datatype.DatatypeFactory
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
-trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
+trait BaseFlussiRendicontazioneActor extends PerRequestActor {
 
   val fdrRepository = repositories.fdrRepository
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
@@ -99,7 +99,14 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
     } yield r
   }
 
-  def saveRendicontazione(nifr: NodoInviaFlussoRendicontazione,
+  def saveRendicontazione(
+                          identificativoFlusso: String,
+                          identificativoPSP: String,
+                          identificativoIntermediarioPSP: String,
+                          identificativoCanale: String,
+                          identificativoDominio: String,
+                          dataOraFlusso: javax.xml.datatype.XMLGregorianCalendar,
+                          xmlRendicontazione: scalaxb.Base64Binary,
                           content: String,
                           flussoRiversamento: CtFlussoRiversamento,
                           pa: CreditorInstitution,
@@ -118,7 +125,7 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
         }
         val ftpServer = ftpServerConf.get._2
 
-        val normalizedIdFlusso = s"${CheckRendicontazioni.normalizeIdFlusso(nifr.identificativoFlusso)}.xml"
+        val normalizedIdFlusso = s"${CheckRendicontazioni.normalizeIdFlusso(identificativoFlusso)}.xml"
         val (filename, contenutoFileBytes) = if (pa.reportingZip) {
           val zipFile = File.createTempFile(normalizedIdFlusso, ".zip")
           val zip = new ZipOutputStream(new FileOutputStream(zipFile))
@@ -156,12 +163,12 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
           0,
           RendicontazioneStatus.VALID,
           0,
-          nifr.identificativoPSP,
-          Some(nifr.identificativoIntermediarioPSP),
-          Some(nifr.identificativoCanale),
-          nifr.identificativoDominio,
-          nifr.identificativoFlusso,
-          LocalDateTime.parse(nifr.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault())),
+          identificativoPSP,
+          Some(identificativoIntermediarioPSP),
+          Some(identificativoCanale),
+          identificativoDominio,
+          identificativoFlusso,
+          LocalDateTime.parse(dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault())),
           None,
           None
         )
@@ -178,16 +185,16 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
           0,
           RendicontazioneStatus.VALID,
           0,
-          nifr.identificativoPSP,
-          Some(nifr.identificativoIntermediarioPSP),
-          Some(nifr.identificativoCanale),
-          nifr.identificativoDominio,
-          nifr.identificativoFlusso,
-          LocalDateTime.parse(nifr.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault())),
+          identificativoPSP,
+          Some(identificativoIntermediarioPSP),
+          Some(identificativoCanale),
+          identificativoDominio,
+          identificativoFlusso,
+          LocalDateTime.parse(dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault())),
           None,
           None
         )
-        val bf = BinaryFile(0, nifr.xmlRendicontazione.length, Some(nifr.xmlRendicontazione.toArray), None, Some(content))
+        val bf = BinaryFile(0, xmlRendicontazione.length, Some(xmlRendicontazione.toArray), None, Some(content))
         fdrRepository
           .saveRendicontazioneAndBinaryFile(rendi, bf)
           .recoverWith({ case e =>
@@ -199,63 +206,6 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
       }
     } yield r
 
-  }
-
-  protected def inviaFlussoRendicontazioneSoap2Rest(req: SoapRequest, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento) = {
-    (for {
-      _ <- Future.successful(())
-      _ = log.info(FdrLogConstant.logGeneraPayload(s"${req.primitive} REST"))
-      nifrRequest = FlowsRequest(
-        nodoInviaFlussoRendicontazione.identificativoFlusso,
-        nodoInviaFlussoRendicontazione.dataOraFlusso.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME),
-        Sender(
-          flussoRiversamento.istitutoMittente.identificativoUnivocoMittente.tipoIdentificativoUnivoco match {
-            case scalaxbmodel.flussoriversamento.GValue => SenderTypeEnum.LEGAL_PERSON
-            case scalaxbmodel.flussoriversamento.A => SenderTypeEnum.ABI_CODE
-            case _ => SenderTypeEnum.BIC_CODE
-          },
-          flussoRiversamento.istitutoMittente.identificativoUnivocoMittente.codiceIdentificativoUnivoco,
-          nodoInviaFlussoRendicontazione.identificativoPSP,
-          flussoRiversamento.istitutoMittente.denominazioneMittente,
-          nodoInviaFlussoRendicontazione.identificativoIntermediarioPSP,
-          nodoInviaFlussoRendicontazione.identificativoCanale,
-          nodoInviaFlussoRendicontazione.password
-        ),
-        Receiver(
-          flussoRiversamento.istitutoRicevente.identificativoUnivocoRicevente.codiceIdentificativoUnivoco,
-          nodoInviaFlussoRendicontazione.identificativoDominio,
-          flussoRiversamento.istitutoRicevente.denominazioneRicevente
-        ),
-        flussoRiversamento.identificativoUnivocoRegolamento,
-        flussoRiversamento.dataRegolamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME),
-        flussoRiversamento.codiceBicBancaDiRiversamento//,
-//        flussoRiversamento.datiSingoliPagamenti.map(p => {
-//          Payment(
-//            p.identificativoUnivocoVersamento,
-//            p.identificativoUnivocoRiscossione,
-//            p.indiceDatiSingoloPagamento.map(_.intValue),
-//            p.singoloImportoPagato,
-//            p.codiceEsitoSingoloPagamento match {
-//              case Number0 => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_ESEGUITO
-//              case Number3 => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_REVOCATO
-//              case _ => CodiceEsitoSingoloPagamentoEnum.PAGAMENTO_NO_RPT
-//            },
-//            p.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.format(DateTimeFormatter.ISO_DATE_TIME)
-//          )
-//        })
-      ).toJson.toString
-
-      nifrResponse <- HttpServiceManagement.createRequestRestAction(
-        req.sessionId,
-        req.testCaseId,
-        req.primitive,
-        SoapReceiverType.FDRNEW.toString,
-        nifrRequest,
-        actorProps
-      )
-    } yield ()).recoverWith({
-      case _ => Future.successful(())
-    })
   }
 
   protected def inviaFlussoRendicontazioneRest2Soap(inviaFlussoRendicontazione: FlowsRequest)(implicit log: NodoLogger, ec: ExecutionContext) = {
@@ -326,7 +276,6 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
         )
         .map(pc => pc._1 -> pc._3)
       pa <- DDataChecks.checkPA(log, ddataMap, nodoInviaFlussoRendicontazione.identificativoDominio)
-      _ <- CheckRendicontazioni.checkFormatoIdFlussoRendicontazione(nodoInviaFlussoRendicontazione.identificativoFlusso, nodoInviaFlussoRendicontazione.identificativoPSP)
     } yield (pa, psp, canale)
 
     paaa.recoverWith({
@@ -337,17 +286,31 @@ trait BaseInviaFlussoRendicontazioneActor extends PerRequestActor {
     })
   }
 
-  def parseInput(payload: String, inputXsdValid: Boolean): Try[NodoInviaFlussoRendicontazione] = {
-    log.info(FdrLogConstant.logSintattico(actorClassId))
+  def checkFormatoIdFlussoRendicontazione(identificativoFlusso: String, idPsp: Option[String] = None) = {
+    log.info(FdrLogConstant.logSemantico(actorClassId))
     (for {
-      _ <- XsdValid.checkOnly(payload, XmlEnum.NODO_INVIA_FLUSSO_RENDICONTAZIONE_NODOPERPSP, inputXsdValid)
-      body <- XmlEnum.str2nodoInviaFlussoRendicontazione_nodoperpsp(payload)
-      _ = log.debug("Request validated successfully")
-    } yield body) recoverWith { case e =>
-      log.warn(e, s"${e.getMessage}")
-      val cfb = exception.DigitPaException(e.getMessage, DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD, e)
-      Failure(cfb)
-    }
+      _ <- CheckRendicontazioni.checkFormatoIdFlussoRendicontazione(identificativoFlusso, idPsp)
+    } yield ()).recoverWith({
+      case ex: DigitPaException =>
+        Failure(ex)
+      case ex@_ =>
+        Failure(exception.DigitPaException(ex.getMessage, DigitPaErrorCodes.PPT_SINTASSI_XSD, ex))
+    })
   }
+
+  protected def notifySFTPSender(pa: CreditorInstitution, sessionId: String, testCaseId: Option[String], file: FtpFile): Future[FTPResponse] = {
+    log.info(s"SFTP Request pushFile")
+
+    val ftpServerConf = ddataMap.ftpServers.find(s => {
+      s._2.service == Constant.KeyName.RENDICONTAZIONI
+    }).get
+
+    askBundle[FTPRequest, FTPResponse](
+      actorProps.routers(BootstrapUtil.actorRouter(Constant.KeyName.FTP_SENDER)),
+      FTPRequest(sessionId, testCaseId, "pushFileRendicontazioni", pa.creditorInstitutionCode, file.fileName, file.id, ftpServerConf._2.id)
+    )
+  }
+
+
 
 }
