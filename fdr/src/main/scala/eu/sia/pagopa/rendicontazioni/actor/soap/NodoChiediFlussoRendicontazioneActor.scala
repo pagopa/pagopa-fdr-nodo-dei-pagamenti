@@ -179,9 +179,9 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        erogatore = Some(Componente.FDR.toString),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatoreDescr = Some(Componente.FDR.toString)
       )
     )
     log.info(FdrLogConstant.logSintattico(actorClassId))
@@ -197,13 +197,13 @@ final case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Re
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         fruitore = Some(ncfr.identificativoStazioneIntermediarioPA),
-        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+        erogatore = Some(Componente.FDR.toString),
         stazione = Some(ncfr.identificativoStazioneIntermediarioPA),
         esito = Some(EsitoRE.RICEVUTA.toString),
         sessionId = Some(req.sessionId),
         insertedTimestamp = now,
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+        erogatoreDescr = Some(Componente.FDR.toString)
       )
       _ = re = Some(re_)
 

@@ -40,9 +40,10 @@ final case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Reposi
           tipoEvento = Some(actorClassId),
           sottoTipoEvento = SottoTipoEvento.INTERN.toString,
           insertedTimestamp = restRequest.timestamp,
-          erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
+          erogatore = Some(FaultId.FDRNODO),
           businessProcess = Some(actorClassId),
-          erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
+          erogatoreDescr = Some(FaultId.FDRNODO),
+          fruitore = Some(Componente.FDR_NOTIFIER.toString)
         )
       )
 

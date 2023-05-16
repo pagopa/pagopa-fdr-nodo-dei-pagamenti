@@ -154,7 +154,7 @@ class RestActorPerRequest(
                 reExtra = Some(ReExtra(statusCode = Some(e.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
               )
               reEventFunc(reRequest, log, actorProps.ddataMap)
-              traceRequest(message, reEventFunc, actorProps.ddataMap)
+//              traceRequest(message, reEventFunc, actorProps.ddataMap)
               complete(createHttpResponse(e.statusCode, payload, sres.sessionId), Constant.KeyName.REST_INPUT)
             case Some(e: Throwable) =>
               log.error(e, s"Rest Response in errore [${e.getMessage}]")
@@ -198,7 +198,8 @@ class RestActorPerRequest(
                       sessionId = Some(message.sessionId),
                       payload = sres.payload.map(_.getUtf8Bytes),
                       insertedTimestamp = now,
-                      info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", "))
+                      info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
+                      fruitore = Some(Componente.FDR_NOTIFIER.toString)
                     ),
                     reExtra = Some(ReExtra(statusCode = Some(sres.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
                   ), sres.payload)
@@ -218,7 +219,8 @@ class RestActorPerRequest(
                       sessionId = Some(message.sessionId),
                       payload = Some(errPayload.getUtf8Bytes),
                       insertedTimestamp = now,
-                      info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", "))
+                      info = Some(message.queryParams.map(a => s"${a._1}=[${a._2}]").mkString(", ")),
+                      fruitore = Some(Componente.FDR_NOTIFIER.toString)
                     ),
                     reExtra = Some(ReExtra(statusCode = Some(sres.statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
                   ), Some(errPayload))
