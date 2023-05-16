@@ -2,14 +2,14 @@ package eu.sia.pagopa.rendicontazioni.actor.soap
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.common.actor.HttpServiceManagement
+import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.common.actor.HttpSoapServiceManagement
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.json.model.rendicontazione.{FlowsRequest, Receiver, Sender, SenderTypeEnum}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.repo.fdr.model._
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XsdValid
@@ -17,18 +17,19 @@ import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicontazioneResponse
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
-import eu.sia.pagopa.{ActorProps, BootstrapUtil}
-import it.pagopa.config.CreditorInstitution
 import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
+import spray.json._
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
-import spray.json._
 
-final case class NodoFlussiRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps) extends BaseFlussiRendicontazioneActor with NodoInviaFlussoRendicontazioneResponse {
+final case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
+  extends BaseFlussiRendicontazioneActor
+    with ReUtil
+    with NodoInviaFlussoRendicontazioneResponse {
 
   var req: SoapRequest = _
   var replyTo: ActorRef = _
@@ -51,9 +52,9 @@ final case class NodoFlussiRendicontazioneActorPerRequest(repositories: Reposito
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         insertedTimestamp = soapRequest.timestamp,
-        erogatore = Some(FaultId.FDR),
+        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.FDR)
+        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
       )
     )
 
@@ -71,19 +72,19 @@ final case class NodoFlussiRendicontazioneActorPerRequest(repositories: Reposito
         tipoEvento = Some(actorClassId),
         sottoTipoEvento = SottoTipoEvento.INTERN.toString,
         fruitore = Some(nifr.identificativoCanale),
-        erogatore = Some(FaultId.FDR),
+        erogatore = Some(FaultId.NODO_DEI_PAGAMENTI_SPC),
         canale = Some(nifr.identificativoCanale),
         esito = Some(EsitoRE.RICEVUTA.toString),
         sessionId = Some(req.sessionId),
         insertedTimestamp = now,
         businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(FaultId.FDR)
+        erogatoreDescr = Some(FaultId.NODO_DEI_PAGAMENTI_SPC)
       )
       _ = re = Some(re_)
 
       _ = log.info(FdrLogConstant.logSemantico(actorClassId))
       (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifr, true, actorClassId))
-      _ <- Future.fromTry(checkFormatoIdFlussoRendicontazione(nifr.identificativoFlusso, Some(nifr.identificativoPSP)))
+      _ <- Future.fromTry(checkFormatoIdFlussoRendicontazione(nifr.identificativoFlusso, nifr.identificativoPSP))
 
       _ = re = re.map(r => r.copy(fruitoreDescr = canale.flatMap(c => c.description), pspDescr = psp.flatMap(p => p.description)))
 
@@ -178,6 +179,7 @@ final case class NodoFlussiRendicontazioneActorPerRequest(repositories: Reposito
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), re)
     }) map (sr => {
+      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
@@ -257,13 +259,14 @@ final case class NodoFlussiRendicontazioneActorPerRequest(repositories: Reposito
         //        })
       ).toJson.toString
 
-      nifrResponse <- HttpServiceManagement.createRequestRestAction(
+      nifrResponse <- HttpSoapServiceManagement.createRequestSoapAction(
         req.sessionId,
         req.testCaseId,
         req.primitive,
-        SoapReceiverType.FDRNEW.toString,
+        SoapReceiverType.FDR.toString,
         nifrRequest,
-        actorProps
+        actorProps,
+        re.get
       )
     } yield ()).recoverWith({
       case _ => Future.successful(())

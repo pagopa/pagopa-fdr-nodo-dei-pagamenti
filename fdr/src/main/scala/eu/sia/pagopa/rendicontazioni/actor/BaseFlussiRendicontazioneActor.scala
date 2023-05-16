@@ -26,14 +26,14 @@ import java.time.{LocalDateTime, ZoneId}
 import java.util.zip.{ZipEntry, ZipOutputStream}
 import javax.xml.datatype.DatatypeFactory
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 trait BaseFlussiRendicontazioneActor extends PerRequestActor {
 
   val fdrRepository = repositories.fdrRepository
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
-  val inputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean
-  val outputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
+  val inputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean).getOrElse(false)
+  val outputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean).getOrElse(false)
   var re: Option[Re] = None
 
 
@@ -271,7 +271,6 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
           nodoInviaFlussoRendicontazione.identificativoIntermediarioPSP,
           Some(nodoInviaFlussoRendicontazione.identificativoCanale),
           Some(nodoInviaFlussoRendicontazione.password),
-          None,
           checkPassword
         )
         .map(pc => pc._1 -> pc._3)
@@ -286,7 +285,7 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
     })
   }
 
-  def checkFormatoIdFlussoRendicontazione(identificativoFlusso: String, idPsp: Option[String] = None) = {
+  def checkFormatoIdFlussoRendicontazione(identificativoFlusso: String, idPsp: String) = {
     log.info(FdrLogConstant.logSemantico(actorClassId))
     (for {
       _ <- CheckRendicontazioni.checkFormatoIdFlussoRendicontazione(identificativoFlusso, idPsp)
@@ -310,7 +309,5 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
       FTPRequest(sessionId, testCaseId, "pushFileRendicontazioni", pa.creditorInstitutionCode, file.fileName, file.id, ftpServerConf._2.id)
     )
   }
-
-
 
 }

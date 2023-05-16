@@ -24,7 +24,7 @@ import scala.util.Try
 
 object AzureProducerBuilder {
 
-  def build(reFeederRouter: ActorRef)(implicit ec: ExecutionContext, system: ActorSystem, log: NodoLogger): ReEventFunc = {
+  def build()(implicit ec: ExecutionContext, system: ActorSystem, log: NodoLogger): ReEventFunc = {
     val eventConfigAzureSdkClient = system.settings.config.getConfig("azure-hub-event.azure-sdk-client.re-event")
     val eventHubName = eventConfigAzureSdkClient.getString("event-hub-name")
     val connectionString = eventConfigAzureSdkClient.getString("connection-string")
@@ -63,7 +63,7 @@ object AzureProducerBuilder {
         log.debug("CONFIGURATION_KEYS [azure-sdk-client.re-event.enabled]=false. Not forward to Azure")
         Future.successful(())
       }
-      Future(defaultOperation(reFeederRouter, request, log, reXmlLog, reJsonLog, data))
+      Future(defaultOperation(request, log, reXmlLog, reJsonLog, data))
     }
   }
 

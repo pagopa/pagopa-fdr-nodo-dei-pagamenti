@@ -1,4 +1,4 @@
-package eu.sia.pagopa.testutil
+package eu.sia.pagopa
 
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.util.Constant

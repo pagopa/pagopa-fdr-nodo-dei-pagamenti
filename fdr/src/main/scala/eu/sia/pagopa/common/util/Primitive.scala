@@ -2,20 +2,19 @@ package eu.sia.pagopa.common.util
 
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.ftpsender.actor.FtpRetryActorPerRequest
-import eu.sia.pagopa.rendicontazioni.actor.rest.ChiediFlussoRendicontazioneActorPerRequest
-import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoFlussiRendicontazioneActorPerRequest}
+import eu.sia.pagopa.rendicontazioni.actor.rest.NotifyFlussoRendicontazioneActorPerRequest
+import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActorPerRequest}
 
 object Primitive {
 
   val soap: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
     "nodoChiediFlussoRendicontazione" -> ("Body/_/identificativoStazioneIntermediarioPA", _ => classOf[NodoChiediFlussoRendicontazioneActorPerRequest]),
-    "nodoInviaFlussoRendicontazione" -> ("Body/_/identificativoCanale", _ => classOf[NodoFlussiRendicontazioneActorPerRequest]),
+    "nodoInviaFlussoRendicontazione" -> ("Body/_/identificativoCanale", _ => classOf[NodoInviaFlussoRendicontazioneActorPerRequest]),
     "nodoChiediElencoFlussiRendicontazione" -> ("Body/_/identificativoStazioneIntermediarioPA", _ => classOf[NodoChiediElencoFlussiRendicontazioneActorPerRequest])
   )
 
   val rest: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
-    //FIXME: trovare un nome più congruo
-    "chiediFlussoRendicontazione" -> ("chiediFlussoRendicontazione", _ => classOf[ChiediFlussoRendicontazioneActorPerRequest])
+    "notifyFlussoRendicontazione" -> ("psps/:psp/flows/ready", _ => classOf[NotifyFlussoRendicontazioneActorPerRequest])
   )
 
   val jobs: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(

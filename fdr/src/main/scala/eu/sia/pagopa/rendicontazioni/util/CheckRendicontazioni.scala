@@ -30,8 +30,7 @@ object CheckRendicontazioni {
     repo.findValidByIdFlussoAndIdPspEqualsAndDate(identificativoFlusso, identificativoPSP, dataOraFlusso)
   }
 
-  def checkFormatoIdFlussoRendicontazione(identificativoFlusso: String, idPsp: Option[String] = None): Try[Unit] = {
-
+  def checkFormatoIdFlussoRendicontazione(identificativoFlusso: String, idPsp: String): Try[Unit] = {
     if (identificativoFlusso.length > IDENTIFICATIVO_FLUSSO_MAX_LEN) {
       Failure(
         exception.DigitPaException(
@@ -59,7 +58,7 @@ object CheckRendicontazioni {
           )
 
         case Success(_) =>
-          if (idPsp.isDefined && !identificativoFlusso.substring(IDENTIFICATIVO_FLUSSO_IDX_END).startsWith(s"""${idPsp.get}-""")) {
+          if (!identificativoFlusso.substring(IDENTIFICATIVO_FLUSSO_IDX_END).startsWith(s"""$idPsp-""")) {
             Failure(
               exception.DigitPaException(
                 s"""identificativo flusso di rendicontazione ($identificativoFlusso) non conforme al formato previsto dalle specifiche (<YYYY-MM-DD><istitutoMittente>-<flusso>)""",

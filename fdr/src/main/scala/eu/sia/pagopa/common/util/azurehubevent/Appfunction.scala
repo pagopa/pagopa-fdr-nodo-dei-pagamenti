@@ -1,6 +1,5 @@
 package eu.sia.pagopa.common.util.azurehubevent
 
-import akka.actor.ActorRef
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.message.{CategoriaEvento, ReExtra, ReRequest, SottoTipoEvento}
@@ -28,7 +27,7 @@ object Appfunction {
 
   type ReEventFunc = (ReRequest, NodoLogger, ConfigData) => Future[Unit]
 
-  def defaultOperation(reFeederRouter: ActorRef, request: ReRequest, log: NodoLogger, reXmlLog: Boolean, reJsonLog: Boolean, data: ConfigData)(implicit ec: ExecutionContext): Unit = {
+  def defaultOperation(request: ReRequest, log: NodoLogger, reXmlLog: Boolean, reJsonLog: Boolean, data: ConfigData)(implicit ec: ExecutionContext): Unit = {
     MDC.put(Constant.MDCKey.DATA_ORA_EVENTO, Appfunction.formatDate(request.re.insertedTimestamp))
 
     if (reXmlLog) {
@@ -79,7 +78,6 @@ object Appfunction {
           })
       )
     }
-    reFeederRouter ! request
   }
 
   private def formatHeaders(headersOpt: Option[Seq[(String, String)]]): String = {
@@ -269,35 +267,14 @@ object Appfunction {
     if (httpType.isDefined && httpType.contains(Constant.RESPONSE)) {
       val jsValue = json.map(v => v.parseJson.asJsObject)
       businessProcess match {
-        case Some(value) if (value == "nodoNotificaAnnullamento" ||
-          value == "nodoInoltraPagamentoMod1" ||
-          value == "nodoInoltraPagamentoMod2" ||
-          value == "nodoInoltraEsitoPagamentoCarta" ||
-          value == "nodoInoltraEsitoPagamentoPayPal" ||
-          value == "nodoChiediInformazioniPagamento" ||
-          value == "nodoChiediListaPsp" ||
-          value == "nodoChiediAvanzamentoPagamento" ||
-          value == "closePayment-v1" ||
-          value == "closePayment-v2") =>
-
+        case Some(value) if (value == "notifyFlussoRendicontazione") =>
           val error = jsValue.flatMap(_.getFields("error").headOption).map(_.convertTo[String]).map(v => s"error=[$v]")
           if (error.isDefined) {
-            val esito = jsValue.flatMap(_.getFields("esito").headOption).map(_.convertTo[String]).map(v => s"esito=[$v]")
-            val errorCode = jsValue.flatMap(_.getFields("errorCode").headOption).map(_.convertTo[String]).map(v => s"errorCode=[$v]")
-            val errorDesc = jsValue.flatMap(_.getFields("descrizione").headOption).map(_.convertTo[String]).map(v => s"descrizione=[$v]")
             (
               Some("<REST_NO_FAULT_CODE>"),
               Some("<REST_NO_FAULT_STRING>"),
-              Some(List(esito, error, errorCode, errorDesc).flatten.mkString(", ")),
+              Some(List(None, error, None, None).flatten.mkString(", ")),
             )
-          } else {
-            (None, None, None)
-          }
-        case Some(value) if value == "checkPosition" =>
-          val outcome = jsValue.flatMap(_.getFields("outcome").headOption).map(_.convertTo[String])
-          val description = jsValue.flatMap(_.getFields("description").headOption).map(_.convertTo[String]).map(v => s"description=[$v]")
-          if (outcome.contains(Constant.KO)) {
-            (Some("<REST_NO_FAULT_CODE>"), Some("<REST_NO_FAULT_STRING>"), Some(description.mkString))
           } else {
             (None, None, None)
           }

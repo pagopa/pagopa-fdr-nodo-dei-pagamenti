@@ -213,7 +213,11 @@ object Main extends App {
     ddata <- data match {
       case Some(ddata) => Future.successful(ddata)
       case None =>
-        Future.failed(new RuntimeException("Could not get ConfigData"))
+        if( Seq("DEV").contains(Constant.INSTANCE)){
+          Future.successful(TestDData.ddataMap)
+        } else {
+          Future.failed(new RuntimeException("Could not get ConfigData"))
+        }
     }
     _ = log.info("ConfigData loaded")
     _ = log.info("Check db connections")
@@ -236,7 +240,7 @@ object Main extends App {
 
       val primitiveActorsNamesAndTypes: Seq[(String, Class[_ <: BaseActor])] = job match {
         case None =>
-          (Primitive.soap.keys ++ Primitive.jobs.keys).map(s => s -> classOf[PrimitiveActor]).toSeq
+          (Primitive.soap.keys ++ Primitive.rest.keys ++ Primitive.jobs.keys).map(s => s -> classOf[PrimitiveActor]).toSeq
         case Some(j) =>
           Seq(j -> classOf[PrimitiveActor])
       }
@@ -246,7 +250,6 @@ object Main extends App {
       val primitiverouters: Map[String, ActorRef] = BootstrapUtil.createLocalRouters(system, primitiveActorsNamesAndTypes)
 
       log.info(s"Created Routers:\n${(baserouters.keys ++ primitiverouters.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
-
 
       log.info(s"Starting Azure Hub Event Service ...")
       val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
