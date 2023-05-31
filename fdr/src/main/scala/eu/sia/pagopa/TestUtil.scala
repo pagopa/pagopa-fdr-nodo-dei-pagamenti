@@ -11,14 +11,14 @@ import scala.concurrent.duration.{FiniteDuration, _}
 import scala.util.{Success, Try}
 object TestItems {
 
-  val PA = "12345678900"
+  val PA = "00000000099"
   val PA_2 = "12345678902"
   val PA_3 = "12345678903"
   val PA_old = "12345678901"
   val PA_FTP = "90000000002"
   val prefixOld = "002"
   val prefixNew = "001"
-  val stazione = "stazioneTest"
+  val stazione = "nodo-doc-dev"
   val stazioneNonIstantanea = "stazioneTestNonIstantanea"
   val stazionePV2 = "stazionePV2"
   val stazionePV2Broadcast = "stazionePV2BroadCast"
@@ -31,7 +31,7 @@ object TestItems {
   val codIUV = "171920000002204"
   val PAUnknown = "01010101010"
 
-  val PSP = "pspTest"
+  val PSP = "nodo-doc-dev"
   val PSPAgid = "AGID_01"
   val PSPCD = "AGID_01"
   val PSPCHECKOUT = "PSP_CHECKOUT"
@@ -39,15 +39,15 @@ object TestItems {
   val PSPMod3New = "15376371009"
   val PSPUnknown = "pspUnknown"
 
-  val testIntPA = "intPaTest"
+  val testIntPA = "nodo-doc-dev"
 
-  val intPSP = "intPspTest"
+  val intPSP = "nodo-doc-dev"
   val intPSPAgid = "97735020584"
   val intPSPCD = "97735020584"
   val intPSPMod3New = "15376371009"
   val intPSPUnknown = "intPspUnknown"
 
-  val canale = "canaleTest"
+  val canale = "nodo-doc-dev"
   val canaleImmediato = "canaleImmediato"
   val canaleDifferito = "canaleDifferito"
   val canaleAgid = "97735020584_02"
@@ -65,7 +65,7 @@ object TestItems {
   val canaleIrr = "canaleIrraggiungibile"
   val canaleUnknown = "canaleUnknown"
 
-  val canalePwd = "canaleTestPwd"
+  val canalePwd = "pwdpwdpwd"
 
   val testDTF: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
   val httpConnectTimeout: FiniteDuration = 10.seconds

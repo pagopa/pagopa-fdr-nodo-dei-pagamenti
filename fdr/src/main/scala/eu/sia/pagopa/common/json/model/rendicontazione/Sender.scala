@@ -12,15 +12,13 @@ object Sender extends DefaultJsonProtocol {
           "type" -> JsString(sender._type.toString),
           "id" -> JsString(sender.id),
           "pspId" -> JsString(sender.pspId),
+          "pspName" -> JsString(sender.pspName),
           "brokerId" -> JsString(sender.brokerId),
           "channelId" -> JsString(sender.channelId),
           "password" -> JsString(sender.password)
         )
       }
 
-      if (sender.pspName.isDefined) {
-        fields = fields + ("pspName" -> JsString(sender.pspName.get))
-      }
       JsObject(fields)
     }
 
@@ -33,7 +31,7 @@ case class Sender(
                    _type: SenderTypeEnum.Value,
                    id: String,
                    pspId: String,
-                   pspName: Option[String],
+                   pspName: String,
                    brokerId: String,
                    channelId: String,
                    password: String

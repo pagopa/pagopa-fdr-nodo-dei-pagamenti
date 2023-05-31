@@ -7,16 +7,11 @@ object Receiver extends DefaultJsonProtocol {
   implicit object SenderJsonFormat extends RootJsonFormat[Receiver] {
 
     def write(receiver: Receiver): JsObject = {
-      var fields: Map[String, JsValue] = {
-        Map(
-          "id" -> JsString(receiver.id),
-          "ecId" -> JsString(receiver.ecId)
-        )
-      }
-      if (receiver.ecName.isDefined) {
-        fields = fields + ("ecName" -> JsString(receiver.ecName.get))
-      }
-      JsObject(fields)
+      JsObject(Map(
+        "id" -> JsString(receiver.id),
+        "ecId" -> JsString(receiver.ecId),
+        "ecName" -> JsString(receiver.ecName)
+      ))
     }
 
     def read(value: JsValue): Receiver = ???
@@ -27,6 +22,6 @@ object Receiver extends DefaultJsonProtocol {
 case class Receiver(
                      id: String,
                      ecId: String,
-                     ecName: Option[String]
+                     ecName: String
                    )
 

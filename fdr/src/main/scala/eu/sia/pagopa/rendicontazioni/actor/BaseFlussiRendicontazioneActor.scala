@@ -208,7 +208,7 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
 
   }
 
-  protected def inviaFlussoRendicontazioneRest2Soap(inviaFlussoRendicontazione: FlowsRequest)(implicit log: NodoLogger, ec: ExecutionContext) = {
+  protected def inviaFlussoRendicontazioneRest2Soap(inviaFlussoRendicontazione: Flow)(implicit log: NodoLogger, ec: ExecutionContext) = {
     for {
       _ <- Future.successful(())
       _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
@@ -228,15 +228,15 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
             },
             inviaFlussoRendicontazione.sender.id
           ),
-          inviaFlussoRendicontazione.sender.pspName
+          Some(inviaFlussoRendicontazione.sender.pspName)
         ),
-        inviaFlussoRendicontazione.bicCodePouringBank,
+        Some(inviaFlussoRendicontazione.bicCodePouringBank),
         CtIstitutoRicevente(
           CtIdentificativoUnivocoPersonaG(
             scalaxbmodel.flussoriversamento.G,
             inviaFlussoRendicontazione.receiver.id
           ),
-          inviaFlussoRendicontazione.receiver.ecName
+          Some(inviaFlussoRendicontazione.receiver.ecName)
         ),0,0
 //        inviaFlussoRendicontazione.payments.size,
 //        inviaFlussoRendicontazione.payments.map(_.singoloImportoPagato).sum
@@ -248,7 +248,7 @@ trait BaseFlussiRendicontazioneActor extends PerRequestActor {
         inviaFlussoRendicontazione.sender.pspId,
         inviaFlussoRendicontazione.sender.brokerId,
         inviaFlussoRendicontazione.sender.channelId,
-        "fakePassword", //TODO
+        inviaFlussoRendicontazione.sender.password,
         inviaFlussoRendicontazione.receiver.ecId,
         inviaFlussoRendicontazione.reportingFlowName,
         DatatypeFactory.newInstance().newXMLGregorianCalendar(inviaFlussoRendicontazione.reportingFlowDate),

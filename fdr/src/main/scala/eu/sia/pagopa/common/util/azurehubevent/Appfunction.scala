@@ -15,6 +15,8 @@ import scala.util.Try
 import spray.json.DefaultJsonProtocol._
 import spray.json._
 
+import java.io.InputStream
+
 object Appfunction {
 
   val sessionId = "session-id"
@@ -26,6 +28,7 @@ object Appfunction {
   }
 
   type ReEventFunc = (ReRequest, NodoLogger, ConfigData) => Future[Unit]
+  type ContainerBlobFunc = (String, InputStream, NodoLogger) => Future[Unit]
 
   def defaultOperation(request: ReRequest, log: NodoLogger, reXmlLog: Boolean, reJsonLog: Boolean, data: ConfigData)(implicit ec: ExecutionContext): Unit = {
     MDC.put(Constant.MDCKey.DATA_ORA_EVENTO, Appfunction.formatDate(request.re.insertedTimestamp))
