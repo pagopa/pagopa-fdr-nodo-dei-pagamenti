@@ -1,12 +1,12 @@
 package eu.sia.pagopa.common.util.azurehubevent.sdkazureclient
 
 import akka.Done
-import akka.actor.{ActorRef, ActorSystem, CoordinatedShutdown}
+import akka.actor.{ActorSystem, CoordinatedShutdown}
 import akka.dispatch.MessageDispatcher
 import com.azure.core.amqp.AmqpTransportType
 import com.azure.messaging.eventhubs.{EventData, EventDataBatch, EventHubClientBuilder, EventHubProducerAsyncClient}
 import eu.sia.pagopa.Main.ConfigData
-import eu.sia.pagopa.common.message.ReRequest
+import eu.sia.pagopa.common.message.{CategoriaEvento, CategoriaEventoEvh, ReEventHub, ReRequest, SottoTipoEvento, SottoTipoEventoEvh}
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.AppObjectMapper
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ReEventFunc, defaultOperation, sessionId}
@@ -101,7 +101,30 @@ object AzureProducerBuilder {
       reRequestSeq
         .map(r => {
           val key = r.sessionId
-          val eventData = new EventData(AppObjectMapper.objectMapper.writeValueAsString(r.re))
+          val reEventHub = ReEventHub(
+            r.re.sottoTipoEvento match {
+              case SottoTipoEvento.REQ => SottoTipoEventoEvh.REQ.toString
+              case SottoTipoEvento.RESP => SottoTipoEventoEvh.RES.toString
+            },
+            r.reExtra.flatMap(_.httpMethod),
+            r.reExtra.flatMap(_.uri),
+            r.re.payload.map(_.mkString("Array(", ", ", ")")),
+            r.re.payload.map(v => v),
+            Nil, //r.reExtra.map(v => v.headers.map(b => (b._1,b._2))).toSeq,
+            r.re.componente,
+            r.re.insertedTimestamp,
+            r.re.sessionId,
+            r.re.categoriaEvento match {
+              case CategoriaEvento.INTERNO => CategoriaEventoEvh.INTERNAL.toString
+              case CategoriaEvento.INTERFACCIA => CategoriaEventoEvh.INTERFACE.toString
+            },
+            r.re.flowName,
+            r.re.psp,
+            r.re.idDominio,
+            r.re.flowAction
+          )
+
+          val eventData = new EventData(AppObjectMapper.objectMapper.writeValueAsString(reEventHub))
           eventData.getProperties.put(sessionId, key)
           MDC.getCopyOfContextMap.entrySet().asScala.map(a => eventData.getProperties.put(a.getKey, a.getValue))
           eventData
