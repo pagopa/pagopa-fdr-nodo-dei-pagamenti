@@ -38,7 +38,7 @@ Feature: PAG-1879
             </pay_i:FlussoRiversamento>
             """
 
-    @test
+    @test @runnable
     Scenario Outline: Test syntax error
         Given pay_i:denominazioneRicevente with <value> in REND
         And REND generation
@@ -71,7 +71,7 @@ Feature: PAG-1879
             | Empty                                                                                                                                         |
             | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa |
 
-    @test
+    @test @runnable
     Scenario Outline: Test OK
         Given REND generation
             """

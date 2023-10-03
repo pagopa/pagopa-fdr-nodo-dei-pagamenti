@@ -40,7 +40,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             </pay_i:FlussoRiversamento>
             """
 
-#     [SEM_NIFR_16]
+    @runnable
+    # [SEM_NIFR_16]
     Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST1
         Given the Create REND scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
@@ -63,7 +64,6 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             """
         When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
         Then check esito is OK of nodoInviaFlussoRendicontazione response
-
 
     Scenario: Create REND2
         Given the Send nodoInviaFlussoRendicontazione primitive scenario executed successfully
@@ -166,7 +166,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             """
 
     @runnable
-    Scenario: Send nodoInviaFlussoRendicontazione3 primitive - TEST3
+    Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST3
         Given the Create REND3 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
             """
@@ -227,7 +227,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             """
 
     @runnable
-    Scenario: Send nodoInviaFlussoRendicontazione4 primitive - TEST4
+    Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST4
         Given the Create REND4 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
             """
@@ -289,7 +289,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             """
 
     @runnable
-    Scenario: Send nodoInviaFlussoRendicontazione5 primitive - TEST5
+    Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST5
         Given the Create REND5 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
             """
@@ -351,7 +351,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             """
 
     @runnable
-    Scenario: Send nodoInviaFlussoRendicontazione6 primitive - TEST6
+    Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST6
         Given the Create REND6 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
             """
@@ -376,7 +376,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
 
     @runnable
     # [SEM_NIFR_24]
-    Scenario: Send nodoInviaFlussoRendicontazione7 primitive - TEST7
+    Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST7
         Given the Create REND scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
             """
@@ -438,7 +438,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             """
 
     @runnable
-    Scenario: Send nodoInviaFlussoRendicontazione8 primitive - TEST8
+    Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST8
         Given the Create REND7 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
             """
@@ -500,7 +500,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             """
 
     @runnable
-    Scenario: Send nodoInviaFlussoRendicontazione9 primitive - TEST9
+    Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST9
         Given the Create REND8 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
             """
@@ -525,7 +525,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
 
     @runnable
     #[SEM_NIFR_22]
-    Scenario: Send nodoInviaFlussoRendicontazione10 primitive - TEST10
+    Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST10
         Given the Create REND scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
             """

@@ -176,9 +176,10 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
         When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
         Then check esito is OK of nodoInviaFlussoRendicontazione response
 
+
     # [SEM_NIFR_15]
     Scenario: Check PPT_SEMANTICA error for nodoInviaFlussoRendicontazione_dataOraFlussoUguale primitive - TEST6
-        Given the Send nodoInviaFlussoRendicontazione primitive scenario executed successfully
+        Given the Send nodoInviaFlussoRendicontazione primitive - TEST1 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
             """
             <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
@@ -252,6 +253,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
         When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
         Then check esito is OK of nodoInviaFlussoRendicontazione response
 
+    @runnable
     # [SEM_NIFR_17]
     Scenario: Create a new REND
         Given the Send nodoInviaFlussoRendicontazione primitive - TEST2 scenario executed successfully
@@ -456,7 +458,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
         Then check esito is KO of nodoInviaFlussoRendicontazione response
         And check faultCode is PPT_SEMANTICA of nodoInviaFlussoRendicontazione response
 
-@runnable
+    @runnable
     # [SEM_NIFR_21]
     Scenario: Check PPT_SEMANTICA error for nodoInviaFlussoRendicontazione primitive - TEST12
         Given the Create REND scenario executed successfully
