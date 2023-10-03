@@ -90,59 +90,58 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
         When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
         Then check faultCode is PPT_SINTASSI_EXTRAXSD of nodoInviaFlussoRendicontazione response
 
-# TODO si spacca il decoupler
-#    @runnable
-#    Scenario Outline: Check PPT_SINTASSI_EXTRAXSD error for nodoInviaFlussoRendicontazione primitive - TEST3
-#        Given the Generazione rendicontazione scenario executed successfully
-#        And initial XML nodoInviaFlussoRendicontazione
-#            """
-#            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
-#            <soapenv:Header/>
-#            <soapenv:Body>
-#            <ws:nodoInviaFlussoRendicontazione>
-#            <identificativoPSP>#psp#</identificativoPSP>
-#            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-#            <identificativoCanale>#canale#</identificativoCanale>
-#            <password>#password#</password>
-#            <identificativoDominio>#creditor_institution_code#</identificativoDominio>
-#            <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
-#            <dataOraFlusso>$timedate</dataOraFlusso>
-#            <xmlRendicontazione>$rendAttachment</xmlRendicontazione>
-#            </ws:nodoInviaFlussoRendicontazione>
-#            </soapenv:Body>
-#            </soapenv:Envelope>
-#            """
-#        And <tag> with <tag_value> in nodoInviaFlussoRendicontazione
-#        When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
-#        Then check faultCode is PPT_SINTASSI_EXTRAXSD of nodoInviaFlussoRendicontazione response
-#        Examples:
-#            | tag                               | tag_value                            | soapUI test |
-#            | soapenv:Body                      | None                                 | SIN_NIFR_08 |
-#            | soapenv:Body                      | Empty                                | SIN_NIFR_09 |
-#            | ws:nodoInviaFlussoRendicontazione | None                                 | SIN_NIFR_10 |
-#            | ws:nodoInviaFlussoRendicontazione | Empty                                | SIN_NIFR_11 |
-#            | identificativoPSP                 | None                                 | SIN_NIFR_12 |
-#            | identificativoPSP                 | Empty                                | SIN_NIFR_13 |
-#            | identificativoPSP                 | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa | SIN_NIFR_14 |
-#            | identificativoIntermediarioPSP    | None                                 | SIN_NIFR_15 |
-#            | identificativoIntermediarioPSP    | Empty                                | SIN_NIFR_16 |
-#            | identificativoIntermediarioPSP    | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa | SIN_NIFR_17 |
-#            | identificativoCanale              | None                                 | SIN_NIFR_18 |
-#            | identificativoCanale              | Empty                                | SIN_NIFR_19 |
-#            | identificativoCanale              | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa | SIN_NIFR_20 |
-#            | password                          | None                                 | SIN_NIFR_21 |
-#            | password                          | Empty                                | SIN_NIFR_22 |
-#            | password                          | aaaaaaa                              | SIN_NIFR_23 |
-#            | password                          | aaaaaaaaaaaaaaaa                     | SIN_NIFR_24 |
-#            | identificativoDominio             | None                                 | SIN_NIFR_25 |
-#            | identificativoDominio             | Empty                                | SIN_NIFR_25 |
-#            | identificativoDominio             | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa | SIN_NIFR_27 |
-#            | identificativoFlusso              | None                                 | SIN_NIFR_28 |
-#            | dataOraFlusso                     | Empty                                | SIN_NIFR_29 |
-#            | dataOraFlusso                     | 2022-24-01T11:02:53.692              | SIN_NIFR_30 |
-#            | dataOraFlusso                     | 22-01-24T11:02:53.692                | SIN_NIFR_30 |
-#            | dataOraFlusso                     | 2022-01-24T11:02                     | SIN_NIFR_30 |
-#            | xmlRendicontazione                | None                                 | SIN_NIFR_31 |
+    @runnable
+    Scenario Outline: Check PPT_SINTASSI_EXTRAXSD error for nodoInviaFlussoRendicontazione primitive - TEST3
+        Given the Generazione rendicontazione scenario executed successfully
+        And initial XML nodoInviaFlussoRendicontazione
+            """
+            <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
+            <soapenv:Header/>
+            <soapenv:Body>
+            <ws:nodoInviaFlussoRendicontazione>
+            <identificativoPSP>#psp#</identificativoPSP>
+            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#canale#</identificativoCanale>
+            <password>#password#</password>
+            <identificativoDominio>#creditor_institution_code#</identificativoDominio>
+            <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
+            <dataOraFlusso>$timedate</dataOraFlusso>
+            <xmlRendicontazione>$rendAttachment</xmlRendicontazione>
+            </ws:nodoInviaFlussoRendicontazione>
+            </soapenv:Body>
+            </soapenv:Envelope>
+            """
+        And <tag> with <tag_value> in nodoInviaFlussoRendicontazione
+        When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
+        Then check faultCode is PPT_SINTASSI_EXTRAXSD of nodoInviaFlussoRendicontazione response
+        Examples:
+            | tag                               | tag_value                            | soapUI test |
+            | soapenv:Body                      | None                                 | SIN_NIFR_08 |
+            | soapenv:Body                      | Empty                                | SIN_NIFR_09 |
+            | ws:nodoInviaFlussoRendicontazione | None                                 | SIN_NIFR_10 |
+            | ws:nodoInviaFlussoRendicontazione | Empty                                | SIN_NIFR_11 |
+            | identificativoPSP                 | None                                 | SIN_NIFR_12 |
+            | identificativoPSP                 | Empty                                | SIN_NIFR_13 |
+            | identificativoPSP                 | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa | SIN_NIFR_14 |
+            | identificativoIntermediarioPSP    | None                                 | SIN_NIFR_15 |
+            | identificativoIntermediarioPSP    | Empty                                | SIN_NIFR_16 |
+            | identificativoIntermediarioPSP    | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa | SIN_NIFR_17 |
+            | identificativoCanale              | None                                 | SIN_NIFR_18 |
+            | identificativoCanale              | Empty                                | SIN_NIFR_19 |
+            | identificativoCanale              | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa | SIN_NIFR_20 |
+            | password                          | None                                 | SIN_NIFR_21 |
+            | password                          | Empty                                | SIN_NIFR_22 |
+            | password                          | aaaaaaa                              | SIN_NIFR_23 |
+            | password                          | aaaaaaaaaaaaaaaa                     | SIN_NIFR_24 |
+            | identificativoDominio             | None                                 | SIN_NIFR_25 |
+            | identificativoDominio             | Empty                                | SIN_NIFR_25 |
+            | identificativoDominio             | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa | SIN_NIFR_27 |
+            | identificativoFlusso              | None                                 | SIN_NIFR_28 |
+            | dataOraFlusso                     | Empty                                | SIN_NIFR_29 |
+            | dataOraFlusso                     | 2022-24-01T11:02:53.692              | SIN_NIFR_30 |
+            | dataOraFlusso                     | 22-01-24T11:02:53.692                | SIN_NIFR_30 |
+            | dataOraFlusso                     | 2022-01-24T11:02                     | SIN_NIFR_30 |
+            | xmlRendicontazione                | None                                 | SIN_NIFR_31 |
 #
 
     @runnable
