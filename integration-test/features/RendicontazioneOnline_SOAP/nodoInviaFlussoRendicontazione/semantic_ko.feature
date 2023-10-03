@@ -74,8 +74,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             | identificativoCanale           | CANALE_NOT_ENABLED | PPT_CANALE_DISABILITATO            | SEM_NIFR_06 |
             | identificativoDominio          | sconosciuto        | PPT_DOMINIO_SCONOSCIUTO            | SEM_NIFR_08 |
             | identificativoDominio          | NOT_ENABLED        | PPT_DOMINIO_DISABILITATO           | SEM_NIFR_09 |
-#   TODO questo test con nodo-auth non ha senso
-#            | password                       | Password1          | PPT_AUTENTICAZIONE                 | SEM_NIFR_07 |
+            | password                       | Password1          | PPT_AUTENTICAZIONE                 | SEM_NIFR_07 |
 
     @runnable
     # [SEM_NIFR_10]

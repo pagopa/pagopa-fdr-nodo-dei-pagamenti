@@ -34,6 +34,4 @@ Feature: Semantic checks for nodoChiediElencoFlussiRendicontazione - KO
             | identificativoPSP                     | ciaoPSP              | PPT_PSP_SCONOSCIUTO               | CEFRSEM8    |
             | identificativoPSP                     | NOT_ENABLED          | PPT_PSP_DISABILITATO              | CEFRSEM9    |
             | identificativoIntermediarioPA         | 90000000001          | PPT_AUTORIZZAZIONE                | CEFRSEM10   |
-
-#    TODO su nuova connettività il test non ha senso
-#            | password                              | password01           | PPT_AUTENTICAZIONE                | CEFRSEM5    |
+            | password                              | password01           | PPT_AUTENTICAZIONE                | CEFRSEM5    |
