@@ -51,34 +51,32 @@ Feature: Syntax checks for nodoChiediFlussoRendicontazione
       When EC sends SOAP nodoChiediFlussoRendicontazione to nodo-dei-pagamenti
       Then check faultCode is PPT_SINTASSI_EXTRAXSD of nodoChiediFlussoRendicontazione response
 
-
-#   TODO si spacca il decoupler
-#@runnable
-#   Scenario Outline: Check PPT_SINTASSI_EXTRAXSD error for nodoChiediFlussoRendicontazione primitive - TEST3
-#      Given initial XML nodoChiediFlussoRendicontazione
-#         """
-#         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
-#         <soapenv:Header/>
-#         <soapenv:Body>
-#         <ws:nodoChiediFlussoRendicontazione>
-#         <identificativoIntermediarioPA>#broker_ci#</identificativoIntermediarioPA>
-#         <identificativoStazioneIntermediarioPA>#id_station#</identificativoStazioneIntermediarioPA>
-#         <password>#password#</password>
-#         <identificativoDominio>#creditor_institution_code#</identificativoDominio>
-#         <identificativoPSP>#psp#</identificativoPSP>
-#         <identificativoFlusso>#identificativoFlusso#</identificativoFlusso>
-#         </ws:nodoChiediFlussoRendicontazione>
-#         </soapenv:Body>
-#         </soapenv:Envelope>
-#         """
-#      And <elem> with <value> in nodoChiediFlussoRendicontazione
-#      When EC sends SOAP nodoChiediFlussoRendicontazione to nodo-dei-pagamenti
-#      Then check faultCode is PPT_SINTASSI_EXTRAXSD of nodoChiediFlussoRendicontazione response
-#      Examples:
-#         | elem                               | value | soapUI test |
-#         | soapenv:Body                       | Empty | CFRSIN2     |
-#         | ws:nodoChiediFlussoRendicontazione | Empty | CFRSIN4     |
-#         | soapenv:Body                       | None  | CFRSIN3     |
+   @runnable
+   Scenario Outline: Check PPT_SINTASSI_EXTRAXSD error for nodoChiediFlussoRendicontazione primitive - TEST3
+      Given initial XML nodoChiediFlussoRendicontazione
+         """
+         <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
+         <soapenv:Header/>
+         <soapenv:Body>
+         <ws:nodoChiediFlussoRendicontazione>
+         <identificativoIntermediarioPA>#broker_ci#</identificativoIntermediarioPA>
+         <identificativoStazioneIntermediarioPA>#id_station#</identificativoStazioneIntermediarioPA>
+         <password>#password#</password>
+         <identificativoDominio>#creditor_institution_code#</identificativoDominio>
+         <identificativoPSP>#psp#</identificativoPSP>
+         <identificativoFlusso>#identificativoFlusso#</identificativoFlusso>
+         </ws:nodoChiediFlussoRendicontazione>
+         </soapenv:Body>
+         </soapenv:Envelope>
+         """
+      And <elem> with <value> in nodoChiediFlussoRendicontazione
+      When EC sends SOAP nodoChiediFlussoRendicontazione to nodo-dei-pagamenti
+      Then check faultCode is PPT_SINTASSI_EXTRAXSD of nodoChiediFlussoRendicontazione response
+      Examples:
+         | elem                               | value | soapUI test |
+         | soapenv:Body                       | Empty | CFRSIN2     |
+         | ws:nodoChiediFlussoRendicontazione | Empty | CFRSIN4     |
+         | soapenv:Body                       | None  | CFRSIN3     |
 
 @runnable
    Scenario Outline: Check PPT_SINTASSI_EXTRAXSD error for nodoChiediFlussoRendicontazione primitive - TEST4
@@ -110,15 +108,14 @@ Feature: Syntax checks for nodoChiediFlussoRendicontazione
          | identificativoStazioneIntermediarioPA | None                                 | CFRSIN9     |
          | identificativoStazioneIntermediarioPA | Empty                                | CFRSIN10    |
          | identificativoStazioneIntermediarioPA | k91JETYVnE7grIIKbzWE6Di7XKM3ymJeawhf | CFRSIN11    |
-#         | password                              | None                                 | CFRSIN12    |
-#         | password                              | Empty                                | CFRSIN13    |
-#         | password                              | Xlve3Jc                              | CFRSIN14    |
-#         | password                              | xxkV8x4phzRKyiuE                     | CFRSIN15    |
+         | password                              | None                                 | CFRSIN12    |
+         | password                              | Empty                                | CFRSIN13    |
+         | password                              | Xlve3Jc                              | CFRSIN14    |
+         | password                              | xxkV8x4phzRKyiuE                     | CFRSIN15    |
          | identificativoPSP                     | Empty                                | CFRSIN20    |
          | identificativoDominio                 | k91JETYVnE7grIIKbzWE6Di7XKM3ymJeawhf | CFRSIN18    |
          | identificativoPSP                     | k91JETYVnE7grIIKbzWE6Di7XKM3ymJeawhf | CFRSIN21    |
          | identificativoFlusso                  | None                                 | CFRSIN22    |
-#   TODO fix for nodo-auth
 
 
     @runnable
