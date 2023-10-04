@@ -55,6 +55,13 @@
       "password": "password",
       "port": "6432"
     },
+    "fdr": {
+      "host": "pagopa-d-weu-fdr-flexible-postgresql.postgres.database.azure.com",
+      "database": "fdr",
+      "user": "fdr",
+      "password": "password",
+      "port": "6432"
+    },
     "nodo_online": {
       "host": "pagopa-d-weu-nodo-flexible-postgresql.postgres.database.azure.com",
       "database": "nodo",
