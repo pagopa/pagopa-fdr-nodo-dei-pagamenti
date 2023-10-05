@@ -252,7 +252,6 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
         When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
         Then check esito is OK of nodoInviaFlussoRendicontazione response
 
-    @runnable
     # [SEM_NIFR_17]
     Scenario: Create a new REND
         Given the Send nodoInviaFlussoRendicontazione primitive - TEST2 scenario executed successfully
