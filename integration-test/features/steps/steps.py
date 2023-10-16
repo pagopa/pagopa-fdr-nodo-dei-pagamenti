@@ -15,6 +15,7 @@ if 'NODOPGDB' in os.environ:
     import db_operation_pg as db
 else:
     import db_operation as db
+import steps.testing_support as testing_support
 import json_operations as jo
 import pytz
 import requests
@@ -1542,21 +1543,16 @@ def step_impl(context, primitive):
 
 @step("nodo-dei-pagamenti has config parameter {param} set to {value}")
 def step_impl(context, param, value):
-    db_selected = context.config.userdata.get(
-        "db_configuration").get('nodo_cfg')
     selected_query = utils.query_json(context, 'update_config', 'configurations').replace(
         'value', value).replace('key', param)
-    conn = db.getConnection(db_selected.get('host'), db_selected.get(
-        'database'), db_selected.get('user'), db_selected.get('password'), db_selected.get('port'))
 
     setattr(context, param, value)
     print(">>>>>>>>>>>>>>>", getattr(context, param))
 
-    exec_query = db.executeQuery(conn, selected_query)
+    exec_query = testing_support.executeQuery(context, selected_query)
     if exec_query is not None:
         print(f'executed query: {exec_query}')
 
-    db.closeConnection(conn)
     headers = {'Host': 'api.dev.platform.pagopa.it:443'}
     refresh_response = requests.get(utils.get_refresh_config_url(
         context), headers=headers, verify=False)
@@ -1627,18 +1623,12 @@ def step_impl(context, query_name, date, macro, db_name):
 
 @then("restore initial configurations")
 def step_impl(context):
-    db_selected = context.config.userdata.get(
-        "db_configuration").get('nodo_cfg')
-    conn = db.getConnection(db_selected.get('host'), db_selected.get(
-        'database'), db_selected.get('user'), db_selected.get('password'), db_selected.get('port'))
-
     config_dict = getattr(context, 'configurations')
     for key, value in config_dict.items():
         selected_query = utils.query_json(context, 'update_config', 'configurations').replace(
             'value', value).replace('key', key)
-        db.executeQuery(conn, selected_query)
+        testing_support.executeQuery(context, selected_query)
 
-    db.closeConnection(conn)
     headers = {'Host': 'api.dev.platform.pagopa.it:443'}
     refresh_response = requests.get(utils.get_refresh_config_url(
         context), headers=headers, verify=False)
@@ -2599,14 +2589,7 @@ def step_impl(context):
 
     db.closeConnection(conn)
 
-    db_config = context.config.userdata.get("db_configuration").get("nodo_cfg")
-
-    conn = db.getConnection(db_config.get('host'), db_config.get(
-        'database'), db_config.get('user'), db_config.get('password'), db_config.get('port'))
-
-    rows3 = db.executeQuery(conn, query3)
-
-    db.closeConnection(conn)
+    rows3 = testing_support.executeQuery(context, query3)
 
     assert rows[0][1] == rows1[0][0]
     assert rows[0][2] == rows1[0][1]
@@ -2702,12 +2685,9 @@ def step_impl(context):
     db.closeConnection(conn)
 
     query5 = "SELECT CODICE_FISCALE, RAGIONE_SOCIALE  FROM PSP WHERE ID_PSP='$activatePaymentNotice.idPSP'"
-    db_config = context.config.userdata.get("db_configuration").get("nodo_cfg")
-    conn = db.getConnection(db_config.get('host'), db_config.get(
-        'database'), db_config.get('user'), db_config.get('password'), db_config.get('port'))
 
     query5 = utils.replace_local_variables(query5, context)
-    rows5 = db.executeQuery(conn, query5)
+    rows5 = testing_support.executeQuery(context, query5)
 
     db.closeConnection(conn)
 

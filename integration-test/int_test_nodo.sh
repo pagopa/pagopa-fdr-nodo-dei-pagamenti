@@ -10,6 +10,7 @@ https://api.dev.platform.pagopa.it/mock-ec-replica-secondary-ndp/service/v1/mock
 https://api.dev.platform.pagopa.it/mock-psp-replica-ndp/service/v1/mock \
 https://api.dev.platform.pagopa.it/mock-psp-secondary-replica-ndp/service/v1/mock \
 https://api.dev.platform.pagopa.it/mock-pm-replica-ndp/service/v1 \
+https://api.dev.platform.pagopa.it/apiconfig-testing-support/api/v1/v1/api/generic/genericQuery \
 password
 USAGE_EX
 
@@ -80,11 +81,10 @@ replace $file ".services.\"mock-pm\".healthcheck"   "/"
 replace $file ".services.\"mock-pm\".soap_service"  ""
 replace $file ".services.\"mock-pm\".rest_service"  ""
 
-replace $file ".db_configuration.nodo_cfg.host"     "pagopa-d-weu-nodo-flexible-postgresql.postgres.database.azure.com"
-replace $file ".db_configuration.nodo_cfg.database" "nodo"
-replace $file ".db_configuration.nodo_cfg.user"     "cfg"
-replace $file ".db_configuration.nodo_cfg.password" "$DB_PWD"
-replace $file ".db_configuration.nodo_cfg.port"     "${DB_PORT}"
+replace $file ".services.\"apiconfig-testing-support\".url"           URL_TESTING_SUPPORT
+replace $file ".services.\"apiconfig-testing-support\".healthcheck"   "/"
+replace $file ".services.\"apiconfig-testing-support\".soap_service"  ""
+replace $file ".services.\"apiconfig-testing-support\".rest_service"  ""
 
 replace $file ".db_configuration.nodo_online.host"      "pagopa-d-weu-nodo-flexible-postgresql.postgres.database.azure.com"
 replace $file ".db_configuration.nodo_online.database"  "nodo"

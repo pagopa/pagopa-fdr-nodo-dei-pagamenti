@@ -37,6 +37,12 @@
       "healthcheck": "/info",
       "soap_service": "",
       "rest_service": ""
+    },
+    "apiconfig-testing-support": {
+      "url": "https://api.dev.platform.pagopa.it/apiconfig-testing-support/api/v1/v1/api/generic/genericQuery",
+      "healthcheck": "",
+      "soap_service": "",
+      "rest_service": ""
     }
   },
   "global_configuration": {
@@ -48,13 +54,6 @@
     "id_station": "15376371009_03"
   },
   "db_configuration": {
-    "nodo_cfg": {
-      "host": "pagopa-d-weu-nodo-flexible-postgresql.postgres.database.azure.com",
-      "database": "nodo",
-      "user": "cfg",
-      "password": "password",
-      "port": "6432"
-    },
     "fdr": {
       "host": "pagopa-d-weu-fdr-flexible-postgresql.postgres.database.azure.com",
       "database": "fdr",
