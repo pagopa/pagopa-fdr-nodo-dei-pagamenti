@@ -3,7 +3,6 @@ from behave.model import Table
 import os
 import steps.utils as utils
 
-import steps.testing_support as testing_support
 if 'NODOPGDB' in os.environ:
     import steps.db_operation_pg as db
     import psycopg2
@@ -29,9 +28,13 @@ def before_all(context):
     context.config.update_userdata(more_userdata)
     # services = context.config.userdata.get("services")
     # db_config = context.config.userdata.get("db_configuration")
-    
-    selected_query = utils.query_json(context, 'select_config', 'configurations')    
-    exec_query = testing_support.executeQuery(context, selected_query)
+    db_selected = context.config.userdata.get("db_configuration").get('nodo_cfg')
+    selected_query = utils.query_json(context, 'select_config', 'configurations')
+    conn = db.getConnection(db_selected.get('host'), db_selected.get('database'), db_selected.get('user'),
+                            db_selected.get('password'), db_selected.get('port'))
+
+    exec_query = db.executeQuery(conn, selected_query)
+    db.closeConnection(conn)
 
     # convert list of tuple in a dict
     config_dict = {key: value for key, value in exec_query}
@@ -59,11 +62,14 @@ def after_feature(context, feature):
 
 def after_all(context):
     print("After all disabled")
+    # db_selected = context.config.userdata.get("db_configuration").get('nodo_cfg')
+    # conn = db.getConnection(db_selected.get('host'), db_selected.get('database'), db_selected.get('user'), db_selected.get('password'),db_selected.get('port'))
+    #
     # config_dict = getattr(context, 'configurations')
     # for key, value in config_dict.items():
     #     #print(key, value)
     #     selected_query = utils.query_json(context, 'update_config', 'configurations').replace('value', value).replace('key', key)
-    #     testing_support.executeQuery(context, selected_query)
+    #     db.executeQuery(conn, selected_query)
     #
     # db.closeConnection(conn)
     # headers = {'Host': 'api.dev.platform.pagopa.it:443'}
