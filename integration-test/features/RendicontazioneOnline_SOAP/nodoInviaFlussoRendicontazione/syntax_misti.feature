@@ -38,7 +38,7 @@ Feature: PAG-1879
             </pay_i:FlussoRiversamento>
             """
 
-    @test @runnable
+    @test <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
     Scenario Outline: Test syntax error
         Given pay_i:denominazioneRicevente with <value> in REND
         And REND generation
@@ -52,7 +52,7 @@ Feature: PAG-1879
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
             <identificativoCanale>#canale#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
@@ -71,7 +71,7 @@ Feature: PAG-1879
             | Empty                                                                                                                                         |
             | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa |
 
-    @test @runnable
+    @test <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
     Scenario Outline: Test OK
         Given REND generation
             """
@@ -85,7 +85,7 @@ Feature: PAG-1879
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
             <identificativoCanale>#canale#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>

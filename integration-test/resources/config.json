@@ -41,9 +41,11 @@
   },
   "global_configuration": {
     "psp": "60000000001",
-    "canale": "15376371009_04",
+    "broker_psp": "60000000001",
+    "channel": "15376371009_04",
     "password": "PLACEHOLDER",
     "creditor_institution_code": "15376371009",
+    "creditor_institution_code_ftp": "15376371009_FTP",
     "broker_ci": "15376371009",
     "id_station": "15376371009_03"
   },

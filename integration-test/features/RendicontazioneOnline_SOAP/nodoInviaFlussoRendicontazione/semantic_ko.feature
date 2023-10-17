@@ -50,8 +50,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
@@ -87,8 +87,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>$identificativoFlusso$identificativoFlusso$identificativoFlusso$identificativoFlusso</identificativoFlusso>
@@ -112,8 +112,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>70000000001-9999</identificativoFlusso>
@@ -137,7 +137,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
             <identificativoCanale>15376371009_05</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
@@ -161,8 +161,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
@@ -186,8 +186,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
@@ -212,8 +212,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
@@ -238,8 +238,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
@@ -302,8 +302,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>88888888888</identificativoDominio>
             <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
@@ -365,8 +365,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
@@ -389,8 +389,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
@@ -415,8 +415,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
@@ -441,8 +441,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>#identificativoFlusso#</identificativoFlusso>
@@ -467,8 +467,8 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - KO
             <soapenv:Body>
             <ws:nodoInviaFlussoRendicontazione>
             <identificativoPSP>#psp#</identificativoPSP>
-            <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-            <identificativoCanale>#canale#</identificativoCanale>
+            <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+            <identificativoCanale>#channel#</identificativoCanale>
             <password>#password#</password>
             <identificativoDominio>#creditor_institution_code#</identificativoDominio>
             <identificativoFlusso>$identificativoFlusso</identificativoFlusso>

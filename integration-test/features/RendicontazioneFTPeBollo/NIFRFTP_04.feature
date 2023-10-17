@@ -50,7 +50,7 @@
 #                <ws:nodoInviaFlussoRendicontazione>
 #                    <identificativoPSP>#psp#</identificativoPSP>
 #                    <identificativoIntermediarioPSP>#psp#</identificativoIntermediarioPSP>
-#                    <identificativoCanale>#canale#</identificativoCanale>
+#                    <identificativoCanale>#channel#</identificativoCanale>
 #                    <password>pwdpwdpwd</password>
 #                    <identificativoDominio>#creditor_institution_code#</identificativoDominio>
 #                    <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
@@ -69,7 +69,7 @@
 #        And checks the value 0 of the record at column OPTLOCK of the table RENDICONTAZIONE retrived by the query rendicontazione on db fdr under macro RendicontazioneFTPeBollo
 #        And checks the value #psp# of the record at column PSP of the table RENDICONTAZIONE retrived by the query rendicontazione on db fdr under macro RendicontazioneFTPeBollo
 #        And checks the value #psp# of the record at column INTERMEDIARIO of the table RENDICONTAZIONE retrived by the query rendicontazione on db fdr under macro RendicontazioneFTPeBollo
-#        And checks the value #canale# of the record at column CANALE of the table RENDICONTAZIONE retrived by the query rendicontazione on db fdr under macro RendicontazioneFTPeBollo
+#        And checks the value #channel# of the record at column CANALE of the table RENDICONTAZIONE retrived by the query rendicontazione on db fdr under macro RendicontazioneFTPeBollo
 #        And checks the value None of the record at column PASSWORD of the table RENDICONTAZIONE retrived by the query rendicontazione on db fdr under macro RendicontazioneFTPeBollo
 #        And checks the value $pa of the record at column DOMINIO of the table RENDICONTAZIONE retrived by the query rendicontazione on db fdr under macro RendicontazioneFTPeBollo
 #        And checks the value NotNone of the record at column DATA_ORA_FLUSSO of the table RENDICONTAZIONE retrived by the query rendicontazione on db fdr under macro RendicontazioneFTPeBollo
