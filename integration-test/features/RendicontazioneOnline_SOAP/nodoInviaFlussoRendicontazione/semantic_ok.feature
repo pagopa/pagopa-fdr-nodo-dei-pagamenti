@@ -40,7 +40,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             </pay_i:FlussoRiversamento>
             """
 
-    <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+    @runnable
     # [SEM_NIFR_16]
     Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST1
         Given the Create REND scenario executed successfully
@@ -103,7 +103,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             </pay_i:FlussoRiversamento>
             """
 
-    <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+    @runnable
     Scenario: Send nodoInviaFlussoRendicontazione_dataOraMaggiore primitive - TEST2
         Given the Create REND2 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
@@ -165,7 +165,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             </pay_i:FlussoRiversamento>
             """
 
-    <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+    @runnable
     Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST3
         Given the Create REND3 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
@@ -226,7 +226,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             </pay_i:FlussoRiversamento>
             """
 
-    <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+    @runnable
     Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST4
         Given the Create REND4 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
@@ -288,7 +288,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             </pay_i:FlussoRiversamento>
             """
 
-    <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+    @runnable
     Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST5
         Given the Create REND5 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
@@ -350,7 +350,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             </pay_i:FlussoRiversamento>
             """
 
-    <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+    @runnable
     Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST6
         Given the Create REND6 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
@@ -374,7 +374,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
         When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
         Then check esito is OK of nodoInviaFlussoRendicontazione response
 
-    <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+    @runnable
     # [SEM_NIFR_24]
     Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST7
         Given the Create REND scenario executed successfully
@@ -437,7 +437,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             </pay_i:FlussoRiversamento>
             """
 
-    <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+    @runnable
     Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST8
         Given the Create REND7 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
@@ -499,7 +499,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             </pay_i:FlussoRiversamento>
             """
 
-    <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+    @runnable
     Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST9
         Given the Create REND8 scenario executed successfully
         And initial XML nodoInviaFlussoRendicontazione
@@ -523,7 +523,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
         When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
         Then check esito is OK of nodoInviaFlussoRendicontazione response
 
-    <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+    @runnable
     #[SEM_NIFR_22]
     Scenario: Send nodoInviaFlussoRendicontazione primitive - TEST10
         Given the Create REND scenario executed successfully
