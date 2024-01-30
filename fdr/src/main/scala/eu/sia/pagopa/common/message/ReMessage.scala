@@ -39,7 +39,6 @@ case class ReEventHub(
                        created: LocalDateTime,
                        sessionId: Option[String] = None,
                        eventType: String,
-                       fdrStatus: Option[String] = None,
                        fdr: Option[String] = None,
                        pspId: Option[String] = None,
                        organizationId: Option[String] = None,
