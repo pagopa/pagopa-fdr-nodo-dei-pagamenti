@@ -7,7 +7,7 @@ pool:
   vmImage: 'ubuntu-22.04'
 
 variables:
-  lightbend_key_secret: $(lightbend_key_dev)
+  lightbend_key_secret: $(LIGHTBEND_KEY_TMP)
 stages:
   - stage: Test
     jobs:
