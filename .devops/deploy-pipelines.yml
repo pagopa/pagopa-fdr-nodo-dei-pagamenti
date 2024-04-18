@@ -153,6 +153,7 @@ stages:
               echo "##vso[build.updatebuildnumber]$buildname"
           - bash: |
               echo "##vso[task.setvariable variable=LIGHTBEND_KEY]$(lightbend_key_secret)"
+
           - checkout: self
             clean: true
             persistCredentials: true
@@ -208,6 +209,8 @@ stages:
               echo "##vso[task.setvariable variable=LIGHTBEND_KEY]$(lightbend_key_secret)"
           - script: ./sbt -v docker:stage
             displayName: "Create Dockerfile"
+            env:
+              LIGHTBEND_KEY: $(lightbend_key_secret)
           - template: templates/docker-release/template.yaml@pagopaCommons
             parameters:
               CONTAINER_REGISTRY_SERVICE_CONN: $(WEU_dockerRegistryServiceConnection)
