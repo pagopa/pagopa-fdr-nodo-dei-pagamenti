@@ -15,8 +15,10 @@ stages:
         steps:
           - checkout: self
             persistCredentials: true
-          - bash: |
-              echo "##vso[task.setvariable variable=LIGHTBEND_KEY]$(lightbend_key_secret)"
+
+          #- bash: |
+          #    echo "##vso[task.setvariable variable=LIGHTBEND_KEY]$(lightbend_key_secret)"
+
           - task: SonarCloudPrepare@1
             displayName: 'Prepare SonarCloud analysis configuration'
             inputs:
@@ -34,6 +36,8 @@ stages:
 
           - script: ./sbt -v clean jacocoAggregate
             displayName: "Run unit tests and generate Jacoco report"
+            env:
+              LIGHTBEND_KEY: $(lightbend_key_secret)
 
           - task: SonarCloudAnalyze@1
             displayName: 'Analyze with SonarCloud'
