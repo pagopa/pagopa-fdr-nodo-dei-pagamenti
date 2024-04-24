@@ -62,7 +62,7 @@ Feature: Syntax checks for nodoInviaFlussoRendicontazione - OK
             </soapenv:Body>
             </soapenv:Envelope>
             """
-        When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
+        When PSP sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
         Then check esito is OK of nodoInviaFlussoRendicontazione response
 
     Scenario: Create REND2
