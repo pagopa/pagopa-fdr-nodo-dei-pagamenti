@@ -15,16 +15,18 @@ import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
+import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoChiediFlussoRendicontazioneResponse
 import it.pagopa.config.{CreditorInstitution, PaymentServiceProvider, Station}
 import scalaxb.Base64Binary
+import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpa.{NodoChiediFlussoRendicontazione, NodoChiediFlussoRendicontazioneRisposta}
 
 import scala.concurrent.Future
 import scala.util.{Failure, Success, Try}
 
 case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
-  extends PerRequestActor with ReUtil with NodoChiediFlussoRendicontazioneResponse {
+  extends BaseFlussiRendicontazioneActor with PerRequestActor with ReUtil with NodoChiediFlussoRendicontazioneResponse {
 
   override def actorError(e: DigitPaException): Unit = {
     actorError(req, replyTo, ddataMap, e, reFlow)
@@ -33,6 +35,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
   var req: SoapRequest = _
   var replyTo: ActorRef = _
 
+  val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
   val outputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean
   val inputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean
 
@@ -208,8 +211,16 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         )
       )
 
+      (rendicontazioniLocal, pa) <- for {
+        _ <- Future.successful(())
+        _ = log.debug(s"Looking for reporting ${ncfr.identificativoFlusso} to db")
+        (_, binaryFileOption, _, pa, staz, psp) <- checksSemanticiEDuplicati(ncfr)
+        _ = reFlow = reFlow.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(p => p.description)))
+        _ = log.debug("Make response with reporting")
+        rendicontazioneDb <- elaboraRisposta(binaryFileOption, pa)
+      } yield (rendicontazioneDb, pa)
 
-      rendicontazioneNexi <- if (callNexiToo) {
+      rendicontazioneNexi <- if ( rendicontazioniLocal.isEmpty && callNexiToo) {
         (for {
           _ <- Future.successful(())
 
@@ -226,10 +237,9 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
           ncfrResponse <- if( response.payload.isDefined ) {
             parseResponseNexi(response.payload.get) match {
               case Success(v) => Future.successful(v)
-              case Failure(e) => {
+              case Failure(e) =>
                 log.error(e, e.getMessage)
                 Future.successful(None)
-              }
             }
           } else {
             Future.successful(None)
@@ -237,33 +247,59 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
 
           xmlRendicontazione <- if (ncfrResponse.isDefined) {
             for {
-              _ <- Future.successful(())
+              _ <- if( ncfrResponse.get.xmlRendicontazione.isEmpty ) {
+                for {
+                  _ <- Future.successful(log.info(s"No report returned by ${SoapReceiverType.NEXI.toString}"))
+                  emptyReport <- Future.successful(None)
+                } yield emptyReport
+              } else {
+                log.info(s"Report [${ncfr.identificativoFlusso}] returned by ${SoapReceiverType.NEXI.toString}")
+                Future.successful(ncfrResponse.get.xmlRendicontazione.get)
+              }
               _ = ncfrResponse.get.fault.map(v => log.warn(s"Esito da ${SoapReceiverType.NEXI.toString}: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))
-            } yield ncfrResponse.get.xmlRendicontazione
+              content <- Future.fromTry(StringUtils.getStringDecoded(ncfrResponse.get.xmlRendicontazione.get, checkUTF8))
+              ctFlussoTiversamento <- Future.fromTry(ctFlussoRiversamento(content))
+
+              _ <- saveRendicontazione(
+                ncfr.identificativoFlusso,
+                "",
+                "",
+                "",
+                ncfr.identificativoDominio.get,
+                ctFlussoTiversamento.get.dataOraFlusso,
+                ncfrResponse.get.xmlRendicontazione.get,
+                checkUTF8,
+                ctFlussoTiversamento.get,
+                pa.get,
+                ddataMap,
+                actorClassId,
+                repositories.fdrRepository)
+            } yield Some(ncfrResponse.get.xmlRendicontazione.get)
           } else {
-            Future.successful(None)
+            for {
+              _ <- Future.successful(log.info(s"No report returned by ${SoapReceiverType.NEXI.toString}"))
+              emptyReport <- Future.successful(None)
+            } yield emptyReport
           }
         } yield xmlRendicontazione).recoverWith({
-          case _ => Future.successful(None)
+          case _ =>
+            for {
+              _ <- Future.successful(log.info(s"No report returned by ${SoapReceiverType.NEXI.toString}"))
+              emptyReport <- Future.successful(None)
+            } yield emptyReport
         })
       } else {
         Future.successful(None)
       }
 
-      xmlrendicontazione <- if( rendicontazioneNexi.isDefined ) {
-        log.info(s"Report [${ncfr.identificativoFlusso}] returned by ${SoapReceiverType.NEXI.toString}")
-        Future.successful(rendicontazioneNexi)
+      xmlrendicontazione = if( rendicontazioniLocal.isDefined ) {
+        Some(rendicontazioniLocal.get)
+      } else if ( rendicontazioneNexi.isDefined) {
+        Some(rendicontazioneNexi.get)
       } else {
-        log.info(s"No report returned by ${SoapReceiverType.NEXI.toString}")
-        for {
-          _ <- Future.successful(())
-          _ = log.debug(s"Looking for reporting ${ncfr.identificativoFlusso} to db")
-          (_, binaryFileOption, _, pa, staz, psp) <- checksSemanticiEDuplicati(ncfr)
-          _ = reFlow = reFlow.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(p => p.description)))
-          _ = log.debug("Make response with reporting")
-          rendicontazioneDb <- elaboraRisposta(binaryFileOption, pa)
-        } yield rendicontazioneDb
+        None
       }
+
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       ncfrResponse = NodoChiediFlussoRendicontazioneRisposta(None, xmlrendicontazione)
 
@@ -291,6 +327,16 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
     (for {
       _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
       body <- XmlEnum.str2nodoChiediFlussoRendicontazioneResponse_nodoperpa(payloadResponse)
+    } yield Some(body)) recoverWith { case e =>
+      Failure(e)
+    }
+  }
+
+  private def ctFlussoRiversamento(flussoRiversamento: String): Try[Option[CtFlussoRiversamento]] = {
+    log.info(FdrLogConstant.logSintattico(s"${SoapReceiverType.NEXI.toString} $RESPONSE_NAME"))
+    (for {
+      _ <- XsdValid.checkOnly(flussoRiversamento, XmlEnum.FLUSSO_RIVERSAMENTO_FLUSSORIVERSAMENTO, inputXsdValid)
+      body <- XmlEnum.str2FlussoRiversamento_flussoriversamento(flussoRiversamento)
     } yield Some(body)) recoverWith { case e =>
       Failure(e)
     }

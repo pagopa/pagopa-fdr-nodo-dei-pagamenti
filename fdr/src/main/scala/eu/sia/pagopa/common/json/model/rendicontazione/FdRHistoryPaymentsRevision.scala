@@ -23,6 +23,7 @@ object GetPaymentResponse extends DefaultJsonProtocol {
           v.asInstanceOf[JsObject].fields("iuv").asInstanceOf[JsString].value,
           v.asInstanceOf[JsObject].fields("iur").asInstanceOf[JsString].value,
           v.asInstanceOf[JsObject].fields("index").asInstanceOf[JsNumber].value.intValue,
+          v.asInstanceOf[JsObject].fields("idTransfer").asInstanceOf[JsNumber].value.intValue,
           v.asInstanceOf[JsObject].fields("pay").asInstanceOf[JsNumber].value,
           PayStatusEnum.withName(v.asInstanceOf[JsObject].fields("payStatus").asInstanceOf[JsString].value),
           v.asInstanceOf[JsObject].fields("payDate").asInstanceOf[JsString].value
@@ -60,11 +61,12 @@ case class Payment(
                     iuv: String,
                     iur: String,
                     index: Integer,
+                    idTransfer: Integer,
                     pay: BigDecimal,
                     payStatus: PayStatusEnum.Value,
                     payDate: String
 )
 
 object PayStatusEnum extends Enumeration {
-  val EXECUTED, REVOKED, NO_RPT = Value
+  val EXECUTED, REVOKED, NO_RPT, STAND_IN = Value
 }
