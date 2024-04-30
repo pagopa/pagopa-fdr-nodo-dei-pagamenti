@@ -211,19 +211,17 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         )
       )
 
-      (rendicontazioniLocal, pa) <- for {
+      rendicontazioniLocal <- for {
         _ <- Future.successful(())
         _ = log.debug(s"Looking for reporting ${ncfr.identificativoFlusso} to db")
         (_, binaryFileOption, _, pa, staz, psp) <- checksSemanticiEDuplicati(ncfr)
         _ = reFlow = reFlow.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(p => p.description)))
         _ = log.debug("Make response with reporting")
         rendicontazioneDb <- elaboraRisposta(binaryFileOption, pa)
-      } yield (rendicontazioneDb, pa)
+      } yield (rendicontazioneDb)
 
       rendicontazioneNexi <- if ( rendicontazioniLocal.isEmpty && callNexiToo) {
         (for {
-          _ <- Future.successful(())
-
           response <- HttpSoapServiceManagement.createRequestSoapAction(
             req.sessionId,
             req.testCaseId,
@@ -257,34 +255,17 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
                 Future.successful(ncfrResponse.get.xmlRendicontazione.get)
               }
               _ = ncfrResponse.get.fault.map(v => log.warn(s"Esito da ${SoapReceiverType.NEXI.toString}: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))
-              content <- Future.fromTry(StringUtils.getStringDecoded(ncfrResponse.get.xmlRendicontazione.get, checkUTF8))
-              ctFlussoTiversamento <- Future.fromTry(ctFlussoRiversamento(content))
-
-              _ <- saveRendicontazione(
-                ncfr.identificativoFlusso,
-                "",
-                "",
-                "",
-                ncfr.identificativoDominio.get,
-                ctFlussoTiversamento.get.dataOraFlusso,
-                ncfrResponse.get.xmlRendicontazione.get,
-                checkUTF8,
-                ctFlussoTiversamento.get,
-                pa.get,
-                ddataMap,
-                actorClassId,
-                repositories.fdrRepository)
             } yield Some(ncfrResponse.get.xmlRendicontazione.get)
           } else {
             for {
-              _ <- Future.successful(log.info(s"No report returned by ${SoapReceiverType.NEXI.toString}"))
+              _ <- Future.successful(log.info(s"No response returned by ${SoapReceiverType.NEXI.toString}"))
               emptyReport <- Future.successful(None)
             } yield emptyReport
           }
         } yield xmlRendicontazione).recoverWith({
           case _ =>
             for {
-              _ <- Future.successful(log.info(s"No report returned by ${SoapReceiverType.NEXI.toString}"))
+              _ <- Future.successful(log.info(s"Error returned by ${SoapReceiverType.NEXI.toString}"))
               emptyReport <- Future.successful(None)
             } yield emptyReport
         })
@@ -327,16 +308,6 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
     (for {
       _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
       body <- XmlEnum.str2nodoChiediFlussoRendicontazioneResponse_nodoperpa(payloadResponse)
-    } yield Some(body)) recoverWith { case e =>
-      Failure(e)
-    }
-  }
-
-  private def ctFlussoRiversamento(flussoRiversamento: String): Try[Option[CtFlussoRiversamento]] = {
-    log.info(FdrLogConstant.logSintattico(s"${SoapReceiverType.NEXI.toString} $RESPONSE_NAME"))
-    (for {
-      _ <- XsdValid.checkOnly(flussoRiversamento, XmlEnum.FLUSSO_RIVERSAMENTO_FLUSSORIVERSAMENTO, inputXsdValid)
-      body <- XmlEnum.str2FlussoRiversamento_flussoriversamento(flussoRiversamento)
     } yield Some(body)) recoverWith { case e =>
       Failure(e)
     }
