@@ -261,3 +261,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
       | password                              | Password01                | PPT_AUTENTICAZIONE                | CFRSEM5     |
       | identificativoFlusso                  | 2017-09-11idPsp1-pluto123 | PPT_ID_FLUSSO_SCONOSCIUTO         | CFRSEM10    |
 
+
+    #TODO
+    #@runnable
+    #Scenario: nodoChiediFlussoRendicontazione - Semantic error: report saved
