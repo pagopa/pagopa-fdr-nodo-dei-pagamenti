@@ -7,7 +7,7 @@ Feature: Syntax and semantic checks for nodoChiediElencoFlussiRendicontazione
   #[CEFRSIN0]
   @runnable
   Scenario: nodoChiediElencoFlussiRendicontazione - Syntax error: wrong WSDL namespace
-    Given initial XML nodoChiediElencoFlussiRendicontazione
+    Given an XML for nodoChiediElencoFlussiRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/ciao/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header>
@@ -31,7 +31,7 @@ Feature: Syntax and semantic checks for nodoChiediElencoFlussiRendicontazione
   #[CEFRSIN1]
   @runnable
   Scenario: nodoChiediElencoFlussiRendicontazione - Syntax error: Missing fields
-    Given initial XML nodoChiediElencoFlussiRendicontazione
+    Given an XML for nodoChiediElencoFlussiRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ppt="http://ws.pagamenti.telematici.gov/ppthead" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header>
@@ -54,7 +54,7 @@ Feature: Syntax and semantic checks for nodoChiediElencoFlussiRendicontazione
   #[CEFRSIN3]
   @runnable
   Scenario: nodoChiediElencoFlussiRendicontazione - Syntax error: Empty body
-    Given initial XML nodoChiediElencoFlussiRendicontazione
+    Given an XML for nodoChiediElencoFlussiRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/">
         <soapenv:Header />
@@ -67,7 +67,7 @@ Feature: Syntax and semantic checks for nodoChiediElencoFlussiRendicontazione
 
   @runnable
   Scenario Outline: nodoChiediElencoFlussiRendicontazione - Syntax error: partial body and wrong content on tag
-    Given initial XML nodoChiediElencoFlussiRendicontazione
+    Given an XML for nodoChiediElencoFlussiRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -102,7 +102,7 @@ Feature: Syntax and semantic checks for nodoChiediElencoFlussiRendicontazione
 
   @runnable
   Scenario Outline: nodoChiediElencoFlussiRendicontazione - Syntax error: wrong content on tag
-    Given initial XML nodoChiediElencoFlussiRendicontazione
+    Given an XML for nodoChiediElencoFlussiRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -131,7 +131,7 @@ Feature: Syntax and semantic checks for nodoChiediElencoFlussiRendicontazione
 
   @runnable
   Scenario Outline: nodoChiediElencoFlussiRendicontazione - Semantic error
-    Given initial XML nodoChiediElencoFlussiRendicontazione
+    Given an XML for nodoChiediElencoFlussiRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header />

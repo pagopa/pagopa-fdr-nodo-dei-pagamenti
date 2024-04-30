@@ -4,7 +4,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
     Given systems up
 
   Scenario: Reporting flow generation
-    Given report generation
+    Given the generated report
     """
     <pay_i:FlussoRiversamento xmlns:pay_i="http://www.digitpa.gov.it/schemas/2011/Pagamenti/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.digitpa.gov.it/schemas/2011/Pagamenti/ FlussoRendicontazione_v_1_0_1.xsd ">
         <pay_i:versioneOggetto>1.0</pay_i:versioneOggetto>
@@ -44,7 +44,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
   # [CFRSIN0]
   @runnable
   Scenario: nodoChiediFlussoRendicontazione - Syntax error: wrong WSDL namespace
-    Given initial XML nodoChiediFlussoRendicontazione
+    Given an XML for nodoChiediFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/WRONG.ENVELOPE/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header>
@@ -69,7 +69,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
   #[CFRSIN1]
   @runnable
   Scenario: nodoChiediFlussoRendicontazione - Syntax error: wrong header content
-    Given initial XML nodoChiediFlussoRendicontazione
+    Given an XML for nodoChiediFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/" xmlns:ppt="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header>
@@ -93,7 +93,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
 
   @runnable
   Scenario Outline: nodoChiediFlussoRendicontazione - Syntax error: wrong content on tag
-    Given initial XML nodoChiediFlussoRendicontazione
+    Given an XML for nodoChiediFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -138,7 +138,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
 
   @runnable
   Scenario Outline: nodoChiediFlussoRendicontazione - Syntax error: missing domain and PSP
-    Given initial XML nodoChiediFlussoRendicontazione
+    Given an XML for nodoChiediFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -165,7 +165,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
   # [CFRSIN23]
   @runnable
   Scenario: nodoChiediFlussoRendicontazione - Syntax error: missing identificativoFlusso
-    Given initial XML nodoChiediFlussoRendicontazione
+    Given an XML for nodoChiediFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -188,7 +188,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
   # [CFRSIN24]
   @runnable
   Scenario: nodoChiediFlussoRendicontazione - Syntax error: invalid field
-    Given initial XML nodoChiediFlussoRendicontazione
+    Given an XML for nodoChiediFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -213,7 +213,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
   @runnable
   Scenario Outline: nodoChiediFlussoRendicontazione - Semantic error: invalid entities for reporting flow request
     Given the Reporting flow generation scenario executed successfully
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -233,7 +233,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
     """
     And PSP sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
     And check esito is OK of nodoInviaFlussoRendicontazione response
-    And initial XML nodoChiediFlussoRendicontazione
+    And an XML for nodoChiediFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>

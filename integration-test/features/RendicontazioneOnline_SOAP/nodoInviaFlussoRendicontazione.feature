@@ -5,7 +5,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
 
 
   Scenario: Reporting flow generation
-    Given report generation
+    Given the generated report
     """
     <pay_i:FlussoRiversamento xmlns:pay_i="http://www.digitpa.gov.it/schemas/2011/Pagamenti/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.digitpa.gov.it/schemas/2011/Pagamenti/ FlussoRendicontazione_v_1_0_1.xsd ">
       <pay_i:versioneOggetto>1.0</pay_i:versioneOggetto>
@@ -46,7 +46,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
   @runnable
   Scenario: nodoInviaFlussoRendicontazione - Syntax error: wrong WSDL namespace
     Given the Reporting flow generation scenario executed successfully
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/WRONG.ENVELOPE/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -71,7 +71,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
   @runnable
   Scenario Outline: nodoInviaFlussoRendicontazione - Syntax error: wrong content on tag
     Given the Reporting flow generation scenario executed successfully
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -124,7 +124,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
   @runnable
   Scenario Outline: nodoInviaFlussoRendicontazione - Syntax error: wrong content on tag xmlRendicontazione
     Given the Reporting flow generation scenario executed successfully
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"	xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -154,7 +154,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
 
   @runnable
   Scenario Outline: nodoInviaFlussoRendicontazione - Syntax error: wrong content on tag for FlussoRiversamento
-    Given initial XML FlussoRiversamento
+    Given an XML for FlussoRiversamento
     """
     <pay_i:FlussoRiversamento xmlns:pay_i="http://www.digitpa.gov.it/schemas/2011/Pagamenti/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.digitpa.gov.it/schemas/2011/Pagamenti/ FlussoRendicontazione_v_1_0_1.xsd ">
         <pay_i:versioneOggetto>1.0</pay_i:versioneOggetto>
@@ -190,11 +190,11 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
     </pay_i:FlussoRiversamento>
     """
     And <tag> with <tag_value> in FlussoRiversamento
-    And report generation
+    And the generated report
     """
     $FlussoRiversamento
     """
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"	xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -299,7 +299,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
   @runnable
   Scenario Outline: nodoInviaFlussoRendicontazione - Semantic error: invalid entities for reporting flow
     Given the Reporting flow generation scenario executed successfully
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -339,7 +339,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
   @runnable
   Scenario: nodoInviaFlussoRendicontazione - Semantic error: send reporting flows with different dates
     Given the Reporting flow generation scenario executed successfully
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -362,7 +362,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
     And EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
     And check esito is KO of nodoInviaFlussoRendicontazione response
     And check faultCode is PPT_SEMANTICA of nodoInviaFlussoRendicontazione response
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -389,7 +389,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
   @runnable
   Scenario: nodoInviaFlussoRendicontazione - Semantic error: changing report domain in update
     Given the Reporting flow generation scenario executed successfully
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -409,7 +409,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
     """
     And EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
     And check esito is OK of nodoInviaFlussoRendicontazione response
-    And report generation
+    And the generated report
     """
     <pay_i:FlussoRiversamento xmlns:pay_i="http://www.digitpa.gov.it/schemas/2011/Pagamenti/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.digitpa.gov.it/schemas/2011/Pagamenti/ FlussoRendicontazione_v_1_0_1.xsd ">
         <pay_i:versioneOggetto>1.0</pay_i:versioneOggetto>
@@ -444,7 +444,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
         </pay_i:datiSingoliPagamenti>
     </pay_i:FlussoRiversamento>
     """
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -470,7 +470,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
   # [SEM_NIFR_19]
   @runnable
   Scenario: nodoInviaFlussoRendicontazione - Semantic error: Reporting flow already generated
-    Given report generation
+    Given the generated report
     """
     <pay_i:FlussoRiversamento xmlns:pay_i="http://www.digitpa.gov.it/schemas/2011/Pagamenti/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.digitpa.gov.it/schemas/2011/Pagamenti/ FlussoRendicontazione_v_1_0_1.xsd ">
         <pay_i:versioneOggetto>1.0</pay_i:versioneOggetto>
@@ -505,7 +505,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
         </pay_i:datiSingoliPagamenti>
     </pay_i:FlussoRiversamento>
     """
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -525,7 +525,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
     """
     And EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
     And check esito is OK of nodoInviaFlussoRendicontazione response
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -552,7 +552,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
   @runnable
   Scenario: nodoInviaFlussoRendicontazione - Semantic error: Different reporting flow identifiers in tags
     Given the Reporting flow generation scenario executed successfully
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -579,7 +579,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
   @runnable
   Scenario: nodoInviaFlussoRendicontazione - Semantic error: Different reporting flow dates in tags
     Given the Reporting flow generation scenario executed successfully
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -604,7 +604,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
 
   @runnable
   Scenario Outline: nodoInviaFlussoRendicontazione - Semantic error: Reporting flow identifier not compliant
-    Given report generation
+    Given the generated report
     """
     <pay_i:FlussoRiversamento xmlns:pay_i="http://www.digitpa.gov.it/schemas/2011/Pagamenti/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.digitpa.gov.it/schemas/2011/Pagamenti/ FlussoRendicontazione_v_1_0_1.xsd ">
         <pay_i:versioneOggetto>1.0</pay_i:versioneOggetto>
@@ -639,7 +639,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
         </pay_i:datiSingoliPagamenti>
     </pay_i:FlussoRiversamento>
     """
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
@@ -669,7 +669,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
   # [SEM_NIFR_26]
   @runnable
   Scenario: nodoInviaFlussoRendicontazione - Semantic error: Different reporting flow identifiers in tags
-    Given report generation
+    Given the generated report
     """
     <pay_i:FlussoRiversamento xmlns:pay_i="http://www.digitpa.gov.it/schemas/2011/Pagamenti/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.digitpa.gov.it/schemas/2011/Pagamenti/ FlussoRendicontazione_v_1_0_1.xsd ">
         <pay_i:versioneOggetto>1.0</pay_i:versioneOggetto>
@@ -704,7 +704,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
         </pay_i:datiSingoliPagamenti>
     </pay_i:FlussoRiversamento>
     """
-    And initial XML nodoInviaFlussoRendicontazione
+    And an XML for nodoInviaFlussoRendicontazione
     """
     <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
         <soapenv:Header/>
