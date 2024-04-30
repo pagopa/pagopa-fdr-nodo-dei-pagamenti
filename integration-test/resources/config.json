@@ -7,90 +7,16 @@
       "soap_service": " ",
       "rest_service": " ",
       "refresh_config_service": "https://api.dev.platform.pagopa.it/nodo/monitoring/v1/config/refresh/CONFIG"
-    },
-    "mock-ec": {
-      "url": "https://api.dev.platform.pagopa.it/mock-ec-replica-ndp/service/v1/mock",
-      "healthcheck": "/info",
-      "soap_service": "",
-      "rest_service": ""
-    },
-    "mock-psp": {
-      "url": "https://api.dev.platform.pagopa.it/mock-psp-replica-ndp/service/v1/mock",
-      "healthcheck": "/info",
-      "soap_service": "",
-      "rest_service": ""
-    },
-    "mock-pm": {
-      "url": "https://api.dev.platform.pagopa.it/mock-pm-replica-ndp/service/v1",
-      "healthcheck": "/",
-      "soap_service": "",
-      "rest_service": ""
-    },
-    "secondary-mock-ec": {
-      "url": "https://api.dev.platform.pagopa.it/mock-ec-replica-secondary-ndp/service/v1/mock",
-      "healthcheck": "/info",
-      "soap_service": "",
-      "rest_service": ""
-    },
-    "secondary-mock-psp": {
-      "url": "https://api.dev.platform.pagopa.it/mock-psp-secondary-replica-ndp/service/v1/mock",
-      "healthcheck": "/info",
-      "soap_service": "",
-      "rest_service": ""
     }
   },
   "global_configuration": {
-    "psp": "60000000001",
-    "broker_psp": "60000000001",
-    "channel": "15376371009_04",
+    "psp": "88888888888",
+    "broker_psp": "88888888888",
+    "channel": "88888888888_01",
     "password": "PLACEHOLDER",
     "creditor_institution_code": "15376371009",
     "creditor_institution_code_ftp": "15376371009_FTP",
     "broker_ci": "15376371009",
     "id_station": "15376371009_03"
-  },
-  "db_configuration": {
-    "nodo_cfg": {
-      "host": "pagopa-d-weu-nodo-flexible-postgresql.postgres.database.azure.com",
-      "database": "nodo",
-      "user": "cfg",
-      "password": "password",
-      "port": "6432"
-    },
-    "fdr": {
-      "host": "pagopa-d-weu-fdr-flexible-postgresql.postgres.database.azure.com",
-      "database": "fdr",
-      "user": "fdr",
-      "password": "password",
-      "port": "6432"
-    },
-    "nodo_online": {
-      "host": "pagopa-d-weu-nodo-flexible-postgresql.postgres.database.azure.com",
-      "database": "nodo",
-      "user": "online",
-      "password": "password",
-      "port": "6432"
-    },
-    "nodo_offline": {
-      "host": "pagopa-d-weu-nodo-flexible-postgresql.postgres.database.azure.com",
-      "database": "nodo",
-      "user": "offline",
-      "password": "password",
-      "port": "6432"
-    },
-    "re": {
-      "host": "pagopa-d-weu-nodo-flexible-postgresql.postgres.database.azure.com",
-      "database": "nodo",
-      "user": "re",
-      "password": "password",
-      "port": "6432"
-    },
-    "wfesp": {
-      "host": "pagopa-d-weu-nodo-flexible-postgresql.postgres.database.azure.com",
-      "database": "nodo",
-      "user": "wfesp",
-      "password": "password",
-      "port": "6432"
-    }
   }
 }

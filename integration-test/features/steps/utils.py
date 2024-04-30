@@ -1,24 +1,21 @@
-import re
-import json
-import os
 import datetime
-from webbrowser import get
-from xml.dom.minidom import parseString
-
-from behave.__main__ import main as behave_main
+import os
+import re
 import time
 from threading import Thread
+from xml.dom.minidom import parseString
+
 import requests
+from behave.__main__ import main as behave_main
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.util.retry import Retry
-
-from urllib3.exceptions import InsecureRequestWarning
 from urllib3 import disable_warnings
+from urllib3.exceptions import InsecureRequestWarning
+
 disable_warnings(InsecureRequestWarning)
 
-
-
 import xml.etree.ElementTree as ET
+
 
 def random_s():
     import random
@@ -31,7 +28,6 @@ def random_s():
 
 
 def compare_lists(lista_api, lista_query):
-
     set_api = set(lista_api)
     print(set_api)
     set_query = set(lista_query)
@@ -48,7 +44,7 @@ def requests_retry_session(
         retries=3,
         backoff_factor=0.3,
         status_forcelist=(500, 502, 504),
-    session=None,
+        session=None,
 ):
     session = session or requests.Session()
     retry = Retry(
@@ -96,19 +92,20 @@ def get_soap_url_nodo(context, primitive=-1):
         "nodoChiediInformativaPSP": "/nodo-per-pa/v1",
         "nodoChiediElencoQuadraturePA": "/nodo-per-pa/v1",
         "nodoChiediQuadraturaPA": "/nodo-per-pa/v1"
-        #"nodoChiediSceltaWISP":"//v1"
+        # "nodoChiediSceltaWISP":"//v1"
     }
-   
+
     if context.config.userdata.get("services").get("nodo-dei-pagamenti").get("soap_service") == " ":
-        return context.config.userdata.get("services").get("nodo-dei-pagamenti").get("url") + primitive_mapping.get(primitive)
+        return context.config.userdata.get("services").get("nodo-dei-pagamenti").get("url") + primitive_mapping.get(
+            primitive)
     else:
-        return  context.config.userdata.get("services").get("nodo-dei-pagamenti").get("url") \
+        return context.config.userdata.get("services").get("nodo-dei-pagamenti").get("url") \
             + context.config.userdata.get("services").get(
                 "nodo-dei-pagamenti").get("soap_service")
 
-        
+
 def get_rest_url_nodo(context, primitive):
-    primitive_mapping = { 
+    primitive_mapping = {
         "avanzamentoPagamento": "/nodo-per-pm/v1",
         "checkPosition": "/nodo-per-pm/v1",
         "informazioniPagamento": "/nodo-per-pm/v1",
@@ -137,7 +134,8 @@ def get_rest_url_nodo(context, primitive):
             primitive = primitive.split('_')[0]
             if "v2/closepayment" in primitive:
                 primitive = "v2/closepayment"
-        return context.config.userdata.get("services").get("nodo-dei-pagamenti").get("url") + primitive_mapping.get(primitive)
+        return context.config.userdata.get("services").get("nodo-dei-pagamenti").get("url") + primitive_mapping.get(
+            primitive)
     else:
         return ""
 
@@ -310,17 +308,6 @@ def get_history(rest_mock, notice_number, primitive):
     return response.json(), response.status_code
 
 
-def query_json(context, name_query, name_macro):
-    query = json.load(open(os.path.join(
-        context.config.base_dir + "/../resources/query_AutomationTest.json")))
-    selected_query = query.get(name_macro).get(name_query)
-    if '$' in selected_query:
-        selected_query = replace_local_variables(selected_query, context)
-        selected_query = replace_context_variables(selected_query, context)
-        selected_query = replace_global_variables(selected_query, context)
-    return selected_query
-
-
 def isFloat(string: str) -> bool:
     value = string.split('.')
     return len(value) == 2 and value[0].isdigit() and value[1].isdigit()
@@ -339,12 +326,12 @@ def single_thread(context, soap_primitive, type):
     primitive = replace_local_variables(primitive, context)
     primitive = replace_context_variables(primitive, context)
     primitive = replace_global_variables(primitive, context)
-    
+
     if type == 'GET':
-        
+
         headers = {'X-Forwarded-For': '10.82.39.148', 'Host': 'api.dev.platform.pagopa.it:443'}
         if 'SUBSCRIPTION_KEY' in os.environ:
-            headers = {'Ocp-Apim-Subscription-Key', os.getenv('SUBSCRIPTION_KEY') }
+            headers = {'Ocp-Apim-Subscription-Key', os.getenv('SUBSCRIPTION_KEY')}
         url_nodo = f"{get_rest_url_nodo(context, primitive)}/{primitive}"
         print(url_nodo)
         soap_response = requests.get(url_nodo, headers=headers, verify=False)
@@ -353,15 +340,16 @@ def single_thread(context, soap_primitive, type):
         print(body)
         if 'xml' in getattr(context, primitive):
             # headers = {'Content-Type': 'application/xml', 'SOAPAction': primitive, 'X-Forwarded-For': '10.82.39.148', 'Host': 'api.dev.platform.pagopa.it:443'}
-            headers = {'Content-Type': 'application/xml', 'SOAPAction': primitive, 'Host': 'api.dev.platform.pagopa.it:443'}
+            headers = {'Content-Type': 'application/xml', 'SOAPAction': primitive,
+                       'Host': 'api.dev.platform.pagopa.it:443'}
             if 'SUBSCRIPTION_KEY' in os.environ:
                 headers['Ocp-Apim-Subscription-Key'] = os.getenv('SUBSCRIPTION_KEY')
             url_nodo = get_soap_url_nodo(context, primitive)
         else:
-            # headers = {'Content-Type': 'application/json', 'X-Forwarded-For': '10.82.39.148', 'Host': 'api.dev.platform.pagopa.it:443'}
+            #  headers = {'Content-Type': 'application/json', 'X-Forwarded-For': '10.82.39.148', 'Host': 'api.dev.platform.pagopa.it:443'}
             headers = {'Content-Type': 'application/json', 'Host': 'api.dev.platform.pagopa.it:443'}
             if 'SUBSCRIPTION_KEY' in os.environ:
-                headers['Ocp-Apim-Subscription-Key'] = os.getenv('SUBSCRIPTION_KEY')            
+                headers['Ocp-Apim-Subscription-Key'] = os.getenv('SUBSCRIPTION_KEY')
             url_nodo = f"{get_rest_url_nodo(context, primitive)}/{primitive}"
         soap_response = requests.post(
             url_nodo, body, headers=headers, verify=False)
@@ -392,7 +380,7 @@ def threading_delayed(context, primitive_list, list_of_delays, list_of_type):
         t = Thread(target=single_thread, args=(
             context, primitive_list[i], list_of_type[i]))
         threads.append(t)
-        time.sleep(list_of_delays[i]/1000)
+        time.sleep(list_of_delays[i] / 1000)
         t.start()
         i += 1
 
@@ -448,34 +436,34 @@ def parallel_executor(context, feature_name, scenario):
     # os.chdir(testenv.PARALLEACTIONS_PATH)
     behave_main(
         '-i {} -n {} --tags=@test --no-skipped --no-capture'.format(feature_name, scenario))
-    
+
 
 def searchValueTag(xml_string, path_tag, flag_all_value_tag):
-  list_tag = path_tag.split(".")
-  size_list = len(list_tag)
+    list_tag = path_tag.split(".")
+    size_list = len(list_tag)
 
-  tag_padre = list_tag[0]
-  tag = list_tag[size_list-1]
+    tag_padre = list_tag[0]
+    tag = list_tag[size_list - 1]
 
-  tree = ET.ElementTree(ET.fromstring(xml_string))
-  root = tree.getroot()
-  list_value_tag = []
-  full_list_tag = []
-  for single_tag in root.findall('.//' + tag_padre):
-    list_value_tag = searchValueTagRecursive(tag_padre, tag, single_tag)
-    full_list_tag.append(list_value_tag)
-    if flag_all_value_tag == False:
-      if list_value_tag: break
-  return full_list_tag
+    tree = ET.ElementTree(ET.fromstring(xml_string))
+    root = tree.getroot()
+    list_value_tag = []
+    full_list_tag = []
+    for single_tag in root.findall('.//' + tag_padre):
+        list_value_tag = searchValueTagRecursive(tag_padre, tag, single_tag)
+        full_list_tag.append(list_value_tag)
+        if flag_all_value_tag == False:
+            if list_value_tag: break
+    return full_list_tag
 
 
 def searchValueTagRecursive(tag_padre, tag, single_tag):
-  list_tag = []
+    list_tag = []
 
-  if tag_padre == tag:
-    list_tag = single_tag.text
-  else:
-    for next_tag in single_tag:
-      list_tag = searchValueTagRecursive(next_tag.tag, tag, next_tag)
-      if list_tag: break
-  return list_tag    
+    if tag_padre == tag:
+        list_tag = single_tag.text
+    else:
+        for next_tag in single_tag:
+            list_tag = searchValueTagRecursive(next_tag.tag, tag, next_tag)
+            if list_tag: break
+    return list_tag
