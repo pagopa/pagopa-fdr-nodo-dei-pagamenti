@@ -294,6 +294,25 @@ Feature: Complete happy path for reporting flow operations
     """
     And PSP sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
     And check esito is OK of nodoInviaFlussoRendicontazione response
+    And an XML for nodoChiediFlussoRendicontazione
+    """
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <ws:nodoChiediFlussoRendicontazione>
+                <identificativoIntermediarioPA>#broker_ci#</identificativoIntermediarioPA>
+                <identificativoStazioneIntermediarioPA>#id_station#</identificativoStazioneIntermediarioPA>
+                <password>#password#</password>
+                <identificativoDominio>#creditor_institution_code#</identificativoDominio>
+                <identificativoPSP>#psp#</identificativoPSP>
+                <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
+            </ws:nodoChiediFlussoRendicontazione>
+        </soapenv:Body>
+    </soapenv:Envelope>
+    """
+    And EC sends SOAP nodoChiediFlussoRendicontazione to nodo-dei-pagamenti
+    And check xmlRendicontazione field exists in nodoChiediFlussoRendicontazione response
+    And check if pay_i:importoTotalePagamenti field is 10.00 in base64 xmlRendicontazione field of nodoChiediFlussoRendicontazione response
     # second send of the report flow, with a new transfer and an updated total amount
     And an XML for FlussoRiversamento
     """
