@@ -277,8 +277,10 @@ def step_impl(context, name):
 @step('{sender} sends soap {soap_primitive} to {receiver}')
 def step_impl(context, sender, soap_primitive, receiver):
     headers = {'Content-Type': 'application/xml', 'SOAPAction': soap_primitive}
-    if 'SUBSCRIPTION_KEY' in os.environ:
-        headers['Ocp-Apim-Subscription-Key'] = os.getenv('SUBSCRIPTION_KEY')
+    if soap_primitive == 'nodoInviaFlussoRendicontazione' and 'NODO_PER_PSP_SUBSCRIPTION_KEY' in os.environ:
+        headers['Ocp-Apim-Subscription-Key'] = os.getenv('NODO_PER_PSP_SUBSCRIPTION_KEY')
+    else:
+        headers['Ocp-Apim-Subscription-Key'] = os.getenv('NODO_PER_PA_SUBSCRIPTION_KEY')
     url_nodo = utils.get_soap_url_nodo(context, soap_primitive)
     print("url_nodo: ", url_nodo)
     print("nodo soap_request sent >>>", getattr(context, soap_primitive))

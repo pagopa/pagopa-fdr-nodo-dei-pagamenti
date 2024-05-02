@@ -10,7 +10,7 @@ def before_all(context):
 
     print('Global settings...')
 
-    more_userdata = json.load(open(os.path.join(context.config.base_dir + "/../resources/config.json")))
+    more_userdata = json.load(open(os.path.join(context.config.base_dir + "/config/config.json")))
     context.config.update_userdata(more_userdata)
 
 
