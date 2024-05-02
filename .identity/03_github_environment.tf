@@ -24,6 +24,7 @@ locals {
     "CD_CLIENT_ID" : data.azurerm_user_assigned_identity.identity_cd.client_id,
     "TENANT_ID" : data.azurerm_client_config.current.tenant_id,
     "SUBSCRIPTION_ID" : data.azurerm_subscription.current.subscription_id,
+    "INTEGRATION_TEST_SUBSCRIPTION_KEY": data.azurerm_key_vault_secret.integration_test_subscription_key[0].value
   }
   env_variables = {
     "CONTAINER_APP_ENVIRONMENT_NAME" : local.container_app_environment.name,
@@ -37,8 +38,7 @@ locals {
   repo_secrets = {
     "SONAR_TOKEN" : data.azurerm_key_vault_secret.key_vault_sonar.value,
     "BOT_TOKEN_GITHUB" : data.azurerm_key_vault_secret.key_vault_bot_token.value,
-    "SLACK_WEBHOOK_URL": data.azurerm_key_vault_secret.key_vault_slack_webhook_url.value,
-    "SUBSCRIPTION_KEY": data.azurerm_key_vault_secret.integration_test_subscription_key[0].value
+    "SLACK_WEBHOOK_URL": data.azurerm_key_vault_secret.key_vault_slack_webhook_url.value
   }
 }
 

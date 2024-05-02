@@ -2,8 +2,8 @@ name: Release And Deploy
 
 # Controls when the workflow will run
 on:
-  pull_request:
-    types: [ closed ]
+#  pull_request:
+#    types: [ closed ] CURRENTLY COMMENTED IN ORDER TO AVOID AUTOMATIC DEPLOY ON DEV AFTER PR CLOSING
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
