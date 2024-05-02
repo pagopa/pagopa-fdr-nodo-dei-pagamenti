@@ -68,5 +68,5 @@ case class Payment(
 )
 
 object PayStatusEnum extends Enumeration {
-  val EXECUTED, REVOKED, NO_RPT, STAND_IN = Value
+  val EXECUTED, REVOKED, NO_RPT, STAND_IN, STAND_IN_NO_RPT = Value
 }

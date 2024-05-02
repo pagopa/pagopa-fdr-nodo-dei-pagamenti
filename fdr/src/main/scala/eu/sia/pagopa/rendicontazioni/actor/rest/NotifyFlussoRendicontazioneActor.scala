@@ -131,6 +131,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
                 case PayStatusEnum.NO_RPT => scalaxbmodel.flussoriversamento.Number9
                 case PayStatusEnum.REVOKED => scalaxbmodel.flussoriversamento.Number3
                 case PayStatusEnum.STAND_IN => scalaxbmodel.flussoriversamento.Number4
+                case PayStatusEnum.STAND_IN_NO_RPT => scalaxbmodel.flussoriversamento.Number8
                 case _ => scalaxbmodel.flussoriversamento.Number0
               },
               DatatypeFactory.newInstance().newXMLGregorianCalendar(p.payDate)
