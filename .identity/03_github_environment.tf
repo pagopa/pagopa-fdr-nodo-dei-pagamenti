@@ -24,8 +24,6 @@ locals {
     "CD_CLIENT_ID" : data.azurerm_user_assigned_identity.identity_cd.client_id,
     "TENANT_ID" : data.azurerm_client_config.current.tenant_id,
     "SUBSCRIPTION_ID" : data.azurerm_subscription.current.subscription_id,
-    "INTEGRATION_TEST_STORAGE_ACCOUNT_NAME": local.integration_test.storage_account_name
-    "INTEGRATION_TEST_REPORTS_FOLDER": local.integration_test.reports_folder
   }
   env_variables = {
     "CONTAINER_APP_ENVIRONMENT_NAME" : local.container_app_environment.name,
@@ -33,10 +31,14 @@ locals {
     "CLUSTER_NAME" : local.aks_cluster.name,
     "CLUSTER_RESOURCE_GROUP" : local.aks_cluster.resource_group_name,
     "NAMESPACE" : local.domain,
-    "NODO_PER_PSP_SUBSCRIPTION_KEY": data.azurerm_key_vault_secret.integration_test_nodo_per_psp_subscription_key[0].value,
-    "NODO_PER_PA_SUBSCRIPTION_KEY": data.azurerm_key_vault_secret.integration_test_nodo_per_pa_subscription_key[0].value
+    "INTEGRATION_TEST_STORAGE_ACCOUNT_NAME": local.integration_test.storage_account_name,
+    "INTEGRATION_TEST_REPORTS_FOLDER": local.integration_test.reports_folder
   }
   repo_secrets = {
+    "SONAR_TOKEN" : data.azurerm_key_vault_secret.key_vault_sonar.value,
+    "BOT_TOKEN_GITHUB" : data.azurerm_key_vault_secret.key_vault_bot_token.value,
+    "SLACK_WEBHOOK_URL": data.azurerm_key_vault_secret.key_vault_slack_webhook_url.value,
+    "SUBSCRIPTION_KEY": data.azurerm_key_vault_secret.integration_test_subscription_key[0].value
   }
 }
 

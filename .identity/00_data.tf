@@ -51,14 +51,8 @@ data "azurerm_user_assigned_identity" "identity_cd" {
   resource_group_name = "${local.product}-identity-rg"
 }
 
-data "azurerm_key_vault_secret" "integration_test_nodo_per_pa_subscription_key" {
+data "azurerm_key_vault_secret" "integration_test_subscription_key" {
   count        = var.env_short == "p" ? 0 : 1
-  name         = "integration-test-nodo-per-pa-subscription-key"
-  key_vault_id = data.azurerm_key_vault.domain_key_vault.id
-}
-
-data "azurerm_key_vault_secret" "integration_test_nodo_per_psp_subscription_key" {
-  count        = var.env_short == "p" ? 0 : 1
-  name         = "integration-test-nodo-per-psp-subscription-key"
+  name         = "integration-test-fdr1-subscription-key"
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
