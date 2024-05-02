@@ -47,7 +47,7 @@ locals {
 ###############
 
 resource "github_actions_environment_secret" "github_environment_runner_secrets" {
-  for_each        = {for k,v in local.tags: k => v if v != ""}
+  for_each        = {for k,v in local.env_secrets: k => v if v != ""}
   repository      = local.github.repository
   environment     = var.env
   secret_name     = each.key
