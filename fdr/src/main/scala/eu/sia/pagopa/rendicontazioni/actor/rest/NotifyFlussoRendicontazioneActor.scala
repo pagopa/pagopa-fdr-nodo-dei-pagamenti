@@ -125,11 +125,12 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
             CtDatiSingoliPagamenti(
               p.iuv,
               p.iur,
-              Some(BigInt.int2bigInt(p.index)),
+              Some(BigInt.int2bigInt(p.idTransfer)),
               p.pay,
               p.payStatus match {
                 case PayStatusEnum.NO_RPT => scalaxbmodel.flussoriversamento.Number9
                 case PayStatusEnum.REVOKED => scalaxbmodel.flussoriversamento.Number3
+                case PayStatusEnum.STAND_IN => scalaxbmodel.flussoriversamento.Number4
                 case _ => scalaxbmodel.flussoriversamento.Number0
               },
               DatatypeFactory.newInstance().newXMLGregorianCalendar(p.payDate)
@@ -227,7 +228,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
           throw RestException("Error during check psp", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
       }
       CheckRendicontazioni.checkFormatoIdFlussoRendicontazione(fdr, psp) match {
-        case Success(_) => Success(())
+        case Success(value) => value
         case Failure(e: DigitPaException) =>
           throw RestException(e.getMessage, Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue)
         case _ =>

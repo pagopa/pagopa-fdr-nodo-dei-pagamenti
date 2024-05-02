@@ -96,7 +96,18 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
             re.get
           )
 
-          ncefrResponse <- Future.fromTry(parseResponseNexi(response.payload.get))
+          ncefrResponse <- if( response.payload.isDefined ) {
+            parseResponseNexi(response.payload.get) match {
+              case Success(v) => Future.successful(v)
+              case Failure(e) => {
+                log.error(e, e.getMessage)
+                Future.successful(None)
+              }
+            }
+          } else {
+            Future.successful(None)
+          }
+
           flussiResponseNexi <- if( ncefrResponse.isDefined ) {
             for {
               _ <- Future.successful(())
@@ -115,7 +126,10 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
             Nil
           }
         } yield tipiIdRendicontazioni).recoverWith({
-          case _ => Future.successful(Nil)
+          case e: Throwable => {
+            log.error(e, s"Error calling ${req.primitive} Nexi")
+            Future.successful(Nil)
+          }
         })
       } else {
         Future.successful(Nil)
@@ -164,8 +178,7 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
       _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
       body <- XmlEnum.str2nodoChiediElencoFlussiRendicontazioneResponse_nodoperpa(payloadResponse)
     } yield Some(body)) recoverWith { case e =>
-      log.error(e, e.getMessage)
-      Success(None)
+      Failure(e)
     }
   }
 

@@ -81,7 +81,7 @@ object Appfunction {
     }
   }
 
-  private def formatHeaders(headersOpt: Option[Seq[(String, String)]]): String = {
+  def formatHeaders(headersOpt: Option[Seq[(String, String)]]): String = {
     headersOpt
       .map(d => {
         if (d.isEmpty) {
@@ -97,7 +97,7 @@ object Appfunction {
     s"[${s.getOrElse(Constant.UNKNOWN)}]"
   }
 
-  private def fmtMessage(re: Re, reExtra: Option[ReExtra]): Try[String] = {
+  def fmtMessage(re: Re, reExtra: Option[ReExtra]): Try[String] = {
     Try({
       if (re.categoriaEvento == CategoriaEvento.INTERFACCIA.toString) {
         val mod = if (re.esito.isDefined) {
@@ -136,7 +136,7 @@ object Appfunction {
     })
   }
 
-  private def fmtMessageJson(re: Re, reExtra: Option[ReExtra], data: ConfigData): Try[String] = {
+  def fmtMessageJson(re: Re, reExtra: Option[ReExtra], data: ConfigData): Try[String] = {
     Try({
       val nd = "nd"
       val (isServerRequest, isServerResponse, isClientRequest, isClientResponse, caller, httpType, subject, subjectDescr, isKO) = if (re.categoriaEvento == CategoriaEvento.INTERFACCIA.toString) {

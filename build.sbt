@@ -294,7 +294,10 @@ lazy val `fdr` = (project in file("fdr"))
         "org.scalaj" %% "scalaj-http" % scalaj % Test,
         "com.h2database" % "h2" % "1.4.200" % Test,
         "org.liquibase" % "liquibase-core" % "4.10.0" % Test,
-        "org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion % Test
+        "org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion % Test,
+        "org.mockito" %% s"mockito-scala" % "1.17.30" % Test,
+        "com.softwaremill.sttp.client4" %% "core" % "4.0.0-M11" % Test,
+        "org.mock-server" % s"mockserver-netty" % "5.14.0" % Test
       )
     }
   )
