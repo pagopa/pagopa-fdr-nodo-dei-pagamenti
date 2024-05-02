@@ -11,12 +11,14 @@ import scala.concurrent.duration.{FiniteDuration, _}
 import scala.util.{Success, Try}
 object TestItems {
 
-  val PA = "15376371009"
+  val PA = "44444444444"
   val PA_2 = "12345678902"
   val PA_old = "12345678901"
   val PA_FTP = "90000000002"
+  val PA_DISABLED = "90000000099"
   val prefixNew = "001"
-  val stazione = "15376371009_03"
+  val stazione = "44444444444_01"
+  val stazione_DISABLED = "stazioneTest_dis"
   val stazioneNonIstantanea = "stazioneTestNonIstantanea"
   val stazionePV2 = "stazionePV2"
   val stazionePV2Broadcast = "stazionePV2BroadCast"
@@ -27,19 +29,23 @@ object TestItems {
   val PAUnknown = "01010101010"
 
   val PSP = "60000000001"
+  val PSP_DISABLED = "pspTest_dis"
   val PSPAgid = "AGID_01"
   val PSPCD = "AGID_01"
   val PSPECOMMERCE = "PSP_ECOMMERCE"
   val PSPMod3New = "15376371009"
 
-  val testIntPA = "15376371009"
+  val testIntPA = "44444444444"
+  val testIntPA_DISABLED = "intPaTest_dis"
 
   val intPSP = "60000000001"
+  val intPSP_DISABLED = "intPspTest_dis"
   val intPSPAgid = "97735020584"
   val intPSPCD = "97735020584"
   val intPSPMod3New = "15376371009"
 
   val canale = "15376371009_04"
+  val canale_DISABLED = "canaleTest_dis"
   val canaleImmediato = "canaleImmediato"
   val canaleDifferito = "canaleDifferito"
   val canaleAgid = "97735020584_02"

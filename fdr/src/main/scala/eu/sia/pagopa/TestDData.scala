@@ -61,11 +61,16 @@ object TestDData {
         "77777777777" -> basePA.copy(creditorInstitutionCode = "77777777777", true, description = Some("77777777777"), businessName = Some("77777777777")),
         TestItems.PA_FTP -> basePA.copy(creditorInstitutionCode = TestItems.PA_FTP, reportingFtp = true),
         TestItems.PA_old -> basePA.copy(creditorInstitutionCode = TestItems.PA_old),
-        TestItems.PA_2 -> basePA.copy(creditorInstitutionCode = TestItems.PA_2)
+        TestItems.PA_2 -> basePA.copy(creditorInstitutionCode = TestItems.PA_2),
+        TestItems.PA_DISABLED -> basePA.copy(creditorInstitutionCode = TestItems.PA_DISABLED, enabled = false)
       ),
-      Map(TestItems.testIntPA -> BrokerCreditorInstitution(TestItems.testIntPA, true, Some("INTPAT"), false)),
+      Map(
+        TestItems.testIntPA -> BrokerCreditorInstitution(TestItems.testIntPA, true, Some("INTPAT"), false),
+        TestItems.testIntPA_DISABLED -> BrokerCreditorInstitution(TestItems.testIntPA_DISABLED, false, Some("INTPAT_dis"), false)
+      ),
       Map(
         TestItems.stazione -> baseStazione.copy(stationCode = TestItems.stazione, version = 2),
+        TestItems.stazione_DISABLED -> baseStazione.copy(stationCode = TestItems.stazione_DISABLED, version = 2,enabled = false),
         TestItems.stazioneOld -> baseStazione.copy(stationCode = TestItems.stazioneOld, version = 1),
         TestItems.stazioneNonIstantanea -> baseStazione.copy(stationCode = TestItems.stazioneNonIstantanea, version = 2, invioRtIstantaneo = false),
         TestItems.stazionePV2 -> baseStazione.copy(stationCode = TestItems.stazionePV2, version = 2, invioRtIstantaneo = false, primitiveVersion = 2),
@@ -100,12 +105,14 @@ object TestDData {
         "idPsp1" -> basePSP.copy(pspCode = "idPsp1", taxCode = Some("idPsp1")),
         TestItems.PSPMod3New -> basePSP.copy(pspCode = TestItems.PSPMod3New, taxCode = Some(TestItems.PSPMod3New)),
         TestItems.PSPAgid -> basePSP.copy(pspCode = TestItems.PSPAgid, taxCode = Some(TestItems.PSPAgid)),
-        TestItems.PSPECOMMERCE -> basePSP.copy(pspCode = TestItems.PSPECOMMERCE, taxCode = Some(TestItems.PSPECOMMERCE))
+        TestItems.PSPECOMMERCE -> basePSP.copy(pspCode = TestItems.PSPECOMMERCE, taxCode = Some(TestItems.PSPECOMMERCE)),
+        TestItems.PSP_DISABLED -> basePSP.copy(pspCode = TestItems.PSP_DISABLED, taxCode = Some(TestItems.PSP_DISABLED),enabled = false)
       ),
       Map(
         TestItems.intPSP -> BrokerPsp(TestItems.intPSP, Some("INTPSPT"), true, true),
         TestItems.intPSPMod3New -> BrokerPsp(TestItems.intPSPMod3New, Some(TestItems.intPSPMod3New), true, true),
-        TestItems.intPSPAgid -> BrokerPsp(TestItems.intPSPAgid, Some(TestItems.intPSPAgid), true, true)
+        TestItems.intPSPAgid -> BrokerPsp(TestItems.intPSPAgid, Some(TestItems.intPSPAgid), true, true),
+        TestItems.intPSP_DISABLED -> BrokerPsp(TestItems.intPSP_DISABLED, Some(TestItems.intPSP_DISABLED), false, true),
       ),
       Map(
         "AD" -> PaymentType("AD", Some("Addebito diretto")),
@@ -157,6 +164,7 @@ object TestDData {
       Map(),
       Map(
         TestItems.canale -> baseCanale.copy(channelCode = TestItems.canale, paymentModel = "ATTIVATO_PRESSO_PSP"),
+        TestItems.canale_DISABLED -> baseCanale.copy(channelCode = TestItems.canale_DISABLED, paymentModel = "ATTIVATO_PRESSO_PSP",enabled = false),
         TestItems.canaleImmediato -> baseCanale.copy(channelCode = TestItems.canaleImmediato, paymentModel = "IMMEDIATO"),
         TestItems.canaleAgid -> baseCanale.copy(channelCode = TestItems.canaleAgid, brokerPspCode = TestItems.intPSPAgid, paymentModel = "IMMEDIATO_MULTIBENEFICIARIO"),
         TestItems.canaleMod3new -> baseCanale.copy(channelCode = TestItems.canaleMod3new, brokerPspCode = TestItems.intPSPMod3New, paymentModel = "IMMEDIATO"),
