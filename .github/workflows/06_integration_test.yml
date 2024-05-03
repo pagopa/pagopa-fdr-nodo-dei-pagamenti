@@ -93,7 +93,7 @@ jobs:
           -e INTEGRATION_TEST_SUBSCRIPTION_KEY="${{ secrets.INTEGRATION_TEST_SUBSCRIPTION_KEY }}" \
           -e TAGS="${{ inputs.tags }}" \
           -e ENV="${{( github.event.inputs == null && 'dev') || inputs.environment }}" \
-          -e CONFIG_FILE="/config/${{( github.event.inputs == null && 'dev') || inputs.environment }}.json"
+          -e CONFIG_FILE="/config/${{( github.event.inputs == null && 'dev') || inputs.environment }}.json" \
           -v  ./reports:/app/reports fdr1_test
 
       - name: Upload reports
