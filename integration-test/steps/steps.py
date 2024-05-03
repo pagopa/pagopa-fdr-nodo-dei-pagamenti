@@ -307,7 +307,7 @@ def step_impl(context, tag, value, primitive):
             'description')[0].firstChild.data)
     data = my_document.getElementsByTagName(tag)[0].firstChild.data
     print(f'check tag "{tag}" - expected: {value}, obtained: {data}')
-    assert value != data
+    assert value != data, f"the passed value [{data}] is not different to required: [{value}]"
 
 
 @step('check if {tag} field is {value} in base64 {base64_field} field of {primitive} response')
@@ -330,7 +330,7 @@ def step_impl(context, tag, value, base64_field, primitive):
     my_internal_document = parseString(report)
     data = my_internal_document.getElementsByTagName(tag)[0].firstChild.data
     print(f'check tag "{tag}" - expected: {value}, obtained: {data}')
-    assert value == data
+    assert value == data, f"the passed value [{data}] is not equals to required: [{value}]"
 
 
 @step('check {tag} is {value} of {primitive} response')
@@ -350,7 +350,7 @@ def step_impl(context, tag, value, primitive):
             'description')[0].firstChild.data)
     data = my_document.getElementsByTagName(tag)[0].firstChild.data
     print(f'check tag "{tag}" - expected: {value}, obtained: {data}')
-    assert value == data
+    assert value == data, f"the passed value [{data}] is not equals to required: [{value}]"
 
 
 @step('check {tag} field exists in {primitive} response')
