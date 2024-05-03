@@ -88,12 +88,12 @@ jobs:
         shell: bash
         run: |
           cd ./integration-test
-          docker build -t fdr3_test .
+          docker build -t fdr1_test .
           docker run \
-          -e NODO_PER_PA_SUBSCRIPTION_KEY="${{ secrets.NODO_PER_PA_SUBSCRIPTION_KEY }}" \
-          -e NODO_PER_PSP_SUBSCRIPTION_KEY="${{ secrets.NODO_PER_PSP_SUBSCRIPTION_KEY }}" \
+          -e INTEGRATION_TEST_SUBSCRIPTION_KEY="${{ secrets.INTEGRATION_TEST_SUBSCRIPTION_KEY }}" \
           -e TAGS="${{ inputs.tags }}" \
           -e ENV="${{( github.event.inputs == null && 'dev') || inputs.environment }}" \
+          -e CONFIG_FILE="/config/${{( github.event.inputs == null && 'dev') || inputs.environment }}.json"
           -v  ./reports:/app/reports fdr1_test
 
       - name: Upload reports
