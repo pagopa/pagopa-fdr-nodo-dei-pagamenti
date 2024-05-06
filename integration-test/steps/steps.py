@@ -329,7 +329,7 @@ def step_impl(context, tag, value, base64_field, primitive):
     payload_with_base64 = my_document.getElementsByTagName(base64_field)[0].firstChild.data
     report = b64.b64decode(payload_with_base64)
     my_internal_document = parseString(report)
-    assert len(my_document.getElementsByTagName(tag)) > 0, f"Cannot found tag [{tag}] from response: [{soap_response.content}]"
+    assert len(my_internal_document.getElementsByTagName(tag)) > 0, f"Cannot found tag [{tag}] from response: [{report}]"
     data = my_internal_document.getElementsByTagName(tag)[0].firstChild.data
     print(f'check tag "{tag}" - expected: {value}, obtained: {data}')
     assert value == data, f"the passed value [{data}] is not equals to required: [{value}]"
@@ -350,6 +350,7 @@ def step_impl(context, tag, value, primitive):
             'faultString')[0].firstChild.data)
         print("fault description: ", my_document.getElementsByTagName(
             'description')[0].firstChild.data)
+    assert len(my_document.getElementsByTagName(tag)) > 0, f"Cannot found tag [{tag}] from response: [{soap_response.content}]"
     data = my_document.getElementsByTagName(tag)[0].firstChild.data
     print(f'check tag "{tag}" - expected: {value}, obtained: {data}')
     assert value == data, f"the passed value [{data}] is not equals to required: [{value}]"
