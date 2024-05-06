@@ -95,10 +95,7 @@ def step_impl(context):
 
     print("Generated report: ", payload)
     setattr(context, 'rendAttachment', payload)
-    attach(
-        payload,
-        name="Generated report"
-    )
+    attach(payload_b, name="Generated report attachment")
 
 
 @given('{elem} with {value} in {action}')
@@ -290,6 +287,8 @@ def step_impl(context, sender, soap_primitive, receiver):
     print(soap_response.content.decode('utf-8'))
     print(soap_response.status_code)
     setattr(context, soap_primitive + RESPONSE, soap_response)
+    attach(getattr(context, soap_primitive), name="Sent request")
+    attach(soap_response, name="Received Response")
 
     assert (soap_response.status_code == 200), f"status_code {soap_response.status_code}"
 
