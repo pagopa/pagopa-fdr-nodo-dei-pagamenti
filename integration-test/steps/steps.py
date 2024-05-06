@@ -283,12 +283,12 @@ def step_impl(context, sender, soap_primitive, receiver):
     print("url_nodo: ", url_nodo)
     print("nodo soap_request sent >>>", getattr(context, soap_primitive))
     print("headers: ", headers)
+    attach(getattr(context, soap_primitive), name="Sent request")
     soap_response = requests.post(url_nodo, getattr(context, soap_primitive), headers=headers, verify=False)
     print(soap_response.content.decode('utf-8'))
     print(soap_response.status_code)
     setattr(context, soap_primitive + RESPONSE, soap_response)
-    attach(getattr(context, soap_primitive), name="Sent request")
-    attach(soap_response, name="Received Response")
+    attach(soap_response.content, name="Received Response")
 
     assert (soap_response.status_code == 200), f"status_code {soap_response.status_code}"
 
