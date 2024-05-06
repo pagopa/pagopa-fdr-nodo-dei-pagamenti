@@ -27,6 +27,11 @@ data "azurerm_key_vault" "domain_key_vault" {
   resource_group_name = "pagopa-${var.env_short}-${local.domain}-sec-rg"
 }
 
+data "azurerm_key_vault" "nodo_key_vault" {
+  name                = "pagopa-${var.env_short}-nodo-kv"
+  resource_group_name = "pagopa-${var.env_short}-nodo-sec-rg"
+}
+
 data "azurerm_resource_group" "apim_resource_group" {
   name = "${local.product}-api-rg"
 }
@@ -46,8 +51,18 @@ data "azurerm_key_vault_secret" "key_vault_slack_webhook_url" {
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
 
+data "azurerm_key_vault_secret" "key_vault_integration_test_slack_webhook_url" {
+  name         = "integrationtest-slack-webhook-url"
+  key_vault_id = data.azurerm_key_vault.nodo_key_vault.id
+}
+
 data "azurerm_user_assigned_identity" "identity_cd" {
   name = "${local.product}-${local.domain}-01-github-cd-identity"
+  resource_group_name = "${local.product}-identity-rg"
+}
+
+data "azurerm_user_assigned_identity" "identity_ci" {
+  name = "${local.product}-${local.domain}-01-github-ci-identity"
   resource_group_name = "${local.product}-identity-rg"
 }
 

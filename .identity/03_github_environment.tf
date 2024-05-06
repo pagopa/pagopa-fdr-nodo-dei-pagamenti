@@ -22,6 +22,7 @@ resource "github_repository_environment" "github_repository_environment" {
 locals {
   env_secrets = {
     "CD_CLIENT_ID" : data.azurerm_user_assigned_identity.identity_cd.client_id,
+    "CI_CLIENT_ID" : data.azurerm_user_assigned_identity.identity_ci.client_id,
     "TENANT_ID" : data.azurerm_client_config.current.tenant_id,
     "SUBSCRIPTION_ID" : data.azurerm_subscription.current.subscription_id,
     "INTEGRATION_TEST_SUBSCRIPTION_KEY": var.env_short != "p" ? data.azurerm_key_vault_secret.integration_test_subscription_key[0].value : ""
@@ -35,11 +36,6 @@ locals {
     "INTEGRATION_TEST_STORAGE_ACCOUNT_NAME": local.integration_test.storage_account_name,
     "INTEGRATION_TEST_REPORTS_FOLDER": local.integration_test.reports_folder
   }
-  repo_secrets = {
-    "SONAR_TOKEN" : data.azurerm_key_vault_secret.key_vault_sonar.value,
-    "BOT_TOKEN_GITHUB" : data.azurerm_key_vault_secret.key_vault_bot_token.value,
-    "SLACK_WEBHOOK_URL": data.azurerm_key_vault_secret.key_vault_slack_webhook_url.value
-  }
 }
 
 ###############
@@ -47,7 +43,7 @@ locals {
 ###############
 
 resource "github_actions_environment_secret" "github_environment_runner_secrets" {
-  for_each        = {for k,v in local.env_secrets: k => v if v != ""}
+  for_each        = local.env_secrets
   repository      = local.github.repository
   environment     = var.env
   secret_name     = each.key
@@ -80,6 +76,22 @@ resource "github_actions_secret" "secret_bot_token" {
   repository       = local.github.repository
   secret_name      = "BOT_TOKEN_GITHUB"
   plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_token.value
+}
+
+#tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
+resource "github_actions_secret" "secret_slack_webhook" {
+
+  repository       = local.github.repository
+  secret_name      = "SLACK_WEBHOOK_URL"
+  plaintext_value  = data.azurerm_key_vault_secret.key_vault_slack_webhook_url.value
+}
+
+#tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
+resource "github_actions_secret" "secret_integrationtest_slack_webhook" {
+
+  repository       = local.github.repository
+  secret_name      = "INTEGRATION_TEST_SLACK_WEBHOOK_URL"
+  plaintext_value  = data.azurerm_key_vault_secret.key_vault_integration_test_slack_webhook_url.value
 }
 
 ############

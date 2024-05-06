@@ -75,7 +75,7 @@ Feature: Syntax and semantic checks for nodoChiediElencoFlussiRendicontazione
             <ws:nodoChiediElencoFlussiRendicontazione>
                 <identificativoIntermediarioPA>#broker_ci#</identificativoIntermediarioPA>
                 <identificativoStazioneIntermediarioPA>#id_station#</identificativoStazioneIntermediarioPA>
-                <password>#password#</password>
+                <password>pwdpwdpwd</password>
             </ws:nodoChiediElencoFlussiRendicontazione>
         </soapenv:Body>
     </soapenv:Envelope>

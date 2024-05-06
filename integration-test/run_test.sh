@@ -5,11 +5,11 @@ then
   echo "DEV environment..."
 else
   echo "Setting $ENV environment..."
-    cp config/config.json config/config.json.orig
+    cp config/${ENV}.json config/${ENV}.json.orig
     dest="api.${ENV}."
-    sed "s/api.dev./$dest/g" config/config.json > config/config.json.bkp
+    sed "s/api.dev./$dest/g" config/${ENV}.json > config/${ENV}.json.bkp
     sleep 1
-    mv config/config.json.bkp config/config.json
+    mv config/${ENV}.json.bkp config/${ENV}.json
     sleep 1
 fi
 
@@ -36,5 +36,5 @@ allure generate results -o reports --clean
 
 if ! [ -z $ENV ]
 then
-  mv config/config.json.orig config/config.json
+  mv config/${ENV}.json.orig config/${ENV}.json
 fi

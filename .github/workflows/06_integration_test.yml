@@ -13,6 +13,7 @@ on:
         options:
           - dev
           - uat
+        default: dev
       tags:
         description: 'run the tests tagged with'
         required: false
@@ -31,11 +32,6 @@ on:
 #        required: false
 #        type: boolean
 #        default: false
-      notify:
-        required: false
-        type: boolean
-        description: 'send the slack notification'
-        default: false
 
 
 permissions:
@@ -61,28 +57,28 @@ jobs:
           mkdir -p ./integration-test/junit
 
       - name: Login
-        id: login
+        id: login_download
         # from https://github.com/Azure/login/commits/master
         uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
         with:
-          client-id: ${{ secrets.CLIENT_ID }}
+          client-id: ${{ secrets.CI_CLIENT_ID }}
           tenant-id: ${{ secrets.TENANT_ID }}
           subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
-      - name: Download old reports
-        uses: azure/CLI@v1
-        env:
-          STORAGE_NAME: ${{ vars.INTEGRATION_TEST_STORAGE_ACCOUNT_NAME }}
-          STORAGE_FOLDER: ${{ vars.INTEGRATION_TEST_REPORTS_FOLDER }}
-        with:
-          inlineScript: |
-            az storage blob download-batch \
-            --destination "./integration-test/reports" \
-            --source "${{ env.STORAGE_FOLDER }}" \
-            --account-name "${{ env.STORAGE_NAME }}" \
-            --subscription "${{ secrets.SUBSCRIPTION_ID }}" \
-            --pattern "reports/*" \
-            --auth-mode login
+#      - name: Download old reports
+#        uses: azure/CLI@v1
+#        env:
+#          STORAGE_NAME: ${{ vars.INTEGRATION_TEST_STORAGE_ACCOUNT_NAME }}
+#          STORAGE_FOLDER: ${{ vars.INTEGRATION_TEST_REPORTS_FOLDER }}
+#        with:
+#          inlineScript: |
+#            az storage blob download-batch \
+#            --destination "./integration-test/reports" \
+#            --source "${{ env.STORAGE_FOLDER }}" \
+#            --account-name "${{ env.STORAGE_NAME }}" \
+#            --subscription "${{ secrets.SUBSCRIPTION_ID }}" \
+#            --pattern "reports/*" \
+#            --auth-mode login
 
       - name: Run Integration Tests
         shell: bash
@@ -93,8 +89,17 @@ jobs:
           -e INTEGRATION_TEST_SUBSCRIPTION_KEY="${{ secrets.INTEGRATION_TEST_SUBSCRIPTION_KEY }}" \
           -e TAGS="${{ inputs.tags }}" \
           -e ENV="${{( github.event.inputs == null && 'dev') || inputs.environment }}" \
-          -e CONFIG_FILE="/config/${{( github.event.inputs == null && 'dev') || inputs.environment }}.json"
+          -e CONFIG_FILE="/config/${{( github.event.inputs == null && 'dev') || inputs.environment }}.json" \
           -v  ./reports:/app/reports fdr1_test
+
+      - name: Login
+        id: login_upload
+        # from https://github.com/Azure/login/commits/master
+        uses: azure/login@92a5484dfaf04ca78a94597f4f19fea633851fa2
+        with:
+          client-id: ${{ secrets.CI_CLIENT_ID }}
+          tenant-id: ${{ secrets.TENANT_ID }}
+          subscription-id: ${{ secrets.SUBSCRIPTION_ID }}
 
       - name: Upload reports
         uses: azure/CLI@v1
@@ -131,10 +136,10 @@ jobs:
     needs: [ integration_test ]
     runs-on: ubuntu-latest
     name: Notify
-    if: ${{ always() && inputs.notify == 'true' }}
+    if: always()
     steps:
       - name: Report Status
-        if: ${{ inputs.notify }}
+        if: always()
         uses: ravsamhq/notify-slack-action@v2
         with:
           status: ${{ needs.integration_test.result }}
@@ -144,7 +149,7 @@ jobs:
           message_format: '{emoji} <{run_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
           footer: 'Linked to <{workflow_url}| workflow file>'
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.INTEGRATION_TEST_SLACK_WEBHOOK_URL }}
 
 #  delete_github_deployments:
 #    runs-on: ubuntu-latest

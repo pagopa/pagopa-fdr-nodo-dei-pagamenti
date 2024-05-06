@@ -1,10 +1,10 @@
 import base64 as b64
 import datetime
-import os
 import random
 from xml.dom.minidom import parseString
 
 import requests
+from allure_commons._allure import attach
 from behave import *
 
 import utils as utils
@@ -68,7 +68,7 @@ def step_impl(context):
     if '#identificativoFlusso#' in payload:
         date = datetime.date.today().strftime("%Y-%m-%d")
         identificativoFlusso = date + context.config.userdata.get(
-            "global_configuration").get("psp") + "-" + str(random.randint(0, 10000))
+            "global_configuration").get("psp") + "-" + str(random.randint(100000000, 999999999))
         payload = payload.replace(
             '#identificativoFlusso#', identificativoFlusso)
         setattr(context, 'identificativoFlusso', identificativoFlusso)
@@ -95,6 +95,7 @@ def step_impl(context):
 
     print("Generated report: ", payload)
     setattr(context, 'rendAttachment', payload)
+    attach(payload_b, name="Generated report attachment")
 
 
 @given('{elem} with {value} in {action}')
@@ -148,7 +149,7 @@ def step_impl(context):
     if '#identificativoFlusso#' in payload:
         date = datetime.date.today().strftime("%Y-%m-%d")
         identificativoFlusso = date + context.config.userdata.get("global_configuration").get("psp") + "-" + str(
-            random.randint(0, 10000))
+            random.randint(100000000, 999999999))
         payload = payload.replace('#identificativoFlusso#', identificativoFlusso)
         setattr(context, 'identificativoFlusso', identificativoFlusso)
 
@@ -217,7 +218,7 @@ def step_impl(context, primitive):
     if '#identificativoFlusso#' in payload:
         date = datetime.date.today().strftime("%Y-%m-%d")
         identificativoFlusso = date + context.config.userdata.get("global_configuration").get("psp") + "-" + str(
-            random.randint(0, 10000))
+            random.randint(100000000, 999999999))
         payload = payload.replace('#identificativoFlusso#', identificativoFlusso)
         setattr(context, 'identificativoFlusso', identificativoFlusso)
 
@@ -282,10 +283,12 @@ def step_impl(context, sender, soap_primitive, receiver):
     print("url_nodo: ", url_nodo)
     print("nodo soap_request sent >>>", getattr(context, soap_primitive))
     print("headers: ", headers)
+    attach(getattr(context, soap_primitive), name="Sent request")
     soap_response = requests.post(url_nodo, getattr(context, soap_primitive), headers=headers, verify=False)
     print(soap_response.content.decode('utf-8'))
     print(soap_response.status_code)
     setattr(context, soap_primitive + RESPONSE, soap_response)
+    attach(soap_response.content, name="Received Response")
 
     assert (soap_response.status_code == 200), f"status_code {soap_response.status_code}"
 
@@ -305,9 +308,11 @@ def step_impl(context, tag, value, primitive):
             'faultString')[0].firstChild.data)
         print("fault description: ", my_document.getElementsByTagName(
             'description')[0].firstChild.data)
+    assert len(
+        my_document.getElementsByTagName(tag)) > 0, f"Cannot found tag [{tag}] from response: [{soap_response.content}]"
     data = my_document.getElementsByTagName(tag)[0].firstChild.data
     print(f'check tag "{tag}" - expected: {value}, obtained: {data}')
-    assert value != data
+    assert value != data, f"the passed value [{data}] is not different to required: [{value}]"
 
 
 @step('check if {tag} field is {value} in base64 {base64_field} field of {primitive} response')
@@ -328,9 +333,11 @@ def step_impl(context, tag, value, base64_field, primitive):
     payload_with_base64 = my_document.getElementsByTagName(base64_field)[0].firstChild.data
     report = b64.b64decode(payload_with_base64)
     my_internal_document = parseString(report)
+    assert len(
+        my_internal_document.getElementsByTagName(tag)) > 0, f"Cannot found tag [{tag}] from response: [{report}]"
     data = my_internal_document.getElementsByTagName(tag)[0].firstChild.data
     print(f'check tag "{tag}" - expected: {value}, obtained: {data}')
-    assert value == data
+    assert value == data, f"the passed value [{data}] is not equals to required: [{value}]"
 
 
 @step('check {tag} is {value} of {primitive} response')
@@ -348,9 +355,11 @@ def step_impl(context, tag, value, primitive):
             'faultString')[0].firstChild.data)
         print("fault description: ", my_document.getElementsByTagName(
             'description')[0].firstChild.data)
+    assert len(
+        my_document.getElementsByTagName(tag)) > 0, f"Cannot found tag [{tag}] from response: [{soap_response.content}]"
     data = my_document.getElementsByTagName(tag)[0].firstChild.data
     print(f'check tag "{tag}" - expected: {value}, obtained: {data}')
-    assert value == data
+    assert value == data, f"the passed value [{data}] is not equals to required: [{value}]"
 
 
 @step('check {tag} field exists in {primitive} response')
