@@ -262,7 +262,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
       | identificativoFlusso                  | 2017-09-11idPsp1-pluto123 | PPT_ID_FLUSSO_SCONOSCIUTO         | CFRSEM10    |
 
 
-  @testtest
+  @runnable
   Scenario Outline: nodoChiediFlussoRendicontazione - Sintax/semantic error: wrong content on password
     Given an XML for FlussoRiversamento
     """
