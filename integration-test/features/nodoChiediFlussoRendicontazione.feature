@@ -258,7 +258,7 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
       | identificativoFlusso                  | 2017-09-11idPsp1-pluto123 | PPT_ID_FLUSSO_SCONOSCIUTO         | CFRSEM10    |
 
 
-  @runnable
+  @@runnable
   Scenario Outline: nodoChiediFlussoRendicontazione - Sintax/semantic error: wrong content on password
     Given an XML for FlussoRiversamento
     """
@@ -340,8 +340,8 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
     Then check faultString is Errore di sintassi extra XSD. of nodoChiediFlussoRendicontazione response
     And check faultCode is PPT_SINTASSI_EXTRAXSD of nodoChiediFlussoRendicontazione response
     Examples:
-      | elem                                  | value                                | soapUI test |
-      | password                              | None                                 | CFRSIN12    |
-      | password                              | Empty                                | CFRSIN13    |
-      | password                              | Xlve3Jc                              | CFRSIN14    |
-      | password                              | xxkV8x4phzRKyiuE                     | CFRSIN15    |
+      | elem     | value            | soapUI test |
+      | password | None             | CFRSIN12    |
+      | password | Empty            | CFRSIN13    |
+      | password | Xlve3Jc          | CFRSIN14    |
+      | password | xxkV8x4phzRKyiuE | CFRSIN15    |
