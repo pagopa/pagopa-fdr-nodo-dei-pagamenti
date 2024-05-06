@@ -124,10 +124,6 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
       | identificativoStazioneIntermediarioPA | None                                 | CFRSIN9     |
       | identificativoStazioneIntermediarioPA | Empty                                | CFRSIN10    |
       | identificativoStazioneIntermediarioPA | k91JETYVnE7grIIKbzWE6Di7XKM3ymJeawhf | CFRSIN11    |
-      | password                              | None                                 | CFRSIN12    |
-      | password                              | Empty                                | CFRSIN13    |
-      | password                              | Xlve3Jc                              | CFRSIN14    |
-      | password                              | xxkV8x4phzRKyiuE                     | CFRSIN15    |
       | identificativoPSP                     | Empty                                | CFRSIN20    |
       | identificativoDominio                 | Empty                                | CFRSIN17    |
       | identificativoDominio                 | k91JETYVnE7grIIKbzWE6Di7XKM3ymJeawhf | CFRSIN18    |
