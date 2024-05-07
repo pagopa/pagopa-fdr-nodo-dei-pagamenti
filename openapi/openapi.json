@@ -53,6 +53,37 @@
           }
         }
       }
+    },
+    "/inviaFdrFTP": {
+      "post": {
+        "tags": [
+          "Fdr fase 1"
+        ],
+        "summary": "Invio di un FDR riversato su FTP da Nexi",
+        "description": "Invio di un FDR riversato su FTP da Nexi",
+        "operationId": "inviaFlussoRendicontazioneFTP",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Fdr"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenericResponse"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {

@@ -1,13 +1,12 @@
 package eu.sia.pagopa.common.util.web
 
 import akka.actor.{ActorRef, ActorSystem, Props}
-import akka.http.javadsl.server.PathMatcher2
 import akka.http.scaladsl.coding.Coders
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.Directives.{path, _}
 import akka.http.scaladsl.server.directives.RouteDirectives
-import akka.http.scaladsl.server.{PathMatcher, PathMatcher1, PathMatchers, Route, RouteResult}
+import akka.http.scaladsl.server.{PathMatcher, PathMatchers, Route, RouteResult}
 import akka.pattern.{AskTimeoutException, ask}
 import akka.stream.Materializer
 import akka.util.ByteString
@@ -110,7 +109,8 @@ case class NodoRoute(
   }
 
   val methods: Map[String, String] = Map(
-    "notifyFlussoRendicontazione" -> "POST"
+    "notifyFlussoRendicontazione" -> "POST",
+    "nodoInviaFlussoRendicontazioneFTP" -> "POST"
   )
 
   val methodsInternal: Map[String, String] = Map(
