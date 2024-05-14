@@ -2,8 +2,8 @@ apiVersion: v2
 name: fdr-chart
 description: Flussi di rendicontazione
 type: application
-version: 2.1.8
-appVersion: 2.1.8
+version: 2.1.8-NOD-576-fdr-test-di-performance
+appVersion: 2.1.8-NOD-576-fdr-test-di-performance
 dependencies:
   - name: microservice-chart
     version: 3.0.0
