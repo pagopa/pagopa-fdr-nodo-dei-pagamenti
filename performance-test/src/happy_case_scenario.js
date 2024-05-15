@@ -100,8 +100,8 @@ export default function () {
     'check status is 200': (resp) => resp.status === 200,
     'xmlRendicontazione field is defined': (r) => parseHTML(response.body).find('xmlRendicontazione').text() !== "",
   });
-  console.log(`nodoChiediFlussoRendicontazione request: ${request_ncfr} to [${parameters.url_nodo_ci}]\n`);
-  console.log(`nodoChiediFlussoRendicontazione response: ${response.body} to [${parameters.url_nodo_ci}]\n`);
+  //console.log(`nodoChiediFlussoRendicontazione request: ${request_ncfr} to [${parameters.url_nodo_ci}]\n`);
+  //console.log(`nodoChiediFlussoRendicontazione response: ${response.body} to [${parameters.url_nodo_ci}]\n`);
 
   // ending the execution
   postcondition();
