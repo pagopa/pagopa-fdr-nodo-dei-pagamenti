@@ -8,9 +8,9 @@
       "broker_psp": "88888888888",
       "channel": "88888888888_01",
       "password": "PLACEHOLDER",
-      "creditor_institution_code": "15376371009",
+      "creditor_institution": "15376371009",
       "broker_ci": "15376371009",
-      "station_id": "15376371009_03"
+      "station": "15376371009_09"
     }
   ]
 }
