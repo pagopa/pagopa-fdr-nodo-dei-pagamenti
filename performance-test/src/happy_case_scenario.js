@@ -57,7 +57,7 @@ export default function () {
 
   // Initialize response variable
   let response = '';
-  var flow_id = `${parameters.today}${parameters.pspId}-${getRandom(1000000, 9999999) + __VU}`;
+  var flow_id = `${parameters.today}${parameters.pspId}-${getRandom(10000000000, 99999999999) + __VU}`;
 
   // Initialize parameter constants
   const params = {

@@ -11,15 +11,31 @@
   ],
   "stages": [
     {
-      "duration": "5m",
-      "target": 100
+      "duration": "2h",
+      "target": 50
+    },
+    {
+      "duration": "2h",
+      "target": 50
+    },
+    {
+      "duration": "2h",
+      "target": 75
+    },
+    {
+      "duration": "2h",
+      "target": 75
+    },
+    {
+      "duration": "2h",
+      "target": 115
+    },
+    {
+      "duration": "2h",
+      "target": 115
     },
     {
       "duration": "10m",
-      "target": 100
-    },
-    {
-      "duration": "5m",
       "target": 0
     }
   ],
