@@ -21,6 +21,7 @@ on:
           - ramping
           - constant
           - load
+          - load-6h
           - smoke
           - soak
           - spike

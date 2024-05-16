@@ -1,0 +1,51 @@
+{
+  "summaryTrendStats": [
+    "avg",
+    "min",
+    "med",
+    "max",
+    "p(95)",
+    "p(99)",
+    "p(99.99)",
+    "count"
+  ],
+  "stages": [
+    {
+      "duration": "45m",
+      "target": 50
+    },
+    {
+      "duration": "1h",
+      "target": 50
+    },
+    {
+      "duration": "1h",
+      "target": 75
+    },
+    {
+      "duration": "1h",
+      "target": 75
+    },
+    {
+      "duration": "1h",
+      "target": 115
+    },
+    {
+      "duration": "1h",
+      "target": 115
+    },
+    {
+      "duration": "10m",
+      "target": 0
+    }
+  ],
+  "thresholds": {
+    "http_req_failed": [
+      "rate<0.001"
+    ],
+    "http_req_duration": [
+      "p(99)<1500"
+    ]
+  }
+}
+
