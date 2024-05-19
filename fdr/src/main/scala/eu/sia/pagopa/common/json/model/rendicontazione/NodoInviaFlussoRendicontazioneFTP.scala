@@ -8,11 +8,7 @@ import scala.util.Try
 object NodoInviaFlussoRendicontazioneFTPReq extends DefaultJsonProtocol {
 
   implicit val format: RootJsonFormat[NodoInviaFlussoRendicontazioneFTPReq] = new RootJsonFormat[NodoInviaFlussoRendicontazioneFTPReq] {
-    def write(req: NodoInviaFlussoRendicontazioneFTPReq): JsObject = {
-      JsObject(Map[String, JsValue](
-        "content" -> JsString(req.content)
-      ))
-    }
+    def write(req: NodoInviaFlussoRendicontazioneFTPReq): JsObject = ???
 
     def read(json: JsValue): NodoInviaFlussoRendicontazioneFTPReq = {
       val map = json.asJsObject.fields
