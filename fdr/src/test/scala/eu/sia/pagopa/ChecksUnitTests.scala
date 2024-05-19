@@ -112,7 +112,7 @@ class ChecksUnitTests  extends AnyFlatSpec with should.Matchers {
     assert(t3.failed.get.asInstanceOf[DigitPaException].code == DigitPaErrorCodes.PPT_INTERMEDIARIO_PA_SCONOSCIUTO)
   }
   "CANALE" should "success" in {
-    val t1 = DDataChecks.checkCanale(log,TestDData.ddataMap,TestItems.canale,Some(TestItems.canalePwd), false)
+    val t1 = DDataChecks.checkCanale(log,TestDData.ddataMap,TestItems.canale,Some(TestItems.canalePlaceholder), false)
     assert(t1.isSuccess)
     val t2 = DDataChecks.checkCanale(log,TestDData.ddataMap,TestItems.canale_DISABLED,Some(""), false)
     assert(t2.isFailure)
@@ -125,7 +125,7 @@ class ChecksUnitTests  extends AnyFlatSpec with should.Matchers {
     assert(t4.failed.get.asInstanceOf[DigitPaException].code == DigitPaErrorCodes.PPT_AUTENTICAZIONE)
   }
   "STAZIONE" should "success" in {
-    val t1 = DDataChecks.checkStazione(log,TestDData.ddataMap,TestItems.stazione,Some(TestItems.stazionePwd), true)
+    val t1 = DDataChecks.checkStazione(log,TestDData.ddataMap,TestItems.stazione,Some(TestItems.stazionePlaceholder), true)
     assert(t1.isSuccess)
     val t2 = DDataChecks.checkStazione(log,TestDData.ddataMap,TestItems.stazione_DISABLED,Some(""), false)
     assert(t2.isFailure)

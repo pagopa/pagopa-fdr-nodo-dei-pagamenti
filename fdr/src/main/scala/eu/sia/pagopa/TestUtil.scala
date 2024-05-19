@@ -24,7 +24,7 @@ object TestItems {
   val stazionePV2Broadcast = "stazionePV2BroadCast"
   val stazioneOld = "stazioneTestOld"
   val paOldStazioneOld = "paOldStazioneOld"
-  val stazionePwd = "PLACEHOLDER"
+  val stazionePlaceholder = "PLACEHOLDER"
   val auxDigit = "0"
   val PAUnknown = "01010101010"
 
@@ -60,7 +60,7 @@ object TestItems {
   val canalePull = "canalePull"
   val canaleIrr = "canaleIrraggiungibile"
 
-  val canalePwd = "PLACEHOLDER"
+  val canalePlaceholder = "PLACEHOLDER"
 
   val testDTF: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSS")
   val httpConnectTimeout: FiniteDuration = 10.seconds

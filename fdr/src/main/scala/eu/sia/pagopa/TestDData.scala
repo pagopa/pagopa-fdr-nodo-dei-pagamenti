@@ -12,7 +12,7 @@ object TestDData {
     TestItems.canale,
     Some(s"${TestItems.canale}_descr"),
     true,
-    TestItems.canalePwd,
+    TestItems.canalePlaceholder,
     Connection("HTTP","localhost",8087),
     TestItems.intPSP,
     None,//proxy
@@ -41,7 +41,7 @@ object TestDData {
     2,
     Connection("HTTP","localhost",8087),
     Some(Connection("HTTP","localhost",8088)),
-    TestItems.stazionePwd,
+    TestItems.stazionePlaceholder,
     Redirect(Some("HTTP"),Some("redirectIp"),Some("redirectPath"),Some(8083),Some("redirectQS")),
     Some(Service(Some("service"),Some("targetHost"),Some(8081),Some("targetPath"))),
     Some(Service(Some("servicePof"),Some("targetHostPof"),Some(8081),Some("targetPathPof"))),

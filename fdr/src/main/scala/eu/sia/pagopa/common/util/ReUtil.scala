@@ -29,7 +29,6 @@ trait ReUtil { this: NodoLogging =>
   }
 
   def traceInternalRequest(message: RestRequest, re: Re, reExtra: ReExtra, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
-    //FIXME: i payload enormi li vogliamo loggare e mandare su RE anche per gli eventi interni?
     //    import StringUtils.Utf8String
     //Util.logPayload(log, Some(message.payload.get))
     val reRequestReq = ReRequest(
