@@ -148,9 +148,6 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
         nifr.xmlRendicontazione,
         checkUTF8,
         flussoRiversamento,
-        pa,
-        ddataMap,
-        actorClassId,
         repositories.fdrRepository
       )
 

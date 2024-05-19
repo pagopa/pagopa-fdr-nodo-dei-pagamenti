@@ -11,13 +11,13 @@ import scala.concurrent.duration.{FiniteDuration, _}
 import scala.util.{Success, Try}
 object TestItems {
 
-  val PA = "44444444444"
+  val PA = "15376371009"
   val PA_2 = "12345678902"
   val PA_old = "12345678901"
   val PA_FTP = "90000000002"
   val PA_DISABLED = "90000000099"
   val prefixNew = "001"
-  val stazione = "44444444444_01"
+  val stazione = "15376371009_03"
   val stazione_DISABLED = "stazioneTest_dis"
   val stazioneNonIstantanea = "stazioneTestNonIstantanea"
   val stazionePV2 = "stazionePV2"
@@ -35,7 +35,7 @@ object TestItems {
   val PSPECOMMERCE = "PSP_ECOMMERCE"
   val PSPMod3New = "15376371009"
 
-  val testIntPA = "44444444444"
+  val testIntPA = "15376371009"
   val testIntPA_DISABLED = "intPaTest_dis"
 
   val intPSP = "60000000001"

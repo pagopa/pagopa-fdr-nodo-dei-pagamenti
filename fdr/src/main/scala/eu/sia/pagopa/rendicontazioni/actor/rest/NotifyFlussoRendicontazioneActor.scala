@@ -164,9 +164,6 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
           flussoRiversamentoBase64,
           checkUTF8,
           flussoRiversamento,
-          pa,
-          ddataMap,
-          actorClassId,
           repositories.fdrRepository
         )
 

@@ -54,19 +54,19 @@
         }
       }
     },
-    "/inviaFdrFTP": {
+    "/nodoInviaFlussoRendicontazioneFTP": {
       "post": {
         "tags": [
           "Fdr fase 1"
         ],
         "summary": "Invio di un FDR riversato su FTP da Nexi",
         "description": "Invio di un FDR riversato su FTP da Nexi",
-        "operationId": "inviaFlussoRendicontazioneFTP",
+        "operationId": "nodoInviaFlussoRendicontazioneFTP",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Fdr"
+                "$ref": "#/components/schemas/NodoInviaFlussoRendicontazioneFTPReq"
               }
             }
           }
@@ -130,6 +130,17 @@
             "format": "int64",
             "type": "integer",
             "example": 1
+          }
+        }
+      },
+      "NodoInviaFlussoRendicontazioneFTPReq": {
+        "required": ["content"],
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "nodoInviaFlussoRendicontazione SOAP xml",
+            "example": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n<soap:Body>\n<ns5:nodoInviaFlussoRendicontazione>..."
           }
         }
       }

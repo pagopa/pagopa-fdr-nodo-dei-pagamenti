@@ -11,6 +11,7 @@ import eu.sia.pagopa.common.repo.{DBComponent, Repositories}
 import eu.sia.pagopa.common.util.xml.XmlUtil
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.commonxml.XmlEnum
+import eu.sia.pagopa.rendicontazioni.actor.rest.NodoInviaFlussoRendicontazioneFTPActorPerRequest
 import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActorPerRequest}
 import eu.sia.pagopa.testutil._
 import liquibase.database.DatabaseFactory
@@ -404,6 +405,39 @@ abstract class BaseUnitTest()
         Map(),
         TestItems.testPDD,
         "notifyFlussoRendicontazione",
+        Util.now(),
+        ReExtra(),
+        testCase
+      )
+    )
+    assert(restResponse.payload.isDefined)
+    responseAssert(restResponse.payload.get, restResponse.statusCode)
+    p.future.map(_ => restResponse.payload.get)
+  }
+
+  def nodoInviaFlussoRendicontazioneFTP(
+                                         payload: Option[String],
+                                         testCase: Option[String] = None,
+                                         responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
+                                         newdata: Option[ConfigData] = None
+                                ): Future[String] = {
+
+    val p = Promise[Boolean]()
+    val nodoInviaFlussoRendicontazioneFTP =
+      system.actorOf(
+        Props.create(classOf[NodoInviaFlussoRendicontazioneFTPTest], p, repositories, props.copy(actorClassId = "nodoInviaFlussoRendicontazioneFTP", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        s"nodoInviaFlussoRendicontazioneFTP${Util.now()}"
+      )
+
+    val restResponse = askActor(
+      nodoInviaFlussoRendicontazioneFTP,
+      RestRequest(
+        UUID.randomUUID().toString,
+        payload,
+        Nil,
+        Map(),
+        TestItems.testPDD,
+        "nodoInviaFlussoRendicontazioneFTP",
         Util.now(),
         ReExtra(),
         testCase
