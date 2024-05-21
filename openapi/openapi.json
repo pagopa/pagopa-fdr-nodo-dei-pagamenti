@@ -23,6 +23,46 @@
     }
   ],
   "paths": {
+    "/internal/organizations/{organizationId}/fdrs/{fdr}": {
+      "get": {
+        "tags": [
+          "Fdr fase 1"
+        ],
+        "summary": "Get xml rendicontazione by organizationId",
+        "description": "Get xml rendicontazione",
+        "operationId": "getAllRevisionFdr",
+        "parameters": [
+          {
+            "name": "organizationId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "fdr",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetXmlRendicontazioneResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/notify/fdr": {
       "post": {
         "tags": [
@@ -93,7 +133,15 @@
         "properties": {
           "message": {
             "type": "string",
-            "example": "Success"
+            "example": "OK"
+          }
+        }
+      },"GetXmlRendicontazioneResponse": {
+        "type": "object",
+        "properties": {
+          "xmlRendicontazione": {
+            "type": "string",
+            "example": "H4sIAAAAAAAAAN1XXW+bMBR951cg3gn+wNhUhGrR2q..."
           }
         }
       },

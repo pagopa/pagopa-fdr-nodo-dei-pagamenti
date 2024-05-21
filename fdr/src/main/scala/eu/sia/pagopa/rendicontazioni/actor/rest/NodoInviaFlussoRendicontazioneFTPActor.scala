@@ -7,6 +7,7 @@ import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
+import eu.sia.pagopa.common.json.model.Error
 import eu.sia.pagopa.common.json.model.rendicontazione._
 import eu.sia.pagopa.common.json.{JsonEnum, JsonValid}
 import eu.sia.pagopa.common.message._
@@ -152,10 +153,10 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
       } yield RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
         .recoverWith({
           case rex: RestException =>
-            Future.successful(generateResponse(Some(rex)))
+            Future.successful(generateErrorResponse(Some(rex)))
           case cause: Throwable =>
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
-            Future.successful(generateResponse(Some(pmae)))
+            Future.successful(generateErrorResponse(Some(pmae)))
       }).map( res => {
         traceInterfaceRequest(req, reFlow.get, req.reExtra, reEventFunc, ddataMap)
         log.info(FdrLogConstant.logEnd(actorClassId))
@@ -225,12 +226,12 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
     RestResponse(sessionId, Some(err), restException.statusCode, re, tcid, Some(restException))
   }
 
-  private def generateResponse(exception: Option[RestException]) = {
+  private def generateErrorResponse(exception: Option[RestException]) = {
     log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Risposta"))
     val httpStatusCode = exception.map(_.statusCode).getOrElse(StatusCodes.OK.intValue)
-    log.debug(s"Generazione risposta $httpStatusCode")
-    val responsePayload = exception.map(v => GenericResponse(GenericResponseOutcome.KO.toString).toJson.toString())
-    RestResponse(req.sessionId, responsePayload, httpStatusCode, reFlow, req.testCaseId, exception)
+    log.debug(s"Generating response $httpStatusCode")
+    val payload = exception.map(v => Error(v.getMessage).toJson.toString())
+    RestResponse(req.sessionId, payload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
 
 }
