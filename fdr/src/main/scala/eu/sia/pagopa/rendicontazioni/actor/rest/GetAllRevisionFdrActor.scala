@@ -57,6 +57,7 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
 
         organizationId = req.pathParams("organizationId")
         fdr = req.pathParams("fdr")
+        _ = MDC.put(Constant.MDCKey.FDR, fdr)
 
         re_ = Re(
           componente = Componente.NDP_FDR.toString,

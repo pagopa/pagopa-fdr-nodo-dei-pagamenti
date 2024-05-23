@@ -65,6 +65,7 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
         _ = log.info(FdrLogConstant.logSintattico(actorClassId))
         (nifrSoap, xmlPayload) <- Future.fromTry(parseInput(req))
 
+        _ = MDC.put(Constant.MDCKey.FDR, nifrSoap.identificativoFlusso)
         now = Util.now()
         re_ = Re(
           idDominio = Some(nifrSoap.identificativoDominio),
