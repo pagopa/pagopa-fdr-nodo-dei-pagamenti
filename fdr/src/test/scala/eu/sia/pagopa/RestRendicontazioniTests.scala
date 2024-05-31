@@ -1,18 +1,10 @@
 package eu.sia.pagopa
 
 import akka.http.javadsl.model.StatusCodes
-import eu.sia.pagopa.common.json.model.rendicontazione.GetXmlRendicontazioneResponse
-import eu.sia.pagopa.common.util.xml.XmlUtil
-import eu.sia.pagopa.common.util.{Constant, RandomStringUtils, Util}
-import eu.sia.pagopa.commonxml.XmlEnum
-import spray.json._
-import eu.sia.pagopa.common.json.model._
-import eu.sia.pagopa.common.message.ReExtra
+import eu.sia.pagopa.common.util.{RandomStringUtils, Util}
 import eu.sia.pagopa.testutil.TestItems
 
 import java.time.format.DateTimeFormatter
-import scala.util.parsing.json.JSON
-import scala.xml.XML
 
 //@org.scalatest.Ignore
 class RestRendicontazioniTests() extends BaseUnitTest {
@@ -162,7 +154,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         None,
         None,
         None,
-        false,
+        flussoNonValido = false,
         ""
       )
 
@@ -193,8 +185,8 @@ class RestRendicontazioniTests() extends BaseUnitTest {
             Some(payload),
             testCase = Some("KO"),
             responseAssert = (resp, status) => {
-              assert(status == StatusCodes.INTERNAL_SERVER_ERROR.intValue)
-              assert(resp.contains("{\"message\":\"KO\"}"))
+              assert(status == StatusCodes.BAD_REQUEST.intValue)
+              assert(resp.contains("{\"error\":\"flusso di rendicontazione gia' presente"))
             }
           )}
         } yield ()
@@ -207,7 +199,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
           testCase = Some("OK"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.BAD_REQUEST.intValue)
-            assert(resp.contains("{\"message\":\"KO\"}"))
+            assert(resp.contains("{\"error\":\"Invalid request\"}"))
           }
         )
       )
@@ -228,7 +220,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         None,
         None,
         None,
-        false,
+        flussoNonValido = false,
         ""
       )
 
@@ -251,7 +243,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
           testCase = Some("KO"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.BAD_REQUEST.intValue)
-            assert(resp.contains("{\"message\":\"KO\"}"))
+            assert(resp.contains("{\"error\":\"Invalid content\"}"))
           }
         )
       )
@@ -272,7 +264,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         None,
         None,
         None,
-        false,
+        flussoNonValido = false,
         ""
       )
 
@@ -289,7 +281,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
           testCase = Some("OK"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.BAD_REQUEST.intValue)
-            assert(resp.contains("{\"message\":\"KO\"}"))
+            assert(resp.contains("{\"error\":\"Invalid content\"}"))
           }
         )
       )

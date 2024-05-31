@@ -155,6 +155,9 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
         .recoverWith({
           case rex: RestException =>
             Future.successful(generateErrorResponse(Some(rex)))
+          case dex: DigitPaException =>
+            val pmae = RestException(dex.message, StatusCodes.BadRequest.intValue)
+            Future.successful(generateErrorResponse(Some(pmae)))
           case cause: Throwable =>
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateErrorResponse(Some(pmae)))
