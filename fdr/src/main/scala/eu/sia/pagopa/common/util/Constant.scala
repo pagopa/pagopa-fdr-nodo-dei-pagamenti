@@ -62,6 +62,7 @@ object Constant {
     val ACTOR_CLASS_ID = "actorClassId"
     val DATA_ORA_EVENTO = "dataOraEvento"
     val ELAPSED = "elapsed"
+    val FDR = "fdr"
   }
 
   object ContentType extends Enumeration {

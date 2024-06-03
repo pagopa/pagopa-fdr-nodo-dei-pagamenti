@@ -223,7 +223,6 @@ object Main extends App {
             case Some(c) => Future.successful(c)
             case None => Future.failed(new RuntimeException("Could not get ConfigData"))
           }
-
         }
       } yield  data
     _ = log.info(s" ConfigData ${ddata.version} loaded")

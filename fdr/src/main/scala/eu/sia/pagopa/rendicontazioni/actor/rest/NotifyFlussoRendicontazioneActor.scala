@@ -164,9 +164,6 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
           flussoRiversamentoBase64,
           checkUTF8,
           flussoRiversamento,
-          pa,
-          ddataMap,
-          actorClassId,
           repositories.fdrRepository
         )
 
@@ -219,6 +216,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
       val psp = nfrReq.get.pspId
       val organizationId = nfrReq.get.organizationId
       val fdr = nfrReq.get.fdr
+      MDC.put(Constant.MDCKey.FDR, fdr)
       val revision = nfrReq.get.revision
       val retry = nfrReq.get.retry
       checkPsp(log, ddataMap, psp) match {

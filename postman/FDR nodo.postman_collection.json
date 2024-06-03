@@ -1,9 +1,10 @@
 {
 	"info": {
-		"_postman_id": "ebe42470-6776-43de-9211-801ac3817cce",
+		"_postman_id": "78fa54f7-71d2-4334-9499-4152eb5ff8ae",
 		"name": "FDR nodo",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "26451960"
+		"_exporter_id": "4579636",
+		"_collection_link": "https://speeding-station-482612.postman.co/workspace/PAGOPA~ec880f84-0a42-4ca9-bbd1-454d00bbe20c/collection/4579636-78fa54f7-71d2-4334-9499-4152eb5ff8ae?action=share&source=collection_link&creator=4579636"
 	},
 	"item": [
 		{
@@ -15,31 +16,30 @@
 						"exec": [
 							""
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
 			"protocolProfileBehavior": {
-				"strictSSL": false
+				"strictSSL": true
 			},
 			"request": {
 				"method": "POST",
 				"header": [
 					{
 						"key": "SOAPAction",
-						"value": "\"nodoChiediElencoFlussiRendicontazione\"",
-						"type": "text"
+						"value": "\"nodoChiediElencoFlussiRendicontazione\""
 					},
 					{
 						"key": "X-Forwarded-For",
 						"value": "127.0.0.1",
-						"type": "text",
 						"disabled": true
 					},
 					{
 						"key": "Ocp-Apim-Subscription-Key",
-						"value": "{{FDR_NODO_KEY}}",
-						"type": "text"
+						"value": "c4b6304d0ff94c8899c12488bbdf0d43",
+						"disabled": true
 					}
 				],
 				"body": {
@@ -118,57 +118,6 @@
 			"response": []
 		},
 		{
-			"name": "nodoChiediFlussoRendicontazione Nexi",
-			"event": [
-				{
-					"listen": "prerequest",
-					"script": {
-						"exec": [
-							""
-						],
-						"type": "text/javascript"
-					}
-				}
-			],
-			"request": {
-				"method": "POST",
-				"header": [
-					{
-						"key": "SOAPAction",
-						"value": "\"nodoChiediFlussoRendicontazione\"",
-						"type": "text"
-					},
-					{
-						"key": "X-Forwarded-For",
-						"value": "127.0.0.1",
-						"type": "text"
-					}
-				],
-				"body": {
-					"mode": "raw",
-					"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <ns4:nodoChiediFlussoRendicontazione xmlns:ns4=\"http://ws.pagamenti.telematici.gov/\" xmlns:ns3=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ns2=\"http://ws.pagamenti.telematici.gov/ppthead\">\n            <identificativoIntermediarioPA>{{brokerPa}}</identificativoIntermediarioPA>\n            <identificativoStazioneIntermediarioPA>{{stationV1_1}}</identificativoStazioneIntermediarioPA>\n            <password>{{stationV1Pwd}}</password>\n            <identificativoDominio>{{pa}}</identificativoDominio>\n            <identificativoPSP>{{psp}}</identificativoPSP>\n            <identificativoFlusso>2023-04-18nodo-doc-dev-16818360088</identificativoFlusso>\n        </ns4:nodoChiediFlussoRendicontazione>\n    </soap:Body>\n</soap:Envelope>",
-					"options": {
-						"raw": {
-							"language": "xml"
-						}
-					}
-				},
-				"url": {
-					"raw": "{{URL_FDRNODO_PA}}?soapAction=nodoChiediFlussoRendicontazione",
-					"host": [
-						"{{URL_FDRNODO_PA}}"
-					],
-					"query": [
-						{
-							"key": "soapAction",
-							"value": "nodoChiediFlussoRendicontazione"
-						}
-					]
-				}
-			},
-			"response": []
-		},
-		{
 			"name": "nodoInviaFlussoRendicontazione",
 			"event": [
 				{
@@ -212,7 +161,7 @@
 							"        <identificativoUnivocoRiscossione>${utils.stringGen(10)}</identificativoUnivocoRiscossione>\\n",
 							"        <indiceDatiSingoloPagamento>2</indiceDatiSingoloPagamento>\\n",
 							"        <singoloImportoPagato>10.00</singoloImportoPagato>\\n",
-							"        <codiceEsitoSingoloPagamento>9</codiceEsitoSingoloPagamento>\\n",
+							"        <codiceEsitoSingoloPagamento>3</codiceEsitoSingoloPagamento>\\n",
 							"        <dataEsitoSingoloPagamento>2017-07-17</dataEsitoSingoloPagamento>\\n",
 							"    </datiSingoliPagamenti><datiSingoliPagamenti>\\n        ",
 							"        <identificativoUnivocoVersamento>${utils.stringGen(14)}</identificativoUnivocoVersamento>\\n",
@@ -226,14 +175,14 @@
 							"        <identificativoUnivocoRiscossione>${utils.stringGen(10)}</identificativoUnivocoRiscossione>\\n",
 							"        <indiceDatiSingoloPagamento>4</indiceDatiSingoloPagamento>\\n",
 							"        <singoloImportoPagato>10.00</singoloImportoPagato>\\n",
-							"        <codiceEsitoSingoloPagamento>9</codiceEsitoSingoloPagamento>\\n",
+							"        <codiceEsitoSingoloPagamento>8</codiceEsitoSingoloPagamento>\\n",
 							"        <dataEsitoSingoloPagamento>2017-07-17</dataEsitoSingoloPagamento>\\n",
 							"    </datiSingoliPagamenti><datiSingoliPagamenti>\\n        ",
 							"        <identificativoUnivocoVersamento>${utils.stringGen(14)}</identificativoUnivocoVersamento>\\n",
 							"        <identificativoUnivocoRiscossione>${utils.stringGen(10)}</identificativoUnivocoRiscossione>\\n",
 							"        <indiceDatiSingoloPagamento>5</indiceDatiSingoloPagamento>\\n",
 							"        <singoloImportoPagato>10.00</singoloImportoPagato>\\n",
-							"        <codiceEsitoSingoloPagamento>9</codiceEsitoSingoloPagamento>\\n",
+							"        <codiceEsitoSingoloPagamento>4</codiceEsitoSingoloPagamento>\\n",
 							"        <dataEsitoSingoloPagamento>2017-07-17</dataEsitoSingoloPagamento>\\n",
 							"    </datiSingoliPagamenti>\\n",
 							"</FlussoRiversamento>`",
@@ -242,7 +191,8 @@
 							"pm.variables.set(\"rendi\",btoa(rendi));",
 							"pm.collectionVariables.set(\"date\",date);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -251,13 +201,11 @@
 				"header": [
 					{
 						"key": "SOAPAction",
-						"value": "\"nodoInviaFlussoRendicontazione\"",
-						"type": "text"
+						"value": "\"nodoInviaFlussoRendicontazione\""
 					},
 					{
 						"key": "Ocp-Apim-Subscription-Key",
-						"value": "{{FDR_NODO_KEY}}",
-						"type": "text"
+						"value": "{{FDR_NODO_KEY}}"
 					}
 				],
 				"body": {
@@ -285,7 +233,7 @@
 			"response": []
 		},
 		{
-			"name": "nodoInviaFlussoRendicontazione CLONE",
+			"name": "nodoInviaFlussoRendicontazionFTP",
 			"event": [
 				{
 					"listen": "prerequest",
@@ -294,6 +242,10 @@
 							"var date = new Date().toISOString().split('T')[0]",
 							"var idflusso = (''+new Date().getTime()).substring(0,11)",
 							"var psp = pm.environment.get('psp')",
+							"var channel = pm.environment.get('channel')",
+							"var brokerPsp = pm.environment.get('brokerPsp')",
+							"var pa = pm.environment.get('pa')",
+							"var channelPwd = pm.environment.get('channelPwd')",
 							"var rendi = `<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\\n",
 							"<FlussoRiversamento xmlns=\"http://www.digitpa.gov.it/schemas/2011/Pagamenti/\">\\n    ",
 							"    <versioneOggetto>1.0</versioneOggetto>\\n",
@@ -315,7 +267,7 @@
 							"        </identificativoUnivocoRicevente>\\n",
 							"    </istitutoRicevente>\\n",
 							"    <numeroTotalePagamenti>5</numeroTotalePagamenti>\\n",
-							"    <importoTotalePagamenti>60.00</importoTotalePagamenti>\\n",
+							"    <importoTotalePagamenti>50.00</importoTotalePagamenti>\\n",
 							"    <datiSingoliPagamenti>\\n        ",
 							"        <identificativoUnivocoVersamento>${utils.stringGen(14)}</identificativoUnivocoVersamento>\\n",
 							"        <identificativoUnivocoRiscossione>${utils.stringGen(10)}</identificativoUnivocoRiscossione>\\n",
@@ -328,7 +280,7 @@
 							"        <identificativoUnivocoRiscossione>${utils.stringGen(10)}</identificativoUnivocoRiscossione>\\n",
 							"        <indiceDatiSingoloPagamento>2</indiceDatiSingoloPagamento>\\n",
 							"        <singoloImportoPagato>10.00</singoloImportoPagato>\\n",
-							"        <codiceEsitoSingoloPagamento>9</codiceEsitoSingoloPagamento>\\n",
+							"        <codiceEsitoSingoloPagamento>3</codiceEsitoSingoloPagamento>\\n",
 							"        <dataEsitoSingoloPagamento>2017-07-17</dataEsitoSingoloPagamento>\\n",
 							"    </datiSingoliPagamenti><datiSingoliPagamenti>\\n        ",
 							"        <identificativoUnivocoVersamento>${utils.stringGen(14)}</identificativoUnivocoVersamento>\\n",
@@ -342,23 +294,48 @@
 							"        <identificativoUnivocoRiscossione>${utils.stringGen(10)}</identificativoUnivocoRiscossione>\\n",
 							"        <indiceDatiSingoloPagamento>4</indiceDatiSingoloPagamento>\\n",
 							"        <singoloImportoPagato>10.00</singoloImportoPagato>\\n",
-							"        <codiceEsitoSingoloPagamento>9</codiceEsitoSingoloPagamento>\\n",
+							"        <codiceEsitoSingoloPagamento>8</codiceEsitoSingoloPagamento>\\n",
 							"        <dataEsitoSingoloPagamento>2017-07-17</dataEsitoSingoloPagamento>\\n",
 							"    </datiSingoliPagamenti><datiSingoliPagamenti>\\n        ",
 							"        <identificativoUnivocoVersamento>${utils.stringGen(14)}</identificativoUnivocoVersamento>\\n",
 							"        <identificativoUnivocoRiscossione>${utils.stringGen(10)}</identificativoUnivocoRiscossione>\\n",
 							"        <indiceDatiSingoloPagamento>5</indiceDatiSingoloPagamento>\\n",
 							"        <singoloImportoPagato>10.00</singoloImportoPagato>\\n",
-							"        <codiceEsitoSingoloPagamento>9</codiceEsitoSingoloPagamento>\\n",
+							"        <codiceEsitoSingoloPagamento>4</codiceEsitoSingoloPagamento>\\n",
 							"        <dataEsitoSingoloPagamento>2017-07-17</dataEsitoSingoloPagamento>\\n",
 							"    </datiSingoliPagamenti>\\n",
 							"</FlussoRiversamento>`",
 							"",
+							"var rendiEncoded = btoa(rendi);",
+							"",
+							"pm.variables.set(\"rendi\",rendiEncoded);",
+							"",
+							"var nodoInviaFlussoRendicontazione = `<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">",
+							"    <soap:Body>",
+							"        <ns5:nodoInviaFlussoRendicontazione xmlns:ns2=\"http://www.digitpa.gov.it/schemas/2011/Pagamenti/\"",
+							"                                            xmlns:ns3=\"http://PuntoAccessoPSP.spcoop.gov.it/QrCode\"",
+							"                                            xmlns:ns4=\"http://PuntoAccessoPSP.spcoop.gov.it/BarCode_GS1_128_Modified\"",
+							"                                            xmlns:ns5=\"http://ws.pagamenti.telematici.gov/\">",
+							"            <identificativoPSP>${psp}</identificativoPSP>",
+							"            <identificativoIntermediarioPSP>${brokerPsp}</identificativoIntermediarioPSP>",
+							"            <identificativoCanale>${channel}</identificativoCanale>",
+							"            <password>${channelPwd}</password>",
+							"            <identificativoDominio>${pa}</identificativoDominio>",
+							"            <identificativoFlusso>${date}${psp}-${idflusso}</identificativoFlusso>",
+							"            <dataOraFlusso>${date}T01:00:59</dataOraFlusso>",
+							"            <xmlRendicontazione>${rendiEncoded}</xmlRendicontazione>",
+							"        </ns5:nodoInviaFlussoRendicontazione>",
+							"    </soap:Body>",
+							"</soap:Envelope>`",
+							"",
+							"var payloadString = JSON.stringify(nodoInviaFlussoRendicontazione);",
+							"",
 							"pm.collectionVariables.set(\"idflusso\", date+ psp+'-'+idflusso);",
-							"pm.variables.set(\"rendi\",btoa(rendi));",
+							"pm.variables.set(\"nodoInviaFlussoRendicontazione\",payloadString);",
 							"pm.collectionVariables.set(\"date\",date);"
 						],
-						"type": "text/javascript"
+						"type": "text/javascript",
+						"packages": {}
 					}
 				}
 			],
@@ -367,29 +344,29 @@
 				"header": [
 					{
 						"key": "SOAPAction",
-						"value": "\"nodoInviaFlussoRendicontazione\"",
-						"type": "text"
+						"value": "\"nodoInviaFlussoRendicontazione\""
+					},
+					{
+						"key": "Ocp-Apim-Subscription-Key",
+						"value": "{{FDR_NODO_KEY}}"
 					}
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">\n    <soap:Body>\n        <ns5:nodoInviaFlussoRendicontazione xmlns:ns2=\"http://www.digitpa.gov.it/schemas/2011/Pagamenti/\"\n                                            xmlns:ns3=\"http://PuntoAccessoPSP.spcoop.gov.it/QrCode\"\n                                            xmlns:ns4=\"http://PuntoAccessoPSP.spcoop.gov.it/BarCode_GS1_128_Modified\"\n                                            xmlns:ns5=\"http://ws.pagamenti.telematici.gov/\">\n            <identificativoPSP>{{psp}}</identificativoPSP>\n            <identificativoIntermediarioPSP>{{brokerPsp}}</identificativoIntermediarioPSP>\n            <identificativoCanale>{{channel}}</identificativoCanale>\n            <password>{{channelPwd}}</password>\n            <identificativoDominio>{{pa}}</identificativoDominio>\n            <identificativoFlusso>{{idflusso}}</identificativoFlusso>\n            <dataOraFlusso>{{date}}T01:00:59</dataOraFlusso>\n            <xmlRendicontazione>{{rendi}}</xmlRendicontazione>\n        </ns5:nodoInviaFlussoRendicontazione>\n    </soap:Body>\n</soap:Envelope>",
+					"raw": "{\n    \"content\": {{nodoInviaFlussoRendicontazione}}\n}",
 					"options": {
 						"raw": {
-							"language": "xml"
+							"language": "json"
 						}
 					}
 				},
 				"url": {
-					"raw": "{{URL_NODO_PER_PSP}}?soapAction=nodoInviaFlussoRendicontazione",
+					"raw": "{{URL_FDRNODO_REST}}/nodoInviaFlussoRendicontazioneFTP",
 					"host": [
-						"{{URL_NODO_PER_PSP}}"
+						"{{URL_FDRNODO_REST}}"
 					],
-					"query": [
-						{
-							"key": "soapAction",
-							"value": "nodoInviaFlussoRendicontazione"
-						}
+					"path": [
+						"nodoInviaFlussoRendicontazioneFTP"
 					]
 				}
 			},
@@ -416,7 +393,13 @@
 			],
 			"request": {
 				"method": "POST",
-				"header": [],
+				"header": [
+					{
+						"key": "Ocp-Apim-Subscription-Key",
+						"value": "{{FDR_NODO_REST_KEY}}",
+						"type": "text"
+					}
+				],
 				"body": {
 					"mode": "raw",
 					"raw": "{\n    \"fdr\": \"2023-08-0760000000001-16914234697\",\n    \"pspId\": \"{{psp}}\",\n    \"organizationId\": \"{{pa}}\",\n    \"retry\": 1,\n    \"revision\": 1\n}",

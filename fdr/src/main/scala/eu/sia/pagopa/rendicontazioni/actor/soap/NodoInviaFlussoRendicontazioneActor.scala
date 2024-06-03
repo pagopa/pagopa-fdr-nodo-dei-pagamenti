@@ -18,6 +18,7 @@ import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicon
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import it.pagopa.config.CreditorInstitution
+import org.slf4j.MDC
 import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
 
 import java.time.format.DateTimeFormatter
@@ -71,6 +72,7 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
 
       nifr <- Future.fromTry(parseInput(soapRequest.payload, inputXsdValid))
 
+      _ = MDC.put(Constant.MDCKey.FDR, nifr.identificativoFlusso)
       now = Util.now()
       re_ = Re(
         idDominio = Some(nifr.identificativoDominio),
@@ -148,9 +150,6 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
         nifr.xmlRendicontazione,
         checkUTF8,
         flussoRiversamento,
-        pa,
-        ddataMap,
-        actorClassId,
         repositories.fdrRepository
       )
 

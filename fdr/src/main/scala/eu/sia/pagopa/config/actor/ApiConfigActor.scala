@@ -1,6 +1,5 @@
 package eu.sia.pagopa.config.actor
 
-import eu.sia.pagopa.Main.SSlContext
 import eu.sia.pagopa.common.actor.BaseActor
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories

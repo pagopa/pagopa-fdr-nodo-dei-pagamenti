@@ -1,12 +1,7 @@
 package eu.sia.pagopa
 
 import akka.http.javadsl.model.StatusCodes
-import eu.sia.pagopa.common.json.model.rendicontazione.GetXmlRendicontazioneResponse
-import eu.sia.pagopa.common.util.xml.XmlUtil
-import eu.sia.pagopa.common.util.{Constant, RandomStringUtils, Util}
-import eu.sia.pagopa.commonxml.XmlEnum
-import spray.json._
-import eu.sia.pagopa.common.json.model._
+import eu.sia.pagopa.common.util.{RandomStringUtils, Util}
 import eu.sia.pagopa.testutil.TestItems
 
 import java.time.format.DateTimeFormatter
@@ -100,6 +95,197 @@ class RestRendicontazioniTests() extends BaseUnitTest {
   }
 
 
+  "nodoInviaFlussoRendicontazioneFTP" must {
+    "ok" in {
+      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+      val random = RandomStringUtils.randomNumeric(9)
+      val idFlusso = s"${date}${TestItems.PSP}-$random"
 
+      val nodoInviaFlussoRendicontazione = inviaFlussoRendicontazionePayload(
+        TestItems.PSP,
+        TestItems.intPSP,
+        TestItems.canale,
+        TestItems.canalePwd,
+        TestItems.PA,
+        idFlussoReq = Some(idFlusso),
+        dateReq = Some(date),
+        None,
+        None,
+        None,
+        false,
+        ""
+      )
+
+      val nodoInviaFlussoRendicontazioneReplaced = nodoInviaFlussoRendicontazione
+        .replaceAll("\"", "\\\\\"")
+        .replaceAll("\n", "")
+
+      val payload =
+        s"""
+           |{
+           | "content": "${nodoInviaFlussoRendicontazioneReplaced}"
+           |}
+           |""".stripMargin
+
+      await(
+        nodoInviaFlussoRendicontazioneFTP(
+          Some(payload),
+          testCase = Some("OK"),
+          responseAssert = (resp, status) => {
+            assert(status == StatusCodes.OK.intValue)
+            assert(resp.contains("{\"message\":\"OK\"}"))
+          }
+        )
+      )
+    }
+    "ko same flow sent" in {
+      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+      val random = RandomStringUtils.randomNumeric(9)
+      val idFlusso = s"${date}${TestItems.PSP}-$random"
+
+      val nodoInviaFlussoRendicontazione = inviaFlussoRendicontazionePayload(
+        TestItems.PSP,
+        TestItems.intPSP,
+        TestItems.canale,
+        TestItems.canalePwd,
+        TestItems.PA,
+        idFlussoReq = Some(idFlusso),
+        dateReq = Some(date),
+        None,
+        None,
+        None,
+        flussoNonValido = false,
+        ""
+      )
+
+      val nodoInviaFlussoRendicontazioneReplaced = nodoInviaFlussoRendicontazione
+        .replaceAll("\"", "\\\\\"")
+        .replaceAll("\n", "")
+
+      val payload =
+        s"""
+           |{
+           | "content": "${nodoInviaFlussoRendicontazioneReplaced}"
+           |}
+           |""".stripMargin
+
+      await(
+        for {
+          _ <- {
+            nodoInviaFlussoRendicontazioneFTP(
+              Some(payload),
+              testCase = Some("OK"),
+              responseAssert = (resp, status) => {
+                assert(status == StatusCodes.OK.intValue)
+                assert(resp.contains("{\"message\":\"OK\"}"))
+              }
+            )}
+          _ <- {
+            nodoInviaFlussoRendicontazioneFTP(
+            Some(payload),
+            testCase = Some("KO"),
+            responseAssert = (resp, status) => {
+              assert(status == StatusCodes.BAD_REQUEST.intValue)
+              assert(resp.contains("{\"error\":\"flusso di rendicontazione gia' presente"))
+            }
+          )}
+        } yield ()
+      )
+    }
+    "ko empty payload" in {
+      await(
+        nodoInviaFlussoRendicontazioneFTP(
+          None,
+          testCase = Some("OK"),
+          responseAssert = (resp, status) => {
+            assert(status == StatusCodes.BAD_REQUEST.intValue)
+            assert(resp.contains("{\"error\":\"Invalid request\"}"))
+          }
+        )
+      )
+    }
+    "ko wrong request xml" in {
+      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+      val random = RandomStringUtils.randomNumeric(9)
+      val idFlusso = s"${date}${TestItems.PSP}-$random"
+
+      val nodoInviaFlussoRendicontazione = inviaFlussoRendicontazionePayload(
+        TestItems.PSP,
+        TestItems.intPSP,
+        TestItems.canale,
+        TestItems.canalePwd,
+        TestItems.PA,
+        idFlussoReq = Some(idFlusso),
+        dateReq = Some(date),
+        None,
+        None,
+        None,
+        flussoNonValido = false,
+        ""
+      )
+
+      val nodoInviaFlussoRendicontazioneReplaced = nodoInviaFlussoRendicontazione
+        .replaceAll("\"", "\\\\\"")
+        .replaceAll("\n", "")
+        .replaceAll("nodoInviaFlussoRendicontazione", "nodoInviaRPT")
+        .replaceAll("identificativoPSP", "idPSP")
+
+      val payload =
+        s"""
+           |{
+           | "content": "${nodoInviaFlussoRendicontazioneReplaced}"
+           |}
+           |""".stripMargin
+
+      await(
+        nodoInviaFlussoRendicontazioneFTP(
+          Some(payload),
+          testCase = Some("KO"),
+          responseAssert = (resp, status) => {
+            assert(status == StatusCodes.BAD_REQUEST.intValue)
+            assert(resp.contains("{\"error\":\"Invalid content\"}"))
+          }
+        )
+      )
+    }
+    "ko invalid request" in {
+      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+      val random = RandomStringUtils.randomNumeric(9)
+      val idFlusso = s"${date}${TestItems.PSP}-$random"
+
+      val nodoInviaFlussoRendicontazione = inviaFlussoRendicontazionePayload(
+        TestItems.PSP,
+        TestItems.intPSP,
+        TestItems.canale,
+        TestItems.canalePwd,
+        TestItems.PA,
+        idFlussoReq = Some(idFlusso),
+        dateReq = Some(date),
+        None,
+        None,
+        None,
+        flussoNonValido = false,
+        ""
+      )
+
+      val payload =
+        s"""
+           |{
+           | "content": ${nodoInviaFlussoRendicontazione}
+           |}
+           |""".stripMargin
+
+      await(
+        nodoInviaFlussoRendicontazioneFTP(
+          Some(payload),
+          testCase = Some("OK"),
+          responseAssert = (resp, status) => {
+            assert(status == StatusCodes.BAD_REQUEST.intValue)
+            assert(resp.contains("{\"error\":\"Invalid content\"}"))
+          }
+        )
+      )
+    }
+  }
 
 }

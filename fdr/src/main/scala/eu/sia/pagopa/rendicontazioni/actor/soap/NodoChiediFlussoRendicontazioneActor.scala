@@ -18,6 +18,7 @@ import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoChiediFlussoRendicontazioneResponse
 import it.pagopa.config.{CreditorInstitution, PaymentServiceProvider, Station}
+import org.slf4j.MDC
 import scalaxb.Base64Binary
 import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpa.{NodoChiediFlussoRendicontazione, NodoChiediFlussoRendicontazioneRisposta}
@@ -200,6 +201,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
     val pipeline = for {
       ncfr <- Future.fromTry(parseInput(soapRequest))
 
+      _ = MDC.put(Constant.MDCKey.FDR, ncfr.identificativoFlusso)
       _ = reFlow = reFlow.map(r =>
         r.copy(
           idDominio = ncfr.identificativoDominio,

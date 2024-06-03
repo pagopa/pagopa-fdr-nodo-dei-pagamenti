@@ -100,83 +100,10 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
                           xmlRendicontazione: scalaxb.Base64Binary,
                           checkUTF8: Boolean,
                           flussoRiversamento: CtFlussoRiversamento,
-                          pa: CreditorInstitution,
-                          ddataMap: ConfigData,
-                          actorClassId: String,
                           fdrRepository: FdrRepository)(implicit log: NodoLogger, ec: ExecutionContext) = {
 
     for {
-      r <- if (pa.reportingFtp) {
-        val ftpServerConf = ddataMap.ftpServers
-          .find(s => {
-            s._2.service == Constant.KeyName.RENDICONTAZIONI
-          })
-        if (ftpServerConf.isEmpty) {
-          log.error("No FTP server configured")
-          throw exception.DigitPaException("No FTP server configured", DigitPaErrorCodes.PPT_SYSTEM_ERROR)
-        }
-        val ftpServer = ftpServerConf.get._2
-
-        val normalizedIdFlusso = s"${CheckRendicontazioni.normalizeIdFlusso(identificativoFlusso)}.xml"
-        val content = StringUtils.getStringDecoded(xmlRendicontazione, checkUTF8) match {
-          case Success(c) => c
-          case Failure(e) =>  throw new DigitPaException("Errore decodifica rendicontazione", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
-        }
-        val (filename, contenutoFileBytes) = if (pa.reportingZip) {
-          val zipFile = File.createTempFile(normalizedIdFlusso, ".zip")
-          val zip = new ZipOutputStream(new FileOutputStream(zipFile))
-          zip.putNextEntry(new ZipEntry(normalizedIdFlusso))
-          zip.write(content.getBytes(Constant.UTF_8))
-          zip.closeEntry()
-          zip.close()
-
-          val zippedContent = Files.readAllBytes(Paths.get(zipFile.getAbsolutePath))
-          Files.delete(Paths.get(zipFile.getAbsolutePath))
-
-          s"$normalizedIdFlusso.zip" -> zippedContent
-        } else {
-          normalizedIdFlusso -> content.getBytes(Constant.UTF_8)
-        }
-
-        val sftpFile = FtpFile(
-          0,
-          contenutoFileBytes.length,
-          contenutoFileBytes,
-          new String(MessageDigest.getInstance("MD5").digest(contenutoFileBytes)),
-          filename,
-          pa.creditorInstitutionCode,
-          FtpFileStatus.TO_UPLOAD,
-          ftpServer.id,
-          ftpServer.host,
-          ftpServer.port,
-          0,
-          Util.now(),
-          Util.now(),
-          actorClassId,
-          actorClassId
-        )
-        val rendi = Rendicontazione(
-          0,
-          RendicontazioneStatus.VALID,
-          0,
-          identificativoPSP,
-          Some(identificativoIntermediarioPSP),
-          Some(identificativoCanale),
-          identificativoDominio,
-          identificativoFlusso,
-          LocalDateTime.parse(dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault())),
-          None,
-          None
-        )
-        fdrRepository
-          .save(rendi, sftpFile)
-          .recoverWith({ case e =>
-            Future.failed(exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e))
-          })
-          .flatMap(data => {
-            Future.successful((Constant.OK, data._1, Some(data._2), flussoRiversamento))
-          })
-      } else {
+      r <- {
         val rendi = Rendicontazione(
           0,
           RendicontazioneStatus.VALID,
@@ -205,7 +132,6 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
           })
       }
     } yield r
-
   }
 
   def checks(ddataMap: ConfigData, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, checkPassword: Boolean, actorClassId: String)(implicit log: NodoLogger) = {

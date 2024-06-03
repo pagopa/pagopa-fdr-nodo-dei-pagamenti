@@ -39,7 +39,7 @@ final case class PrimitiveActor(repositories: Repositories, actorProps: ActorPro
       actors.incrementAndGet()
     }).recover { case e: Throwable =>
       log.error(e, s"Error creating ActorPerRequest ${actorClassId}")
-      sender ! "errore" //FIXME rispondere errore xml/json
+      sender ! "errore"
     //          actorError(replyTo, soapRequet, ddataMap, DigitPaException("Errore creazione ActorPerRequest", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), None)
     }
   }
