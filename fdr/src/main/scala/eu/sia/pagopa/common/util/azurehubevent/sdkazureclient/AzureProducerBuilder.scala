@@ -6,13 +6,13 @@ import akka.dispatch.MessageDispatcher
 import com.azure.core.amqp.AmqpTransportType
 import com.azure.core.util.BinaryData
 import com.azure.messaging.eventhubs.{EventData, EventDataBatch, EventHubClientBuilder, EventHubProducerAsyncClient}
-import com.azure.storage.blob.{BlobAsyncClient, BlobClient, BlobClientBuilder}
-import eu.sia.pagopa.Main.{ConfigData, config, file, log}
-import eu.sia.pagopa.common.message.{SottoTipoEvento, _}
+import com.azure.storage.blob.{BlobAsyncClient, BlobClientBuilder}
+import eu.sia.pagopa.Main.ConfigData
+import eu.sia.pagopa.common.json.model.{Event, FlussiRendicontazioneEvent, IUVRendicontatiEvent}
+import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.{AppObjectMapper, Appfunction}
+import eu.sia.pagopa.common.util.azurehubevent.AppObjectMapper
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ReEventFunc, defaultOperation, sessionId}
-import net.openhft.hashing.LongHashFunction
 import org.slf4j.MDC
 import reactor.core.publisher.{Flux, Mono}
 
@@ -26,6 +26,134 @@ import scala.collection.Seq
 import scala.concurrent.{ExecutionContext, Future}
 import scala.jdk.CollectionConverters._
 import scala.util.Try
+
+trait AzureEventProducer {
+
+  protected def configName = "tdb"
+  protected var producer: Option[EventHubProducerAsyncClient] = None
+  protected implicit var executionContext: MessageDispatcher = _
+
+  val NEGATIVE_EVENT_MSG_PUBLISHED = "Negative Biz Event PUBLISHED \npayload:"
+  val POSITIVE_EVENT_MSG_PUBLISHED = "Positive Biz Event PUBLISHED \npayload:"
+  val NEGATIVE_EVENT_MSG_FAILED = "Negative Biz Event FAILED \npayload:"
+  val POSITIVE_EVENT_MSG_FAILED = "Positive Biz Event FAILED \npayload:"
+  val NEGATIVE_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED = "Negative Biz Event FAILED...Producer not initialized,call .init() method first \npayload:"
+  val POSITIVE_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED = "Positive Biz Event FAILED...Producer not initialized,call .init() method first \npayload:"
+
+  val FAILED_ACT_VER_EVENT_MSG_PUBLISHED = "FailedActivateVerify Biz Event PUBLISHED \npayload:"
+  val FAILED_ACT_VER_EVENT_MSG_FAILED = "FailedActivateVerify Biz Event FAILED \npayload:"
+  val FAILED_ACT_VER_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED = "FailedActivateVerify Biz Event FAILED...Producer not initialized,call .init() method first \npayload:"
+
+
+  def init(system: ActorSystem): Unit = {
+    val eventConfigAzureSdkClient = system.settings.config.getConfig(s"azure-hub-event.azure-sdk-client.$configName")
+    val eventHubName = eventConfigAzureSdkClient.getString("event-hub-name")
+    val connectionString = eventConfigAzureSdkClient.getString("connection-string")
+
+    executionContext = system.dispatchers.lookup("eventhub-dispatcher")
+    producer = Some(new EventHubClientBuilder().transportType(AmqpTransportType.AMQP_WEB_SOCKETS).connectionString(connectionString, eventHubName).buildAsyncProducerClient())
+
+    val coordinatedShutdown = system.settings.config.getBoolean("coordinatedShutdown")
+    if (coordinatedShutdown) {
+      CoordinatedShutdown(system).addTask(CoordinatedShutdown.PhaseBeforeActorSystemTerminate, s"$configName-producer-stop") { () =>
+        producer.foreach(_.close())
+        Future.successful(Done)
+      }
+    } else {
+      system.registerOnTermination(() => {
+        producer.foreach(_.close())
+      })
+    }
+  }
+
+  private def addOrNewBatch(producer: EventHubProducerAsyncClient, batch: EventDataBatch, eventDataSeq: Seq[EventData], log: NodoLogger): Mono[_ <: Seq[EventDataBatch]] = {
+    if (eventDataSeq.isEmpty) {
+      Mono.just(Seq(batch))
+    } else {
+      Try(if (batch.tryAdd(eventDataSeq.head)) {
+        log.debug("add to batch")
+        addOrNewBatch(producer, batch, eventDataSeq.tail, log)
+      } else {
+        log.debug("creating new batch")
+        for {
+          res <- producer
+            .createBatch()
+            .flatMap(newBatch => {
+              addOrNewBatch(producer, newBatch, eventDataSeq, log)
+            })
+        } yield Seq(batch) ++ res
+
+      }).recover({ case e =>
+        log.debug("discarding message")
+        addOrNewBatch(producer, batch, eventDataSeq.tail, log)
+      }).get
+    }
+  }
+
+  protected def publish(items: Seq[Event], log: NodoLogger): Unit = {
+    val logMessage: (Event, String) => String = (event: Event, msg: String) => event match {
+      case _: IUVRendicontatiEvent => s"$msg${AppObjectMapper.objectMapper.writeValueAsString(event)}"
+      case _: FlussiRendicontazioneEvent => s"$msg${AppObjectMapper.objectMapper.writeValueAsString(event)}"
+    }
+
+    try {
+      val mdcMap = MDC.getCopyOfContextMap
+
+      if (producer.nonEmpty) {
+        log.debug(s"create eventDatas")
+        val eventDataSeq: Seq[EventData] = items.map(r => {
+          val eventData = new EventData(AppObjectMapper.objectMapper.writeValueAsString(r))
+          eventData.getProperties.put(Constant.MDCKey.SERVICE_IDENTIFIER, Constant.SERVICE_IDENTIFIER)
+          eventData
+        })
+        producer.get
+          .createBatch()
+          .flatMap(batch => {
+            addOrNewBatch(producer.get, batch, eventDataSeq, log)
+          })
+          .flatMap(batches => {
+            Flux
+              .fromIterable(batches.asJava)
+              .flatMap(d => {
+                producer.get.send(d)
+              })
+              .collectList()
+          })
+          .subscribe(
+            (f: java.util.List[Void]) => {
+              MDC.setContextMap(mdcMap)
+              items.foreach(x => log.info(logMessage(x, POSITIVE_EVENT_MSG_PUBLISHED)))
+            },
+            (ex: Throwable) => {
+              MDC.setContextMap(mdcMap)
+              items.foreach(x => log.error(ex, logMessage(x, FAILED_ACT_VER_EVENT_MSG_FAILED)))
+            }
+          )
+      } else {
+        items.foreach(x => log.warn(logMessage(x, POSITIVE_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED)))
+      }
+    } catch {
+      case ex: Throwable =>
+        items.foreach(x => log.error(ex, logMessage(x, POSITIVE_EVENT_MSG_FAILED)))
+    }
+
+  }
+}
+object AzureIuvRendicontatiProducer extends AzureEventProducer{
+  override val configName = "iuv-rendicontati"
+
+  def send(log: NodoLogger, event: IUVRendicontatiEvent) = {
+    Future(publish(Seq(event), log))
+  }
+}
+
+object AzureFlussiRendicontazioneProducer extends AzureEventProducer{
+  override val configName = "flussi-rendicontazione"
+
+  def send(log: NodoLogger, event: FlussiRendicontazioneEvent) = {
+    Future(publish(Seq(event), log))
+  }
+}
 
 object AzureProducerBuilder {
 

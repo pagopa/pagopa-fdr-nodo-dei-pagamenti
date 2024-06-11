@@ -14,7 +14,7 @@ import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, QueueAddFunc, ReEventFunc}
+import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, FlussiRendicontazioneFunc, IuvRendicontatiFunc, QueueAddFunc, ReEventFunc}
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
 import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.queueclient.AzureQueueClient
@@ -405,6 +405,8 @@ final case class ActorProps(
                              reEventFunc: ReEventFunc,
                              containerBlobFunction: ContainerBlobFunc,
                              queueAddFunction: QueueAddFunc,
+                             iuvRendicontatiFunction: IuvRendicontatiFunc,
+                             flussiRendicontazioneFunction: FlussiRendicontazioneFunc,
                              actorClassId: String,
                              cacertsPath: String,
                              var ddataMap: ConfigData

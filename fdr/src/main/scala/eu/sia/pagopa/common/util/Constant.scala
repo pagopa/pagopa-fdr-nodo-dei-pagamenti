@@ -1,5 +1,7 @@
 package eu.sia.pagopa.common.util
 
+import eu.sia.pagopa.common.util.Constant.SERVICE_IDENTIFIER_KEY
+
 import java.nio.charset.{Charset, StandardCharsets}
 import java.time.format.DateTimeFormatter
 
@@ -20,6 +22,8 @@ object Constant {
   val SUSPEND_JOBS_KEY = "scheduler.suspendAllJobs"
 
   val INSTANCE_KEY = "INSTANCE"
+  val SERVICE_IDENTIFIER_KEY = "SERVICE_IDENTIFIER"
+  val SERVICE_IDENTIFIER = sys.env.get(SERVICE_IDENTIFIER_KEY).getOrElse("NOT_SET")
   val APP_NAME_KEY = "APP_NAME"
   val APP_VERSION_KEY = "APP_VERSION"
   val INSTANCE = sys.env.getOrElse(INSTANCE_KEY, "")
@@ -63,6 +67,7 @@ object Constant {
     val DATA_ORA_EVENTO = "dataOraEvento"
     val ELAPSED = "elapsed"
     val FDR = "fdr"
+    val SERVICE_IDENTIFIER = "serviceIdentifier"
   }
 
   object ContentType extends Enumeration {
