@@ -33,16 +33,11 @@ trait AzureEventProducer {
   protected var producer: Option[EventHubProducerAsyncClient] = None
   protected implicit var executionContext: MessageDispatcher = _
 
-  val NEGATIVE_EVENT_MSG_PUBLISHED = "Negative Biz Event PUBLISHED \npayload:"
-  val POSITIVE_EVENT_MSG_PUBLISHED = "Positive Biz Event PUBLISHED \npayload:"
-  val NEGATIVE_EVENT_MSG_FAILED = "Negative Biz Event FAILED \npayload:"
-  val POSITIVE_EVENT_MSG_FAILED = "Positive Biz Event FAILED \npayload:"
-  val NEGATIVE_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED = "Negative Biz Event FAILED...Producer not initialized,call .init() method first \npayload:"
-  val POSITIVE_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED = "Positive Biz Event FAILED...Producer not initialized,call .init() method first \npayload:"
+  val QI_EVENT_MSG_PUBLISHED = "Positive Biz Event PUBLISHED \npayload:"
+  val QI_EVENT_MSG_FAILED = "Positive Biz Event FAILED \npayload:"
+  val QI_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED = "Positive Biz Event FAILED...Producer not initialized,call .init() method first \npayload:"
 
-  val FAILED_ACT_VER_EVENT_MSG_PUBLISHED = "FailedActivateVerify Biz Event PUBLISHED \npayload:"
   val FAILED_ACT_VER_EVENT_MSG_FAILED = "FailedActivateVerify Biz Event FAILED \npayload:"
-  val FAILED_ACT_VER_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED = "FailedActivateVerify Biz Event FAILED...Producer not initialized,call .init() method first \npayload:"
 
 
   def init(system: ActorSystem): Unit = {
@@ -122,7 +117,7 @@ trait AzureEventProducer {
           .subscribe(
             (f: java.util.List[Void]) => {
               MDC.setContextMap(mdcMap)
-              items.foreach(x => log.info(logMessage(x, POSITIVE_EVENT_MSG_PUBLISHED)))
+              items.foreach(x => log.info(logMessage(x, QI_EVENT_MSG_PUBLISHED)))
             },
             (ex: Throwable) => {
               MDC.setContextMap(mdcMap)
@@ -130,11 +125,11 @@ trait AzureEventProducer {
             }
           )
       } else {
-        items.foreach(x => log.warn(logMessage(x, POSITIVE_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED)))
+        items.foreach(x => log.warn(logMessage(x, QI_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED)))
       }
     } catch {
       case ex: Throwable =>
-        items.foreach(x => log.error(ex, logMessage(x, POSITIVE_EVENT_MSG_FAILED)))
+        items.foreach(x => log.error(ex, logMessage(x, QI_EVENT_MSG_FAILED)))
     }
 
   }

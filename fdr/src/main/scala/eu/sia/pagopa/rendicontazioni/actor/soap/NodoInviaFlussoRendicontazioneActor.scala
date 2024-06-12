@@ -201,7 +201,6 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
       .map(_ => {
         complete()
       })
-
   }
 
   override def actorError(e: DigitPaException): Unit = {

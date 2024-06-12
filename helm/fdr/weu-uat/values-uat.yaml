@@ -89,6 +89,8 @@ fdrnodo:
     AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
     ADDITIONAL_FDR_VALIDATIONS: "true"
     AZURE_QUEUE_NAME: "queueconversion"
+    EVENT_HUB_IUVRENDICONTATI_NAME: ""
+    EVENT_HUB_FLUSSIRENDICONTAZIONE_NAME: ""
   secretProvider:
     create: true
     envSecrets:
@@ -101,6 +103,8 @@ fdrnodo:
       FDR_SUBSCRIPTION_KEY: "fdr-internal-product-subscription-key"
       FDR_LEGACY_SUBSCRIPTION_KEY: "fdr-legacy-subscription-key"
       DB_FDR_PASSWORD: "db-fdr-password"
+      EVENT_HUB_IUVRENDICONTATI_CONNECTION_STRING: ""
+      EVENT_HUB_FLUSSIRENDICONTAZIONE_CONNECTION_STRING: ""
     keyvault:
       name: "pagopa-u-fdr-kv"
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
