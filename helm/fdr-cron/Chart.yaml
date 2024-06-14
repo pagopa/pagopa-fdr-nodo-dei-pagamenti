@@ -2,8 +2,8 @@ apiVersion: v2
 name: fdr-cron-chart
 description: Flussi di rendicontazione cron job
 type: application
-version: 2.1.8-PTPO-208-fix-cache
-appVersion: 2.1.8-PTPO-208-fix-cache
+version: 2.1.9
+appVersion: 2.1.9
 dependencies:
   - name: cron-chart
     version: 2.3.0
