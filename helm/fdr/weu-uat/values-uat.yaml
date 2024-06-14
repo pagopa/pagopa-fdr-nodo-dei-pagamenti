@@ -29,8 +29,8 @@ fdrnodo:
     create: true
   resources:
     requests:
-      memory: "6Gi"
-      cpu: "2048m"
+      memory: "640m"
+      cpu: "512m"
     limits:
       memory: "8Gi"
       cpu: "2560m"
