@@ -4,7 +4,7 @@
     "title": "FDR - Flussi di rendicontazione FASE 1",
     "description": "FDR - Flussi di rendicontazione FASE 1",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "2.1.8-NOD-576-fdr-test-di-performance"
+    "version": "2.1.8-PTPO-208-fix-cache"
   },
   "servers": [
     {
@@ -136,7 +136,8 @@
             "example": "OK"
           }
         }
-      },"GetXmlRendicontazioneResponse": {
+      },
+      "GetXmlRendicontazioneResponse": {
         "type": "object",
         "properties": {
           "xmlRendicontazione": {
@@ -182,7 +183,9 @@
         }
       },
       "NodoInviaFlussoRendicontazioneFTPReq": {
-        "required": ["content"],
+        "required": [
+          "content"
+        ],
         "type": "object",
         "properties": {
           "content": {
