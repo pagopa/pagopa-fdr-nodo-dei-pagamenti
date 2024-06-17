@@ -19,7 +19,7 @@ object EventUtil {
         dsp.identificativoUnivocoVersamento,
         flussoRiversamento.identificativoUnivocoRegolamento,
         dsp.singoloImportoPagato,
-        Integer.getInteger(dsp.codiceEsitoSingoloPagamento.toString),
+        Integer.parseInt(dsp.codiceEsitoSingoloPagamento.toString),
         dsp.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime,
         dsp.indiceDatiSingoloPagamento.get.toString(),
         nifr.identificativoFlusso,
@@ -49,7 +49,9 @@ object EventUtil {
       nifr.identificativoPSP,
       nifr.identificativoIntermediarioPSP,
       s"${nifr.identificativoFlusso}${nifr.dataOraFlusso}${insertedTimestamp}",
-      flussoRiversamento.datiSingoliPagamenti.map(dsp => dsp.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime)
+//      ConfigUtil.serializeJson(
+        flussoRiversamento.datiSingoliPagamenti.map(dsp => dsp.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.toString)
+//      )
     )
   }
 }

@@ -13,7 +13,7 @@ trait RendicontazioneTable { self: DBComponent with FdrMapping =>
 
   class Rendicontazioni(tag: Tag) extends Table[Rendicontazione](tag, adjustName("RENDICONTAZIONE")) {
     override def * =
-      (objId, stato, optlock, psp, intermediarioPsp, canale, dominio, idFlusso, dataOraFlusso, fk_binary_file, fk_sftp_file) <> (Rendicontazione.tupled, Rendicontazione.unapply)
+      (objId, stato, optlock, psp, intermediarioPsp, canale, dominio, idFlusso, dataOraFlusso, fk_binary_file, fk_sftp_file, insertedTimestamp) <> (Rendicontazione.tupled, Rendicontazione.unapply)
 
     def objId = column[Long](adjustName("ID"), O.PrimaryKey, O.AutoInc)
     def stato = column[RendicontazioneStatus.Value](adjustName("STATO"))
@@ -26,6 +26,7 @@ trait RendicontazioneTable { self: DBComponent with FdrMapping =>
     def dataOraFlusso = column[LocalDateTime](adjustName("DATA_ORA_FLUSSO"))
     def fk_binary_file = column[Option[Long]](adjustName("FK_BINARY_FILE"))
     def fk_sftp_file = column[Option[Long]](adjustName("FK_SFTP_FILE"))
+    def insertedTimestamp = column[LocalDateTime](adjustName("INSERTED_TIMESTAMP"))
     //def binaryFile = foreignKey("fk_binary_file", FK_BINARY_FILE, binaryFiles)(_.objId)
 
   }

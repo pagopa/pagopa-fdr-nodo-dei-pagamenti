@@ -141,7 +141,7 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
       }
 
       (flussoRiversamento, _) <- validateRendicontazione(nifr, checkUTF8, inputXsdValid, repositories.fdrRepository)
-      (esito, _, _, _) <- saveRendicontazione(
+      (esito, rendicontazioneSaved, _, _) <- saveRendicontazione(
         nifr.identificativoFlusso,
         nifr.identificativoPSP,
         nifr.identificativoIntermediarioPSP,
@@ -160,12 +160,12 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
         req.sessionId,
         nifr,
         flussoRiversamento,
-        Util.now()
+        rendicontazioneSaved.insertedTimestamp
       )
       _ = flussiRendicontazioneEvent = Some(EventUtil.createFlussiRendicontazioneEvent(
         nifr,
         flussoRiversamento,
-        Util.now()
+        rendicontazioneSaved.insertedTimestamp
       ))
 
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
@@ -177,27 +177,28 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield sr
 
-    pipeline.recover({
-      case e: DigitPaException =>
-        log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
-        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, reFlow)
-      case e: Throwable =>
-        log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
-        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
-    }).map(sr => {
-      log.info(FdrLogConstant.logEnd(actorClassId))
-      traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
-      replyTo ! sr
-    }).flatMap(_ => {
-      Future.sequence(
-        iuvRendicontatiEvent.map(event=>{
-          AzureIuvRendicontatiProducer.send(log,event)
-        }) ++
-        flussiRendicontazioneEvent.map(event=>{
-          AzureFlussiRendicontazioneProducer.send(log,event)
-        })
-      )
-    })
+    pipeline
+      .recover({
+        case e: DigitPaException =>
+          log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
+          errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, reFlow)
+        case e: Throwable =>
+          log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
+          errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
+      }).map(sr => {
+        log.info(FdrLogConstant.logEnd(actorClassId))
+        traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+        replyTo ! sr
+      }).flatMap(_ => {
+        Future.sequence(
+          iuvRendicontatiEvent.map(event=>{
+            AzureIuvRendicontatiProducer.send(log,event)
+          }) ++
+          flussiRendicontazioneEvent.map(event=>{
+            AzureFlussiRendicontazioneProducer.send(log,event)
+          })
+        )
+      })
       .map(_ => {
         complete()
       })

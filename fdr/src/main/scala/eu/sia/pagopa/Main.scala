@@ -405,8 +405,6 @@ final case class ActorProps(
                              reEventFunc: ReEventFunc,
                              containerBlobFunction: ContainerBlobFunc,
                              queueAddFunction: QueueAddFunc,
-                             iuvRendicontatiFunction: IuvRendicontatiFunc,
-                             flussiRendicontazioneFunction: FlussiRendicontazioneFunc,
                              actorClassId: String,
                              cacertsPath: String,
                              var ddataMap: ConfigData
