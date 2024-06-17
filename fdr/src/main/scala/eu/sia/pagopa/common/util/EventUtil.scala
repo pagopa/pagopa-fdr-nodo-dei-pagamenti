@@ -49,9 +49,7 @@ object EventUtil {
       nifr.identificativoPSP,
       nifr.identificativoIntermediarioPSP,
       s"${nifr.identificativoFlusso}${nifr.dataOraFlusso}${insertedTimestamp}",
-//      ConfigUtil.serializeJson(
-        flussoRiversamento.datiSingoliPagamenti.map(dsp => dsp.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.toString)
-//      )
+      flussoRiversamento.datiSingoliPagamenti.map(dsp => dsp.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.toString)
     )
   }
 }
