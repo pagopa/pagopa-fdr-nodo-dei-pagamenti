@@ -17,7 +17,7 @@ case class IUVRendicontatiEvent(
                              @JsonProperty("IMPORTO") importo: BigDecimal,
                              @JsonProperty("COD_ESITO") codEsito: Integer,
                              @JsonProperty("DATA_ESITO_SINGOLO_PAGAMENTO") dataEsitoSingoloPagamento: LocalDateTime,
-                             @JsonProperty("IDSP") idPsp: String,
+                             @JsonProperty("IDSP") idsp: String,
                              @JsonProperty("ID_FLUSSO") idFlusso: String,
                              @JsonProperty("DATA_ORA_FLUSSO") dataOraFlusso: LocalDateTime,
                              @JsonProperty("ID_DOMINIO") idDominio: String,

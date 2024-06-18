@@ -189,17 +189,16 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
         log.info(FdrLogConstant.logEnd(actorClassId))
         traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
         replyTo ! sr
-      }).flatMap(_ => {
+      })
+      .map(_ => {
         Future.sequence(
           iuvRendicontatiEvent.map(event=>{
             AzureIuvRendicontatiProducer.send(log,event)
           }) ++
-          flussiRendicontazioneEvent.map(event=>{
-            AzureFlussiRendicontazioneProducer.send(log,event)
-          })
+            flussiRendicontazioneEvent.map(event=>{
+              AzureFlussiRendicontazioneProducer.send(log,event)
+            })
         )
-      })
-      .map(_ => {
         complete()
       })
   }

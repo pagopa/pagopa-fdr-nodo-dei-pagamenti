@@ -85,8 +85,8 @@ fdrnodo:
     AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
     ADDITIONAL_FDR_VALIDATIONS: "true"
     AZURE_QUEUE_NAME: "queueconversion"
-    EVENT_HUB_FLOWTX_NAME: "FLUSSI_RENDICONTAZIONE"
-    EVENT_HUB_REPORTEDIUV_NAME: "IUV_RENDICONTATI"
+    EVENT_HUB_FLOWTX_NAME: "fdr-qi-flows"
+    EVENT_HUB_REPORTEDIUV_NAME: "fdr-qi-reported-iuv"
   secretProvider:
     create: true
     envSecrets:

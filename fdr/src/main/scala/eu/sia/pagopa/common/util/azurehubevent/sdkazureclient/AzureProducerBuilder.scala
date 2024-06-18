@@ -87,8 +87,10 @@ trait AzureEventProducer {
 
   protected def publish(items: Seq[Event], log: NodoLogger): Unit = {
     val logMessage: (Event, String) => String = (event: Event, msg: String) => event match {
-      case _: IUVRendicontatiEvent => s"$msg${AppObjectMapper.objectMapper.writeValueAsString(event)}"
-      case _: FlussiRendicontazioneEvent => s"$msg${AppObjectMapper.objectMapper.writeValueAsString(event)}"
+      case _: IUVRendicontatiEvent =>
+        s"$msg${AppObjectMapper.objectMapper.writeValueAsString(event)}"
+      case _: FlussiRendicontazioneEvent =>
+        s"$msg${AppObjectMapper.objectMapper.writeValueAsString(event)}"
     }
 
     try {
@@ -135,7 +137,7 @@ trait AzureEventProducer {
   }
 }
 object AzureIuvRendicontatiProducer extends AzureEventProducer{
-  override val configName = "iuv-rendicontati"
+  override val configName = "fdr-qi-reported-iuv"
 
   def send(log: NodoLogger, event: IUVRendicontatiEvent) = {
     Future(publish(Seq(event), log))
@@ -143,7 +145,7 @@ object AzureIuvRendicontatiProducer extends AzureEventProducer{
 }
 
 object AzureFlussiRendicontazioneProducer extends AzureEventProducer{
-  override val configName = "flussi-rendicontazione"
+  override val configName = "fdr-qi-flows"
 
   def send(log: NodoLogger, event: FlussiRendicontazioneEvent) = {
     Future(publish(Seq(event), log))

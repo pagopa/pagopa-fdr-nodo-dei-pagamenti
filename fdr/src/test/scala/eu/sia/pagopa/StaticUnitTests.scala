@@ -108,7 +108,7 @@ class StaticUnitTests() extends AnyFlatSpec with should.Matchers {
       10.00,
       0,
       now,
-      TestItems.PSP,
+      "2",
       idFlusso,
       now,
       TestItems.PA,
