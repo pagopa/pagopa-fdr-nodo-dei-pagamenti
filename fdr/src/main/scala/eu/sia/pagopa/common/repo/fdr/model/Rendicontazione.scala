@@ -15,5 +15,6 @@ case class Rendicontazione(
     idFlusso: String,
     dataOraFlusso: LocalDateTime,
     fk_binary_file: Option[Long],
-    fk_sftp_file: Option[Long]
+    fk_sftp_file: Option[Long],
+    insertedTimestamp: LocalDateTime
 )

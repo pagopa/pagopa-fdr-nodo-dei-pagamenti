@@ -123,4 +123,9 @@ object ConfigUtil {
     s"${primitiva}_$primitivaType".toUpperCase
   }
 
+  def serializeJson(value: Any): String = {
+    val objmapper = new ObjectMapper().findAndRegisterModules()
+    objmapper.writeValueAsString(value)
+  }
+
 }

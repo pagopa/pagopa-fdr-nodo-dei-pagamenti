@@ -15,7 +15,7 @@ import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, QueueAddFunc, ReEventFunc}
-import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
+import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.{AzureFlussiRendicontazioneProducer, AzureIuvRendicontatiProducer, AzureProducerBuilder}
 import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.queueclient.AzureQueueClient
 import eu.sia.pagopa.common.util.web.NodoRoute
@@ -262,6 +262,9 @@ object Main extends App {
       val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
 
       val queueAddFunction: QueueAddFunc = AzureQueueClient.build()
+
+      AzureIuvRendicontatiProducer.init(system)
+      AzureFlussiRendicontazioneProducer.init(system)
 
       val actorProps = ActorProps(
         http,

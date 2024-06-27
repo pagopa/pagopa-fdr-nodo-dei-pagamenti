@@ -76,7 +76,8 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
             nifr.identificativoFlusso,
             LocalDateTime.parse(nifr.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault())),
             None,
-            None
+            None,
+            Util.now()
           )
           fdrRepository
             .save(rendi)
@@ -115,7 +116,8 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
           identificativoFlusso,
           LocalDateTime.parse(dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault())),
           None,
-          None
+          None,
+          Util.now()
         )
         val content = StringUtils.getStringDecoded(xmlRendicontazione, checkUTF8) match {
           case Success(c) => c

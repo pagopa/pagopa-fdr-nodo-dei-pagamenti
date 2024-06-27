@@ -2,22 +2,22 @@ package eu.sia.pagopa.rendicontazioni.actor.soap
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
+import eu.sia.pagopa.ActorProps
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
+import eu.sia.pagopa.common.json.model.{FlussiRendicontazioneEvent, IUVRendicontatiEvent}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.repo.fdr.model.FtpFile
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
+import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.{AzureFlussiRendicontazioneProducer, AzureIuvRendicontatiProducer}
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicontazioneResponse
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
-import eu.sia.pagopa.{ActorProps, BootstrapUtil}
-import it.pagopa.config.CreditorInstitution
 import org.slf4j.MDC
 import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
 
@@ -42,9 +42,10 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
   val inputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean).getOrElse(false)
   val outputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean).getOrElse(false)
 
-  private val additionalFdrValidations: Boolean = Try(context.system.settings.config.getBoolean(s"additionalFdrValidations")).getOrElse(false)
-
   val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"
+
+  var iuvRendicontatiEvent: Seq[IUVRendicontatiEvent] = Nil
+  var flussiRendicontazioneEvent: Option[FlussiRendicontazioneEvent] = None
 
   override def receive: Receive = { case soapRequest: SoapRequest =>
     req = soapRequest
@@ -139,8 +140,8 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
           Future.successful(())
       }
 
-      (flussoRiversamento, flussoRiversamentoContent) <- validateRendicontazione(nifr, checkUTF8, inputXsdValid, repositories.fdrRepository)
-      (esito, _, sftpFile, _) <- saveRendicontazione(
+      (flussoRiversamento, _) <- validateRendicontazione(nifr, checkUTF8, inputXsdValid, repositories.fdrRepository)
+      (esito, rendicontazioneSaved, _, _) <- saveRendicontazione(
         nifr.identificativoFlusso,
         nifr.identificativoPSP,
         nifr.identificativoIntermediarioPSP,
@@ -153,22 +154,19 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
         repositories.fdrRepository
       )
 
-      _ <-
-        if (sftpFile.isDefined) {
-          notifySFTPSender(pa, req.sessionId, req.testCaseId, sftpFile.get).flatMap(resp => {
-            if (resp.throwable.isDefined) {
-              //HOTFIX non torno errore al chiamante se ftp non funziona
-              log.warn(s"Error sending file first time for reporting flow [${resp.throwable.get.getMessage}]")
-              Future.successful(())
-            } else {
-              Future.successful(())
-            }
-          })
-        } else {
-          Future.successful(())
-        }
-
       _ <- actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log)
+
+      _ = iuvRendicontatiEvent = EventUtil.createIUVRendicontatiEvent(
+        req.sessionId,
+        nifr,
+        flussoRiversamento,
+        rendicontazioneSaved.insertedTimestamp
+      )
+      _ = flussiRendicontazioneEvent = Some(EventUtil.createFlussiRendicontazioneEvent(
+        nifr,
+        flussoRiversamento,
+        rendicontazioneSaved.insertedTimestamp
+      ))
 
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
@@ -179,20 +177,30 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield sr
 
-    pipeline.recover({
-      case e: DigitPaException =>
-        log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
-        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, reFlow)
-      case e: Throwable =>
-        log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
-        errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
-    }) map (sr => {
-      traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
-      log.info(FdrLogConstant.logEnd(actorClassId))
-      replyTo ! sr
-      complete()
-    })
-
+    pipeline
+      .recover({
+        case e: DigitPaException =>
+          log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
+          errorHandler(req.sessionId, req.testCaseId, outputXsdValid, e, reFlow)
+        case e: Throwable =>
+          log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
+          errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
+      }).map(sr => {
+        log.info(FdrLogConstant.logEnd(actorClassId))
+        traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+        replyTo ! sr
+      })
+      .map(_ => {
+        Future.sequence(
+          iuvRendicontatiEvent.map(event=>{
+            AzureIuvRendicontatiProducer.send(log,event)
+          }) ++
+            flussiRendicontazioneEvent.map(event=>{
+              AzureFlussiRendicontazioneProducer.send(log,event)
+            })
+        )
+        complete()
+      })
   }
 
   override def actorError(e: DigitPaException): Unit = {
@@ -234,19 +242,6 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
       val cfb = exception.DigitPaException(e.getMessage, DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD, e)
       Failure(cfb)
     }
-  }
-
-  protected def notifySFTPSender(pa: CreditorInstitution, sessionId: String, testCaseId: Option[String], file: FtpFile): Future[FTPResponse] = {
-    log.info(s"SFTP Request pushFile")
-
-    val ftpServerConf = ddataMap.ftpServers.find(s => {
-      s._2.service == Constant.KeyName.RENDICONTAZIONI
-    }).get
-
-    askBundle[FTPRequest, FTPResponse](
-      actorProps.routers(BootstrapUtil.actorRouter(Constant.KeyName.FTP_SENDER)),
-      FTPRequest(sessionId, testCaseId, "pushFileRendicontazioni", pa.creditorInstitutionCode, file.fileName, file.id, ftpServerConf._2.id)
-    )
   }
 
 }

@@ -27,6 +27,8 @@ object Appfunction {
   type ReEventFunc = (ReRequest, NodoLogger, ConfigData) => Future[Unit]
   type ContainerBlobFunc = (String, String, NodoLogger) => Future[Unit]
   type QueueAddFunc = (String, String, String, NodoLogger) => Future[Unit]
+  type IuvRendicontatiFunc = (String, String, String, NodoLogger) => Future[Unit]
+  type FlussiRendicontazioneFunc = (String, String, String, NodoLogger) => Future[Unit]
 
   def defaultOperation(request: ReRequest, log: NodoLogger, reXmlLog: Boolean, reJsonLog: Boolean, data: ConfigData)(implicit ec: ExecutionContext): Unit = {
     MDC.put(Constant.MDCKey.DATA_ORA_EVENTO, Appfunction.formatDate(request.re.insertedTimestamp))
