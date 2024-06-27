@@ -127,7 +127,7 @@ class StaticUnitTests() extends AnyFlatSpec with should.Matchers {
          |  "IMPORTO": 10.0,
          |  "COD_ESITO": 0,
          |  "DATA_ESITO_SINGOLO_PAGAMENTO": "$now",
-         |  "IDSP": "${TestItems.PSP}",
+         |  "IDSP": "2",
          |  "ID_FLUSSO": "$idFlusso",
          |  "DATA_ORA_FLUSSO": "$now",
          |  "ID_DOMINIO": "${TestItems.PA}",
