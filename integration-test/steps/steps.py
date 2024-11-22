@@ -367,3 +367,10 @@ def step_impl(context, tag, primitive):
     soap_response = getattr(context, primitive + RESPONSE)
     my_document = parseString(soap_response.content)
     assert len(my_document.getElementsByTagName(tag)) > 0
+
+
+@step('check {tag} field not exists in {primitive} response')
+def step_impl(context, tag, primitive):
+    soap_response = getattr(context, primitive + RESPONSE)
+    my_document = parseString(soap_response.content)
+    assert len(my_document.getElementsByTagName(tag)) == 0
