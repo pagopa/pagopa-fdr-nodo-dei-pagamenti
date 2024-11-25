@@ -27,3 +27,6 @@ lightbend.sbt
 /helm/nodo-cron/charts/
 *__pycache__
 .identity/.terraform/*
+/integration-test/reports/
+/integration-test/results/
+**/.venv/
