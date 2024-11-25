@@ -29,3 +29,4 @@ lightbend.sbt
 .identity/.terraform/*
 /integration-test/reports/
 /integration-test/results/
+**/.venv/
