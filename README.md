@@ -2,7 +2,7 @@
 Manage FdR Nodo Dei Pagamenti
 
 
-# 🚦Integration Test
+# 🧩 Integration Test
 - Report DEV is available [here](https://pagopadweusharedtstdtsa.blob.core.windows.net/pagopa-fdr-nodo-dei-pagamenti/reports/index.html)
 - Report UAT is available [here](https://pagopauweusharedtstdtsa.blob.core.windows.net/pagopa-fdr-nodo-dei-pagamenti/reports/index.html) 
 
