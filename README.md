@@ -25,6 +25,7 @@ Available values are:
 - `runnable`
 - `ftp`
 - `bigfdr` 
+- `legacy` 
 - `""` empty for all
 
 ## Run Features Locally 🏡

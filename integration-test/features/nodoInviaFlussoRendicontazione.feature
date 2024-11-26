@@ -107,10 +107,6 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
       | identificativoCanale              | None                                 | SIN_NIFR_18 |
       | identificativoCanale              | Empty                                | SIN_NIFR_19 |
       | identificativoCanale              | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa | SIN_NIFR_20 |
-      | password                          | None                                 | SIN_NIFR_21 |
-      | password                          | Empty                                | SIN_NIFR_22 |
-      | password                          | aaaaaaa                              | SIN_NIFR_23 |
-      | password                          | aaaaaaaaaaaaaaaa                     | SIN_NIFR_24 |
       | identificativoDominio             | None                                 | SIN_NIFR_25 |
       | identificativoDominio             | Empty                                | SIN_NIFR_25 |
       | identificativoDominio             | aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa | SIN_NIFR_27 |
@@ -119,6 +115,37 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
       | dataOraFlusso                     | 2022-24-01T11:02:53.692              | SIN_NIFR_30 |
       | dataOraFlusso                     | 22-01-24T11:02:53.692                | SIN_NIFR_30 |
       | dataOraFlusso                     | 2022-01-24T11:02                     | SIN_NIFR_30 |
+
+  @legacy
+  Scenario Outline: nodoInviaFlussoRendicontazione - Syntax error: wrong content on tag
+    Given the Reporting flow generation scenario executed successfully
+    And an XML for nodoInviaFlussoRendicontazione
+    """
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <ws:nodoInviaFlussoRendicontazione>
+                <identificativoPSP>#psp#</identificativoPSP>
+                <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+                <identificativoCanale>#channel#</identificativoCanale>
+                <password>#password#</password>
+                <identificativoDominio>#creditor_institution_code#</identificativoDominio>
+                <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
+                <dataOraFlusso>$timedate</dataOraFlusso>
+                <xmlRendicontazione>$rendAttachment</xmlRendicontazione>
+            </ws:nodoInviaFlussoRendicontazione>
+        </soapenv:Body>
+    </soapenv:Envelope>
+    """
+    And <tag> with <tag_value> in nodoInviaFlussoRendicontazione
+    When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
+    Then check faultCode is PPT_SINTASSI_EXTRAXSD of nodoInviaFlussoRendicontazione response
+    Examples:
+      | tag                               | tag_value                            | soapUI test |
+      | password                          | None                                 | SIN_NIFR_21 |
+      | password                          | Empty                                | SIN_NIFR_22 |
+      | password                          | aaaaaaa                              | SIN_NIFR_23 |
+      | password                          | aaaaaaaaaaaaaaaa                     | SIN_NIFR_24 |
 
 
   @runnable
@@ -330,9 +357,36 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
       | identificativoCanale           | CANALE_NOT_ENABLED | PPT_CANALE_DISABILITATO            | SEM_NIFR_06 |
       | identificativoDominio          | sconosciuto        | PPT_DOMINIO_SCONOSCIUTO            | SEM_NIFR_08 |
       | identificativoDominio          | NOT_ENABLED        | PPT_DOMINIO_DISABILITATO           | SEM_NIFR_09 |
-      | password                       | Password1          | PPT_AUTENTICAZIONE                 | SEM_NIFR_07 |
       | identificativoFlusso           | 70000000001-9999   | PPT_SEMANTICA                      | SEM_NIFR_11 |
       | identificativoCanale           | 15376371009_05     | PPT_AUTORIZZAZIONE                 | SEM_NIFR_14 |
+
+  @legacy
+  Scenario Outline: nodoInviaFlussoRendicontazione - Semantic error: invalid entities for reporting flow
+    Given the Reporting flow generation scenario executed successfully
+    And an XML for nodoInviaFlussoRendicontazione
+    """
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <ws:nodoInviaFlussoRendicontazione>
+                <identificativoPSP>#psp#</identificativoPSP>
+                <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+                <identificativoCanale>#channel#</identificativoCanale>
+                <password>#password#</password>
+                <identificativoDominio>#creditor_institution_code#</identificativoDominio>
+                <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
+                <dataOraFlusso>$timedate</dataOraFlusso>
+                <xmlRendicontazione>$rendAttachment</xmlRendicontazione>
+            </ws:nodoInviaFlussoRendicontazione>
+        </soapenv:Body>
+    </soapenv:Envelope>
+    """
+    And <tag> with <tag_value> in nodoInviaFlussoRendicontazione
+    When EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
+    Then check faultCode is <error> of nodoInviaFlussoRendicontazione response
+    Examples:
+      | tag                            | tag_value          | error                              | soapUI test |
+      | password                       | Password1          | PPT_AUTENTICAZIONE                 | SEM_NIFR_07 |
 
 
   # [SEM_NIFR_15]
