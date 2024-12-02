@@ -425,7 +425,7 @@ Feature: Complete happy path for reporting flow operations
   # - a direct query on DB
   # - a check for automatic conversion xml-to-json inquiring FdR3
   # but these checks are beyond the scope of these integration tests, where only the three FdR1's primitive are used.
-#  @runnable
+  @runnable
   @ftp
   Scenario Outline: Standard scenario, single FlussoRiversamento single datiSingoliPagamenti in report for SFTP
     # Sending the nodoInviaFlussoRendicontazione

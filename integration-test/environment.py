@@ -21,9 +21,9 @@ def before_all(context):
         config_file = os.getenv('CONFIG_FILE')
 
     more_userdata = json.load(open(os.path.join(context.config.base_dir + config_file)))
-    # for key, cfg in more_userdata.get("services").items():
-    #     if cfg.get("subscription_key") is not None:
-    #         cfg["subscription_key"] = os.getenv(cfg["subscription_key"])
+    for key, cfg in more_userdata.get("services").items():
+        if cfg.get("subscription_key") is not None:
+            cfg["subscription_key"] = os.getenv(cfg["subscription_key"])
     context.config.update_userdata(more_userdata)
 
 
