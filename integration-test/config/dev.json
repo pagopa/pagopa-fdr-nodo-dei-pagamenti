@@ -3,7 +3,8 @@
   "services": {
     "nodo-dei-pagamenti": {
       "url": "https://api.dev.platform.pagopa.it/nodo-auth",
-      "subscription_key": "INTEGRATION_TEST_SUBSCRIPTION_KEY"
+      "subscription_key": "INTEGRATION_TEST_SUBSCRIPTION_KEY",
+      "host": "api.dev.platform.pagopa.it:443"
     }
   },
   "global_configuration": {

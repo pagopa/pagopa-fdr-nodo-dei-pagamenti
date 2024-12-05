@@ -35,4 +35,4 @@ From `integration-test` folder:
 
 1. install `behave` and `allure`
 2. install the `requirements.txt`
-3. run `behave --format allure_behave.formatter:AllureFormatter -o results --tags="" --summary --show-timings -v`
+3. run `behave --format allure_behave.formatter:AllureFormatter -o results --summary --tags="@runnable" --show-timings -v`

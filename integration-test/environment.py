@@ -30,10 +30,11 @@ def before_all(context):
 def before_feature(context, feature):
     services = context.config.userdata.get("services")
     # add heading
-    feature.background.steps[0].table = Table(headings=("name", "url", "healthcheck"))
+    feature.background.steps[0].table = Table(headings=("name", "url", "healthcheck", "host"))
     # add data in the tables
     for system_name in services.keys():
         row = (system_name,
                services.get(system_name).get("url", ""),
-               services.get(system_name).get("healthcheck", ""))
+               services.get(system_name).get("healthcheck", ""),
+               services.get(system_name).get("host", ""))
         feature.background.steps[0].table.add_row(row)
