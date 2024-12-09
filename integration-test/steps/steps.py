@@ -31,7 +31,7 @@ def step_impl(context):
             print(f"calling: {row.get('name')} -> {row.get('url')}")
             url = row.get("url") + row.get("healthcheck")
             print(f"calling -> {url}")
-            headers = {'Host': 'api.dev.platform.pagopa.it:443'}
+            headers = {'Host': row.get('host')}
             resp = requests.get(url, headers=headers, verify=False)
             print(f"response: {resp.status_code}")
             responses &= (resp.status_code == 200)
