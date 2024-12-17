@@ -26,7 +26,6 @@ object Appfunction {
 
   type ReEventFunc = (ReRequest, NodoLogger, ConfigData) => Future[Unit]
   type ContainerBlobFunc = (String, String, NodoLogger) => Future[Unit]
-  type QueueAddFunc = (String, String, String, NodoLogger) => Future[Unit]
   type IuvRendicontatiFunc = (String, String, String, NodoLogger) => Future[Unit]
   type FlussiRendicontazioneFunc = (String, String, String, NodoLogger) => Future[Unit]
 

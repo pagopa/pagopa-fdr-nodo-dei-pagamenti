@@ -92,11 +92,6 @@ abstract class BaseUnitTest()
             container-name = "xmlsharefile"
             connection-string = "fake"
         }
-        azure-queue {
-            enabled  = false
-            name = "flowidsendqueue"
-            connection-string =  "fake"
-        }
         config.http.connect-timeout = 1
         bundleTimeoutSeconds = 120
         bundle.checkUTF8 = false
@@ -173,9 +168,6 @@ abstract class BaseUnitTest()
   val containerBlobFunction = (a: String, b: String, c: NodoLogger) => {
     Future.successful(())
   }
-  val queueAddFunction = (a: String, b: String, c: String, d: NodoLogger) => {
-    Future.successful(())
-  }
 
   val certPath = s"${new File(".").getCanonicalPath}/localresources/cacerts"
 
@@ -185,7 +177,7 @@ abstract class BaseUnitTest()
 
   val repositories = new RepositoriesTest(system.settings.config, log)
 
-  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, queueAddFunction, "", certPath, TestItems.ddataMap)
+  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, "", certPath, TestItems.ddataMap)
 
   val mockActor = system.actorOf(Props.create(classOf[MockActor]), s"mock")
 
