@@ -17,6 +17,7 @@ const vars = varsArray[0];
 const app_host = `${vars.app_host}`;
 const subkey = `${__ENV.API_SUBSCRIPTION_KEY}`;
 const flow_size = Number(`${__ENV.FLOW_SIZE}`);
+console.log("FLOW SIZE: " + flow_size);
 
 
 const parameters = {
