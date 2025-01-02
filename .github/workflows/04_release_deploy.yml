@@ -113,6 +113,13 @@ jobs:
       #          branch: ${{ github.ref_name}}
       #          github_token: ${{ secrets.GITHUB_TOKEN }}
       #          tag: ${{ needs.release.outputs.version }}
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '11'
+          cache: 'sbt'
+
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3
         with:
           ref: ${{ github.ref_name }}
