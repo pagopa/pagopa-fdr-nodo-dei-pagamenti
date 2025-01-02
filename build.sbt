@@ -233,6 +233,7 @@ lazy val `fdr` = (project in file("fdr"))
     })),
     openapiSpec :=(Compile / resourceDirectory).value / "openapi_config.json",
     commonSettings,
+    javacOptions ++= Seq("-source", "11", "-target", "11"), // TODO test adding java version
     libraryDependencies += Cinnamon.library.cinnamonSlf4jMdc,
     libraryDependencies += Cinnamon.library.cinnamonAkka,
     libraryDependencies += Cinnamon.library.cinnamonPrometheus,
