@@ -233,7 +233,6 @@ lazy val `fdr` = (project in file("fdr"))
     })),
     openapiSpec :=(Compile / resourceDirectory).value / "openapi_config.json",
     commonSettings,
-//    javacOptions ++= Seq("-source", "11", "-target", "11"), // TODO test adding java version
     libraryDependencies += Cinnamon.library.cinnamonSlf4jMdc,
     libraryDependencies += Cinnamon.library.cinnamonAkka,
     libraryDependencies += Cinnamon.library.cinnamonPrometheus,
@@ -248,9 +247,7 @@ lazy val `fdr` = (project in file("fdr"))
     cinnamonLogLevel := "INFO",
     Compile / mainClass := Some("eu.sia.pagopa.Main"),
     Docker / packageName := "nodo-dei-pagamenti",
-//    dockerBaseImage := "adoptopenjdk:11-jdk-hotspot", // TODO try to set jdk 17
-    dockerBaseImage := "eclipse-temurin:11.0.22_7-jre-alpine",
-//    dockerBaseImage := "eclipse-temurin:17-jdk-ubi9-minimal",
+    dockerBaseImage := "adoptopenjdk:11-jdk-hotspot",
     dockerExposedPorts := Seq(8080, 8558, 2552),
     dockerUpdateLatest := true,
 //    dockerUsername := sys.props.get("docker.username"),
