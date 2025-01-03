@@ -106,20 +106,14 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.semver != 'skip' }}
     steps:
-      #      - name: Build and Push
-      #        id: semver
-      #        uses: pagopa/github-actions-template/ghcr-build-push@v1.5.4
-      #        with:
-      #          branch: ${{ github.ref_name}}
-      #          github_token: ${{ secrets.GITHUB_TOKEN }}
-      #          tag: ${{ needs.release.outputs.version }}
+
       - name: Checkout Java
         uses: actions/checkout@v4
 
       - name: Setup Java
         uses: actions/setup-java@v4
         with:
-          distribution: 'temurin' # See 'Supported distributions' for available options
+          distribution: 'temurin'
           java-version: '11'
           cache: 'sbt'
 
@@ -144,11 +138,13 @@ jobs:
             ${{ needs.release.outputs.version }}
             type=ref,event=branch
             type=sha
+
       - name: Create Dockerfile
         env:
           LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
         run: |
           ./sbt -v docker:stage
+
       - name: Build and push
         uses: docker/build-push-action@0a97817b6ade9f46837855d676c4cca3a2471fc9 # v4
         with:
