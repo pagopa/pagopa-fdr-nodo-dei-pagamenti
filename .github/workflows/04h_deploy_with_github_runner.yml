@@ -51,7 +51,7 @@ jobs:
     environment: ${{ inputs.environment }}
     steps:
       - name: Deploy
-        uses: pagopa/github-actions-template/aks-deploy@b08181a5f9d95d40b7fb74c4f8dd5206e0b7e0ce
+        uses: pagopa/github-actions-template/aks-deploy@change-working-directory
         with:
           branch: ${{ github.ref_name }}
           client_id: ${{ secrets.CD_CLIENT_ID }}
