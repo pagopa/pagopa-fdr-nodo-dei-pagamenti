@@ -93,12 +93,13 @@ jobs:
     steps:
       - name: Make Release
         id: release
-        uses: pagopa/github-actions-template/sbt-release@5db4c9108164a07d96527978da1c3febec934f22 # v1.11.1
+        uses: pagopa/github-actions-template/sbt-release@change-working-directory # v1.11.1 TODO set version
         with:
           semver: ${{ needs.setup.outputs.semver }}
           github_token: ${{ secrets.BOT_TOKEN_GITHUB }}
           beta: ${{ inputs.beta }}
           skip_ci: false
+          working_directory: "helm-fdr"
 
   image:
     needs: [ setup, release ]
