@@ -94,6 +94,28 @@ Feature: Syntax and semantic checks for nodoChiediElencoFlussiRendicontazione
       | identificativoStazioneIntermediarioPA    | None                                 | CEFRSIN9    |
       | identificativoStazioneIntermediarioPA    | Empty                                | CEFRSIN10   |
       | identificativoStazioneIntermediarioPA    | k91JETYVnE7grIIKbzWE6Di7XKM3ymJeawhf | CEFRSIN11   |
+
+  @legacy
+  Scenario Outline: nodoChiediElencoFlussiRendicontazione - Syntax error: partial body and wrong content on tag
+    Given an XML for nodoChiediElencoFlussiRendicontazione
+    """
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <ws:nodoChiediElencoFlussiRendicontazione>
+                <identificativoIntermediarioPA>#broker_ci#</identificativoIntermediarioPA>
+                <identificativoStazioneIntermediarioPA>#id_station#</identificativoStazioneIntermediarioPA>
+                <password>pwdpwdpwd</password>
+            </ws:nodoChiediElencoFlussiRendicontazione>
+        </soapenv:Body>
+    </soapenv:Envelope>
+    """
+    And <elem> with <value> in nodoChiediElencoFlussiRendicontazione
+    When EC sends SOAP nodoChiediElencoFlussiRendicontazione to nodo-dei-pagamenti
+    Then check faultString is Errore di sintassi extra XSD. of nodoChiediElencoFlussiRendicontazione response
+    And check faultCode is PPT_SINTASSI_EXTRAXSD of nodoChiediElencoFlussiRendicontazione response
+    Examples:
+      | elem                                     | value                                | soapUI test |
       | password                                 | None                                 | CEFRSIN12   |
       | password                                 | Empty                                | CEFRSIN13   |
       | password                                 | Xlve3Jc                              | CEFRSIN14   |
@@ -160,4 +182,27 @@ Feature: Syntax and semantic checks for nodoChiediElencoFlussiRendicontazione
       | identificativoPSP                     | fakePSP              | PPT_PSP_SCONOSCIUTO               | CEFRSEM8    |
       | identificativoPSP                     | NOT_ENABLED          | PPT_PSP_DISABILITATO              | CEFRSEM9    |
       | identificativoIntermediarioPA         | 90000000001          | PPT_AUTORIZZAZIONE                | CEFRSEM10   |
+
+  @legacy
+  Scenario Outline: nodoChiediElencoFlussiRendicontazione - Semantic error
+    Given an XML for nodoChiediElencoFlussiRendicontazione
+    """
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
+        <soapenv:Header />
+        <soapenv:Body>
+            <ws:nodoChiediElencoFlussiRendicontazione>
+                <identificativoIntermediarioPA>#broker_ci#</identificativoIntermediarioPA>
+                <identificativoStazioneIntermediarioPA>#id_station#</identificativoStazioneIntermediarioPA>
+                <password>#password#</password>
+                <identificativoDominio>#creditor_institution_code#</identificativoDominio>
+                <identificativoPSP>#psp#</identificativoPSP>
+            </ws:nodoChiediElencoFlussiRendicontazione>
+        </soapenv:Body>
+    </soapenv:Envelope>
+    """
+    And <elem> with <value> in nodoChiediElencoFlussiRendicontazione
+    When EC sends SOAP nodoChiediElencoFlussiRendicontazione to nodo-dei-pagamenti
+    Then check faultCode is <error> of nodoChiediElencoFlussiRendicontazione response
+    Examples:
+      | elem                                  | value                | error                             | soapUI test |
       | password                              | password01           | PPT_AUTENTICAZIONE                | CEFRSEM5    |
