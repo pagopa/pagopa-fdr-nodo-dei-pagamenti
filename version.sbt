@@ -1,1 +1,1 @@
-ThisBuild / version := "2.1.9-17-deploy-gh-action"
+ThisBuild / version := "2.1.9-20-deploy-gh-action"

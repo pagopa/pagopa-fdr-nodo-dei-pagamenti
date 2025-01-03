@@ -153,3 +153,8 @@ fdrnodo:
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m
+microservice-chart:
+  image:
+    tag: 2.1.9-20-deploy-gh-action
+  canaryDelivery:
+    create: false
