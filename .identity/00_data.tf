@@ -41,13 +41,13 @@ data "azurerm_key_vault_secret" "key_vault_sonar" {
   key_vault_id = data.azurerm_key_vault.key_vault.id
 }
 
-data "azurerm_key_vault_secret" "key_vault_bot_token" {
-  name         = "bot-token-github"
-  key_vault_id = data.azurerm_key_vault.key_vault.id
+data "azurerm_key_vault_secret" "key_vault_bot_cd_token" {
+  name         = "pagopa-platform-domain-github-bot-cd-pat"
+  key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
 
 data "azurerm_key_vault_secret" "key_vault_slack_webhook_url" {
-  name         = "slack-webhook-url"
+  name         = "pagopa-pagamenti-deploy-webhook"
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
 
@@ -69,5 +69,10 @@ data "azurerm_user_assigned_identity" "identity_ci" {
 data "azurerm_key_vault_secret" "integration_test_subscription_key" {
   count        = var.env_short == "p" ? 0 : 1
   name         = "integration-test-fdr1-subscription-key"
+  key_vault_id = data.azurerm_key_vault.domain_key_vault.id
+}
+
+data "azurerm_key_vault_secret" "key_vault_lightbend_key" {
+  name         = "lightbend-key"
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }

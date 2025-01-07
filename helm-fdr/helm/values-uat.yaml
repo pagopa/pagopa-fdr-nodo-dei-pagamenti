@@ -29,7 +29,7 @@ fdrnodo:
     create: true
   resources:
     requests:
-      memory: "640m"
+      memory: "640M"
       cpu: "512m"
     limits:
       memory: "8Gi"
@@ -153,3 +153,8 @@ fdrnodo:
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m
+microservice-chart:
+  image:
+    tag: 2.1.9-25-deploy-gh-action
+  canaryDelivery:
+    create: false
