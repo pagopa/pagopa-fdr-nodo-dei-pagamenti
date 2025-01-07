@@ -6,7 +6,7 @@ fdrnodo:
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
     tag: "2.1.9-27-PAGOPA-2394"
-    pullPolicy: Always  
+    pullPolicy: Always
   livenessProbe:
     httpGet:
       path: /alive
@@ -156,6 +156,6 @@ fdrnodo:
     proxyBodySize: 100m
 microservice-chart:
   image:
-    tag: 2.1.9-25-deploy-gh-action
+    tag: 2.1.9-30-deploy-gh-action
   canaryDelivery:
     create: false
