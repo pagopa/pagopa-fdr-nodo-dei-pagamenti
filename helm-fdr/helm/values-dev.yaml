@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "fdr"
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.1.9-25-deploy-gh-action
+    tag: 2.1.9-28-deploy-gh-action
   canaryDelivery:
     create: false
 fdrnodo:
