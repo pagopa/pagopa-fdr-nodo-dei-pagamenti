@@ -1,11 +1,15 @@
-fdrnodo:
+microservice-chart: &microservice-chart
   namespace: "fdr"
+  image:
+    repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
+    tag: 2.1.9-21-deploy-gh-action
+  canaryDelivery:
+    create: false
+fdrnodo:
+  !!merge <<: *microservice-chart
   nameOverride: ""
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
-  image:
-    repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.1.9-2-deploy-gh-action
   livenessProbe:
     httpGet:
       path: /alive
@@ -149,8 +153,3 @@ fdrnodo:
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m
-microservice-chart:
-  image:
-    tag: 2.1.9-21-deploy-gh-action
-  canaryDelivery:
-    create: false
