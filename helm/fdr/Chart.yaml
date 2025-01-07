@@ -1,11 +1,11 @@
 apiVersion: v2
-name: fdr-chart
-description: Flussi di rendicontazione
+name: pagopa-fdr-nodo-dei-pagamenti
+description: Flussi di rendicontazione Fase 1
 type: application
 version: 2.1.9
 appVersion: 2.1.9
 dependencies:
   - name: microservice-chart
-    version: 3.0.0
+    version: 7.1.1
     repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
-    alias: fdrnodo
+    alias: pagopafdrnododeipagamenti
