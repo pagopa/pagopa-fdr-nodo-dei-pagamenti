@@ -154,7 +154,7 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
         repositories.fdrRepository
       )
 
-      _ <- actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log)
+     // _ <- actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log) TODO comment
 
       _ = iuvRendicontatiEvent = EventUtil.createIUVRendicontatiEvent(
         req.sessionId,
