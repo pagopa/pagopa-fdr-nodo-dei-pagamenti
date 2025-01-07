@@ -1,6 +1,6 @@
 apiVersion: v2
-name: fdr-chart
-description: Flussi di rendicontazione
+name: pagopa-fdr-nodo-dei-pagamenti
+description: Flussi di rendicontazione Fase 1
 type: application
 version: 0.7.0
 appVersion: 2.1.9-29-deploy-gh-action

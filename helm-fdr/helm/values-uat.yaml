@@ -4,8 +4,9 @@ fdrnodo:
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
   image:
-    repository: pagopaucommonacr.azurecr.io/pagopafdrnododeipagamenti
-    tag: 1.0.0-SNAPSHOT
+    repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
+    tag: "2.1.9-27-PAGOPA-2394"
+    pullPolicy: Always  
   livenessProbe:
     httpGet:
       path: /alive
@@ -155,6 +156,6 @@ fdrnodo:
     proxyBodySize: 100m
 microservice-chart:
   image:
-    tag: 2.1.9-29-deploy-gh-action
+    tag: 2.1.9-25-deploy-gh-action
   canaryDelivery:
     create: false
