@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.semver != 'skip' }}
     steps:
-
+    
       - name: Checkout Java
         uses: actions/checkout@v4
 

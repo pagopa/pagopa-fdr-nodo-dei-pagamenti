@@ -254,11 +254,56 @@ Feature: Syntax and semantic checks for nodoChiediFlussoRendicontazione
       | identificativoIntermediarioPA         | INT_NOT_ENABLED           | PPT_INTERMEDIARIO_PA_DISABILITATO | CFRSEM2     |
       | identificativoStazioneIntermediarioPA | ciaoStazionePA            | PPT_STAZIONE_INT_PA_SCONOSCIUTA   | CFRSEM3     |
       | identificativoStazioneIntermediarioPA | STAZIONE_NOT_ENABLED      | PPT_STAZIONE_INT_PA_DISABILITATA  | CFRSEM4     |
-      | password                              | Password01                | PPT_AUTENTICAZIONE                | CFRSEM5     |
       | identificativoFlusso                  | 2017-09-11idPsp1-pluto123 | PPT_ID_FLUSSO_SCONOSCIUTO         | CFRSEM10    |
 
+  @legacy
+  Scenario Outline: nodoChiediFlussoRendicontazione - Semantic error: invalid entities for reporting flow request
+    Given the Reporting flow generation scenario executed successfully
+    And an XML for nodoInviaFlussoRendicontazione
+    """
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <ws:nodoInviaFlussoRendicontazione>
+                <identificativoPSP>#psp#</identificativoPSP>
+                <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
+                <identificativoCanale>#channel#</identificativoCanale>
+                <password>#password#</password>
+                <identificativoDominio>#creditor_institution_code#</identificativoDominio>
+                <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
+                <dataOraFlusso>$timedate</dataOraFlusso>
+                <xmlRendicontazione>$rendAttachment</xmlRendicontazione>
+            </ws:nodoInviaFlussoRendicontazione>
+        </soapenv:Body>
+    </soapenv:Envelope>
+    """
+    And PSP sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
+    And check esito is OK of nodoInviaFlussoRendicontazione response
+    And an XML for nodoChiediFlussoRendicontazione
+    """
+    <soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ws="http://ws.pagamenti.telematici.gov/">
+        <soapenv:Header/>
+        <soapenv:Body>
+            <ws:nodoChiediFlussoRendicontazione>
+                <identificativoIntermediarioPA>#broker_ci#</identificativoIntermediarioPA>
+                <identificativoStazioneIntermediarioPA>#id_station#</identificativoStazioneIntermediarioPA>
+                <password>#password#</password>
+                <identificativoDominio>#creditor_institution_code#</identificativoDominio>
+                <identificativoPSP>#psp#</identificativoPSP>
+                <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
+            </ws:nodoChiediFlussoRendicontazione>
+        </soapenv:Body>
+    </soapenv:Envelope>
+    """
+    And <elem> with <value> in nodoChiediFlussoRendicontazione
+    When EC sends SOAP nodoChiediFlussoRendicontazione to nodo-dei-pagamenti
+    Then check faultCode is <error> of nodoChiediFlussoRendicontazione response
+    Examples:
+      | elem                                  | value                     | error                             | soapUI test |
+      | password                              | Password01                | PPT_AUTENTICAZIONE                | CFRSEM5     |
 
-  @@runnable
+
+  @legacy
   Scenario Outline: nodoChiediFlussoRendicontazione - Sintax/semantic error: wrong content on password
     Given an XML for FlussoRiversamento
     """

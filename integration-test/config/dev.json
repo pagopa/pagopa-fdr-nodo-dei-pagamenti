@@ -3,7 +3,8 @@
   "services": {
     "nodo-dei-pagamenti": {
       "url": "https://api.dev.platform.pagopa.it/nodo-auth",
-      "subscription_key": "INTEGRATION_TEST_SUBSCRIPTION_KEY"
+      "subscription_key": "INTEGRATION_TEST_SUBSCRIPTION_KEY",
+      "host": "api.dev.platform.pagopa.it:443"
     }
   },
   "global_configuration": {
@@ -12,6 +13,7 @@
     "channel": "88888888888_01",
     "password": "PLACEHOLDER",
     "creditor_institution_code": "15376371009",
+    "creditor_institution_ftp_code": "15376371009_FTP",
     "broker_ci": "15376371009",
     "id_station": "15376371009_03"
   }
