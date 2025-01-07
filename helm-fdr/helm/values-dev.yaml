@@ -91,6 +91,7 @@ fdrnodo:
     AZURE_QUEUE_NAME: "queueconversion"
     EVENT_HUB_FLOWTX_NAME: "fdr-qi-flows"
     EVENT_HUB_REPORTEDIUV_NAME: "fdr-qi-reported-iuv"
+    APIM_URL: "https://api.dev.platform.pagopa.it"
   secretProvider:
     create: true
     envSecrets:
