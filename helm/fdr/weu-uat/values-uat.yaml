@@ -21,11 +21,41 @@ pagopafdrnododeipagamenti:
     initialDelaySeconds: 10
     failureThreshold: 10
     periodSeconds: 5
-  # externalConfigMap:
-  #   create: true
-  #   configMaps:
-  #     - name: fdr-cacerts
-  #       key: cacerts
+  deployment:
+    create: true
+  serviceMonitor:
+    create: true
+    endpoints:
+      - interval: 10s #micrometer
+        targetPort: 9092
+        path: /
+      - interval: 10s #cinnamon
+        targetPort: 9091
+        path: /metrics
+  ports:
+    - 8080 #http
+    - 8558 #akka-management
+    - 9091 #cinnamon
+    - 9092 #micrometer
+    - 3000 #jmx debug port
+  service:
+    create: true  
+    type: ClusterIP
+    ports:
+      - 8080 #http
+      - 9091 #cinnamon
+      - 9092 #micrometer
+  ingress:
+    create: true
+    host: "weuuat.fdr.internal.uat.platform.pagopa.it"
+    path: /pagopa-fdr-nodo-service(/|$)(.*)
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
+  externalConfigMap:
+    create: true
+    configMaps:
+      - name: fdr-cacerts
+        key: cacerts
   tmpVolumeMount:
     create: true
   resources:
@@ -126,31 +156,3 @@ pagopafdrnododeipagamenti:
                 operator: In
                 values:
                   - user
-  serviceMonitor:
-    create: true
-    endpoints:
-      - interval: 10s #micrometer
-        targetPort: 9092
-        path: /
-      - interval: 10s #cinnamon
-        targetPort: 9091
-        path: /metrics
-  ports:
-    - 8080 #http
-    - 8558 #akka-management
-    - 9091 #cinnamon
-    - 9092 #micrometer
-    - 3000 #jmx debug port
-  service:
-    type: ClusterIP
-    ports:
-      - 8080 #http
-      - 9091 #cinnamon
-      - 9092 #micrometer
-  ingress:
-    create: true
-    host: "weuuat.fdr.internal.uat.platform.pagopa.it"
-    path: /pagopa-fdr-nodo-service(/|$)(.*)
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
-    proxyBodySize: 100m
