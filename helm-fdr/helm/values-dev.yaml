@@ -6,7 +6,7 @@ microservice-chart: &microservice-chart
     pullPolicy: Always
   canaryDelivery:
     create: false
-fdrnodo:
+pagopafdrnododeipagamenti:
   !!merge <<: *microservice-chart
   nameOverride: ""
   fullnameOverride: ""
