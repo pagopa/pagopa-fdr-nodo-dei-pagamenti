@@ -8,4 +8,4 @@ dependencies:
   - name: microservice-chart
     version: 7.1.1
     repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
-    alias: fdrnodo
+    alias: pagopafdrnododeipagamenti
