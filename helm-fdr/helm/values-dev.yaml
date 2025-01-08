@@ -3,6 +3,7 @@ microservice-chart: &microservice-chart
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
     tag: 2.1.9-30-deploy-gh-action
+    pullPolicy: Always
   canaryDelivery:
     create: false
 fdrnodo:
@@ -40,6 +41,9 @@ fdrnodo:
       cpu: "2560m"
   autoscaling:
     enable: true
+    minReplica: 1
+    maxReplica: 1
+    pollingInterval: 10 # seconds
     triggers:
       - type: cpu
         metricType: Utilization
@@ -50,6 +54,7 @@ fdrnodo:
         metadata:
           value: "80"
     advanced:
+      restoreToOriginalReplicaCount: false
       horizontalPodAutoscalerConfig:
         behavior:
           scaleDown:
