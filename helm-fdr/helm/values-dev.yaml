@@ -1,16 +1,16 @@
 microservice-chart: &microservice-chart
   namespace: "fdr"
-  image:
-    repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.1.9-30-deploy-gh-action
-    pullPolicy: Always
-  canaryDelivery:
-    create: false
-pagopafdrnododeipagamenti:
-  !!merge <<: *microservice-chart
   nameOverride: ""
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
+  image:
+    repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
+    tag: "2.1.9-30-deploy-gh-action"
+    pullPolicy: Always
+  deployment:
+    create: true
+  canaryDelivery:
+    create: false
   livenessProbe:
     httpGet:
       path: /alive
@@ -25,6 +25,8 @@ pagopafdrnododeipagamenti:
     initialDelaySeconds: 10
     failureThreshold: 10
     periodSeconds: 5
+pagopafdrnododeipagamenti:
+  !!merge <<: *microservice-chart
   externalConfigMap:
     create: true
     configMaps:
