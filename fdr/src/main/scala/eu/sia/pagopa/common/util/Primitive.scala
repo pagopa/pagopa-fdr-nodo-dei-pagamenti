@@ -3,13 +3,13 @@ package eu.sia.pagopa.common.util
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.ftpsender.actor.FtpRetryActorPerRequest
 import eu.sia.pagopa.rendicontazioni.actor.rest.{GetAllRevisionFdrActorPerRequest, NodoInviaFlussoRendicontazioneFTPActorPerRequest, NotifyFlussoRendicontazioneActorPerRequest}
-import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActorPerRequest}
+import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActor}
 
 object Primitive {
 
   val soap: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
     "nodoChiediFlussoRendicontazione" -> ("Body/_/identificativoStazioneIntermediarioPA", _ => classOf[NodoChiediFlussoRendicontazioneActorPerRequest]),
-    "nodoInviaFlussoRendicontazione" -> ("Body/_/identificativoCanale", _ => classOf[NodoInviaFlussoRendicontazioneActorPerRequest]),
+    "nodoInviaFlussoRendicontazione" -> ("Body/_/identificativoCanale", _ => classOf[NodoInviaFlussoRendicontazioneActor]),
     "nodoChiediElencoFlussiRendicontazione" -> ("Body/_/identificativoStazioneIntermediarioPA", _ => classOf[NodoChiediElencoFlussiRendicontazioneActorPerRequest])
   )
 
@@ -26,7 +26,7 @@ object Primitive {
     "ftpUpload" -> ("ftpUpload", _ => classOf[FtpRetryActorPerRequest])
   )
 
-  val allPrimitives = Primitive.soap ++ Primitive.rest ++ Primitive.restInternal ++ Primitive.jobs
+  private val allPrimitives = Primitive.soap ++ Primitive.rest ++ Primitive.restInternal ++ Primitive.jobs
 
   def getActorClass(primitive: String): Class[_ <: PerRequestActor] = {
     allPrimitives(primitive)._2(false)
