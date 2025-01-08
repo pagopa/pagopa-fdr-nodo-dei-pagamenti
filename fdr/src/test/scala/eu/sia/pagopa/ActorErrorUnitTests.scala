@@ -7,7 +7,7 @@ import eu.sia.pagopa.common.message.{ReExtra, RestResponse, SoapRequest, SoapRes
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util.Util
 import eu.sia.pagopa.rendicontazioni.actor.rest.{GetAllRevisionFdrActorPerRequest, NodoInviaFlussoRendicontazioneFTPActorPerRequest, NotifyFlussoRendicontazioneActorPerRequest}
-import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActorPerRequest}
+import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActor}
 
 import scala.concurrent.Promise
 
@@ -38,7 +38,7 @@ class GetAllRevisionFdrTest(testPromise: Promise[Boolean], override val reposito
   }
 }
 
-class NodoInviaFlussoRendicontazioneTest(override val repositories: Repositories, override val actorProps: ActorProps) extends NodoInviaFlussoRendicontazioneActorPerRequest(repositories, actorProps) {
+class NodoInviaFlussoRendicontazioneTest(override val repositories: Repositories, override val actorProps: ActorProps) extends NodoInviaFlussoRendicontazioneActor(repositories, actorProps) {
   override def receive: Receive = {
     case "init" =>
       replyTo = sender()
