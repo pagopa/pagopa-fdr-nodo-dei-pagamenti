@@ -11,10 +11,13 @@ on:
         required: true
         description: The environment target of the job
         type: string
+      working_directory:
+        required: true
+        description: The working directory of bash steps
+        type: string
 
 env:
   APP_NAME: fdr-nodo
-
 
 permissions:
   id-token: write
@@ -51,8 +54,7 @@ jobs:
     environment: ${{ inputs.environment }}
     steps:
       - name: Deploy
-#        uses: pagopa/github-actions-template/aks-deploy@change-working-directory
-        uses: pagopa/github-actions-template/aks-deploy@main
+        uses: pagopa/github-actions-template/aks-deploy@change-working-directory
         with:
           branch: ${{ github.ref_name }}
           client_id: ${{ secrets.CD_CLIENT_ID }}
@@ -63,7 +65,7 @@ jobs:
           cluster_name: ${{ vars.CLUSTER_NAME }}
           resource_group: ${{ vars.CLUSTER_RESOURCE_GROUP }}
           app_name: ${{ env.APP_NAME }}
-#          working_directory: 'helm-fdr'
+          working_directory: ${{ inputs.working_directory }}
           helm_upgrade_options: --debug --set-file fdrnodo.configMapFromFile.logback\\.xml=./helm/config/${{ inputs.environment }}/logback.xml --set-file fdrnodo.configMapFromFile.config-app\\.conf=./helm/config/${{ inputs.environment }}/config-app.conf
 
   cleanup_runner:
