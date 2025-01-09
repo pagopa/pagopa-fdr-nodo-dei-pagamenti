@@ -11,9 +11,9 @@ on:
         required: true
         description: The environment target of the job
         type: string
-      working_directory:
+      component:
         required: true
-        description: The working directory of bash steps
+        description: The component to deploy
         type: string
 
 env:
@@ -53,14 +53,6 @@ jobs:
     name: Deploy on AKS
     environment: ${{ inputs.environment }}
     steps:
-      - name: Set Helm Component
-        id: get_component
-        run: |
-          if [ "${{ inputs.working_directory }}" == "helm-fdr" ]; then
-            echo "component=fdrnodo" >> $GITHUB_ENV
-          else
-            echo "component=cj-ftp-upload" >> $GITHUB_ENV
-          fi
 
       - name: Deploy
         uses: pagopa/github-actions-template/aks-deploy@change-working-directory
@@ -74,8 +66,8 @@ jobs:
           cluster_name: ${{ vars.CLUSTER_NAME }}
           resource_group: ${{ vars.CLUSTER_RESOURCE_GROUP }}
           app_name: ${{ env.APP_NAME }}
-          working_directory: ${{ inputs.working_directory }}
-          helm_upgrade_options: --set-file ${{ steps.get_component.outputs.component }}.configMapFromFile.logback\\.xml=./helm/config/${{ inputs.environment }}/logback.xml --set-file ${{ steps.get_component.outputs.component }}.configMapFromFile.config-app\\.conf=./helm/config/${{ inputs.environment }}/config-app.conf
+          working_directory: helm-${{ inputs.component }}
+          helm_upgrade_options: --set-file ${{ inputs.component }}nodo.configMapFromFile.logback\\.xml=./helm/config/${{ inputs.environment }}/logback.xml --set-file ${{ inputs.component }}nodo.configMapFromFile.config-app\\.conf=./helm/config/${{ inputs.environment }}/config-app.conf
 
   cleanup_runner:
     name: Cleanup Runner

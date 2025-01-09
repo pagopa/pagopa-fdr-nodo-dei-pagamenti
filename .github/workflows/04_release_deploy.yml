@@ -92,16 +92,6 @@ jobs:
         name: Set Output
         run: echo "environment=${{env.ENVIRNOMENT}}" >> $GITHUB_OUTPUT
 
-      - name: Set Helm Component Output
-        id: set_working_directory
-        run: |
-          if [ "${{ github.event.inputs.component }}" == "fdr" ]; then
-            echo "helm_folder=helm-fdr" >> $GITHUB_ENV
-          else
-            echo "helm_folder=helm-fdr-cron" >> $GITHUB_ENV
-          fi
-
-
   release:
     name: Create a New Release
     runs-on: ubuntu-latest
@@ -117,7 +107,7 @@ jobs:
           github_token: ${{ secrets.BOT_TOKEN_GITHUB }}
           beta: ${{ inputs.beta }}
           skip_ci: false
-          working_directory: ${{ needs.setup.outputs.working_dir }}
+          working_directory: helm-${{ inputs.component }}
 
   image:
     needs: [ setup, release ]
@@ -184,7 +174,7 @@ jobs:
     with:
       environment: ${{ matrix.environment }}
       target: ${{ needs.setup.outputs.environment }}
-      working_directory: ${{ needs.setup.outputs.working_dir }}
+      component: ${{ inputs.component }}
     secrets: inherit
 
   notify:

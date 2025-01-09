@@ -8,4 +8,4 @@ dependencies:
   - name: cron-chart
     version: 2.3.0
     repository: "https://pagopa.github.io/aks-cron-chart-blueprint"
-    alias: cj-ftp-upload
+    alias: cronnodo
