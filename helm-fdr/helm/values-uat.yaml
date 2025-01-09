@@ -10,9 +10,6 @@ fdrnodo:
   nameOverride: ""
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
-  image:
-    repository: pagopaucommonacr.azurecr.io/pagopafdrnododeipagamenti
-    tag: 1.0.0-SNAPSHOT
   livenessProbe:
     httpGet:
       path: /alive
