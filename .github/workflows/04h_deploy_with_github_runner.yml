@@ -58,10 +58,13 @@ jobs:
         id: get_wdir
         run: |
           echo "component=helm-${{ inputs.component }}" >> $GITHUB_ENV
+          echo "APP_NAME=${{ inputs.component }}-nodo" >> $GITHUB_ENV
           echo "Component determined: $component"
+
       - name: TEST Component
         run: |
           echo "${{ env.component }}"
+          echo "APP NAME ${{ env.APP_NAME }}"
 
       - name: Deploy
         uses: pagopa/github-actions-template/aks-deploy@change-working-directory
@@ -74,7 +77,7 @@ jobs:
           namespace: ${{ vars.NAMESPACE }}
           cluster_name: ${{ vars.CLUSTER_NAME }}
           resource_group: ${{ vars.CLUSTER_RESOURCE_GROUP }}
-          app_name: ${{ env.APP_NAME }}
+          app_name: ${{ env.APP_NANE }}
           working_directory: ${{ env.component }}
           helm_upgrade_options: --set-file ${{ inputs.component }}nodo.configMapFromFile.logback\\.xml=./helm/config/${{ inputs.environment }}/logback.xml --set-file ${{ inputs.component }}nodo.configMapFromFile.config-app\\.conf=./helm/config/${{ inputs.environment }}/config-app.conf
 
