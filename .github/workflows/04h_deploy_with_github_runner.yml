@@ -71,8 +71,8 @@ jobs:
           cluster_name: ${{ vars.CLUSTER_NAME }}
           resource_group: ${{ vars.CLUSTER_RESOURCE_GROUP }}
           app_name: ${{ env.APP_NAME }}
-          working_directory: ${{ steps.get_wdir.outputs.component }}
-          helm_upgrade_options: --set-file ${{ inputs.component }}nodo.configMapFromFile.logback\\.xml=./helm/config/${{ inputs.environment }}/logback.xml --set-file ${{ inputs.component }}nodo.configMapFromFile.config-app\\.conf=./helm/config/${{ inputs.environment }}/config-app.conf
+          working_directory: ${{ env.component }}
+          helm_upgrade_options: --set-file ${{ env.component }}.configMapFromFile.logback\\.xml=./helm/config/${{ inputs.environment }}/logback.xml --set-file ${{ env.component }}.configMapFromFile.config-app\\.conf=./helm/config/${{ inputs.environment }}/config-app.conf
 
   cleanup_runner:
     name: Cleanup Runner
