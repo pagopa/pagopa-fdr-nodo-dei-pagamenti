@@ -1,4 +1,4 @@
-cj-ftp-upload:
+cronnodo:
   namespace: "fdr"
   schedule: "0/5 * * * *"
   args: [ ftpUpload ]
