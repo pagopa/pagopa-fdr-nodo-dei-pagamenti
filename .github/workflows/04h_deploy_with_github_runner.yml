@@ -53,6 +53,15 @@ jobs:
     name: Deploy on AKS
     environment: ${{ inputs.environment }}
     steps:
+      - name: Set Helm Component
+        id: get_component
+        run: |
+          if [ "${{ inputs.working_directory }}" == "helm-fdr" ]; then
+            echo "component=fdrnodo" >> $GITHUB_ENV
+          else
+            echo "component=cj-ftp-upload" >> $GITHUB_ENV
+          fi
+
       - name: Deploy
         uses: pagopa/github-actions-template/aks-deploy@change-working-directory
         with:
@@ -66,7 +75,7 @@ jobs:
           resource_group: ${{ vars.CLUSTER_RESOURCE_GROUP }}
           app_name: ${{ env.APP_NAME }}
           working_directory: ${{ inputs.working_directory }}
-          helm_upgrade_options: --debug --set-file fdrnodo.configMapFromFile.logback\\.xml=./helm/config/${{ inputs.environment }}/logback.xml --set-file fdrnodo.configMapFromFile.config-app\\.conf=./helm/config/${{ inputs.environment }}/config-app.conf
+          helm_upgrade_options: --set-file ${{ steps.get_component.outputs.component }}.configMapFromFile.logback\\.xml=./helm/config/${{ inputs.environment }}/logback.xml --set-file ${{ steps.get_component.outputs.component }}.configMapFromFile.config-app\\.conf=./helm/config/${{ inputs.environment }}/config-app.conf
 
   cleanup_runner:
     name: Cleanup Runner
