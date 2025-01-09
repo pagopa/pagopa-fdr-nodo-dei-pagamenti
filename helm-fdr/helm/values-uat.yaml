@@ -1,5 +1,12 @@
-fdrnodo:
+microservice-chart: &microservice-chart
   namespace: "fdr"
+  image:
+    repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
+    tag: 2.1.9-25-deploy-gh-action
+  canaryDelivery:
+    create: false
+fdrnodo:
+  !!merge <<: *microservice-chart
   nameOverride: ""
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
@@ -91,6 +98,7 @@ fdrnodo:
     AZURE_QUEUE_NAME: "queueconversion"
     EVENT_HUB_FLOWTX_NAME: "fdr-qi-flows"
     EVENT_HUB_REPORTEDIUV_NAME: "fdr-qi-reported-iuv"
+    APIM_URL: "https://api.uat.platform.pagopa.it"
   secretProvider:
     create: true
     envSecrets:
@@ -153,8 +161,3 @@ fdrnodo:
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m
-microservice-chart:
-  image:
-    tag: 2.1.9-25-deploy-gh-action
-  canaryDelivery:
-    create: false
