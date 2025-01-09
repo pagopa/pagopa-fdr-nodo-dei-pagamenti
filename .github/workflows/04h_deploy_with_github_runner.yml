@@ -63,7 +63,7 @@ jobs:
           resource_group: ${{ vars.CLUSTER_RESOURCE_GROUP }}
           app_name: ${{ env.APP_NAME }}
           working_directory: 'helm-fdr'
-          helm_upgrade_options: ' --debug ' # ${{ inputs.environment == 'dev' && ' --debug --set postgresql.enabled=true --set oracle.enabled=true' || ' --debug --set postgresql.enabled=true --set oracle.enabled=true' }}
+          helm_upgrade_options: --debug --set-file fdrnodo.configMapFromFile.logback\\.xml=./helm/config/logback.xml --set-file fdrnodo.configMapFromFile.config-app\\.conf=./helm/config/config-app.conf
 
   cleanup_runner:
     name: Cleanup Runner
