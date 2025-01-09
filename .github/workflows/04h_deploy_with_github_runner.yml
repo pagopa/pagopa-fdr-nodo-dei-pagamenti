@@ -58,6 +58,10 @@ jobs:
         id: get_wdir
         run: |
           echo "component=${{ inputs.component }}nodo" >> $GITHUB_ENV
+          echo "Component determined: $component"
+      - name: TEST Component
+        run: |
+          echo "${{ env.component }}"
 
       - name: Deploy
         uses: pagopa/github-actions-template/aks-deploy@change-working-directory
