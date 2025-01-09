@@ -1,0 +1,11 @@
+apiVersion: v2
+name: fdr-chart
+description: Flussi di rendicontazione
+type: application
+version: 0.5.0
+appVersion: 2.1.9-25-deploy-gh-action
+dependencies:
+  - name: microservice-chart
+    version: 3.0.0
+    repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
+    alias: fdrnodo
