@@ -5,9 +5,9 @@
       "executor": "constant-arrival-rate",
       "duration": "5m",
       "rate": 1,
-      "timeUnit": "30s",
-      "preAllocatedVUs": 10,
-      "maxVUs": 10000
+      "timeUnit": "5m",
+      "preAllocatedVUs": 1,
+      "maxVUs": 1
     }
   }
 }
