@@ -27,7 +27,7 @@ import java.util.UUID
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
-case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
+case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actorProps: ActorProps)
   extends BaseFlussiRendicontazioneActor
     with PerRequestActor
     with ReUtil
@@ -96,7 +96,7 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
       _ = reFlow = Some(re_)
 
       _ = log.info(FdrLogConstant.logSemantico(actorClassId))
-      (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifr, true, actorClassId))
+      (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifr, checkPassword = true, actorClassId))
       _ <- Future.fromTry(checkFormatoIdFlussoRendicontazione(nifr.identificativoFlusso, nifr.identificativoPSP, actorClassId))
 
       _ = reFlow = reFlow.map(r => r.copy(fruitoreDescr = canale.flatMap(c => c.description), pspDescr = psp.flatMap(p => p.description)))
@@ -163,6 +163,7 @@ case class NodoInviaFlussoRendicontazioneActorPerRequest(repositories: Repositor
         rendicontazioneSaved.insertedTimestamp
       )
       _ = flussiRendicontazioneEvent = Some(EventUtil.createFlussiRendicontazioneEvent(
+        req.sessionId,
         nifr,
         flussoRiversamento,
         rendicontazioneSaved.insertedTimestamp

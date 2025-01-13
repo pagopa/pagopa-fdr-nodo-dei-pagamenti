@@ -57,7 +57,6 @@ cronnodo:
       APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-connection-string"
       EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
       AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
-      AZURE_QUEUE_CONNECTION_STRING: "fdr-sa-connection-string"
       BLOB_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       FDR_SUBSCRIPTION_KEY: "fdr-subscription-key-string"
