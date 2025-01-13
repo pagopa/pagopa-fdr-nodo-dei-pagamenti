@@ -62,7 +62,7 @@ jobs:
           echo "Component determined: $component"
 
       - name: Deploy
-        uses: pagopa/github-actions-template/aks-deploy@change-working-directory
+        uses: pagopa/github-actions-template/aks-deploy@a93315d4b293eb883c4f126c2bae7dcef2f70c20 #v1.21.0
         with:
           branch: ${{ github.ref_name }}
           client_id: ${{ secrets.CD_CLIENT_ID }}
