@@ -24,6 +24,7 @@ on:
         options:
           - fdr
           - cron
+          - prf
       beta:
         required: false
         type: boolean
