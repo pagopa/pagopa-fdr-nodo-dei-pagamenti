@@ -12,7 +12,7 @@ import eu.sia.pagopa.common.util.xml.XmlUtil
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.rest.NodoInviaFlussoRendicontazioneFTPActorPerRequest
-import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActorPerRequest}
+import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActor}
 import eu.sia.pagopa.testutil._
 import liquibase.database.DatabaseFactory
 import liquibase.database.jvm.JdbcConnection
@@ -92,11 +92,6 @@ abstract class BaseUnitTest()
             container-name = "xmlsharefile"
             connection-string = "fake"
         }
-        azure-queue {
-            enabled  = false
-            name = "flowidsendqueue"
-            connection-string =  "fake"
-        }
         config.http.connect-timeout = 1
         bundleTimeoutSeconds = 120
         bundle.checkUTF8 = false
@@ -173,9 +168,6 @@ abstract class BaseUnitTest()
   val containerBlobFunction = (a: String, b: String, c: NodoLogger) => {
     Future.successful(())
   }
-  val queueAddFunction = (a: String, b: String, c: String, d: NodoLogger) => {
-    Future.successful(())
-  }
 
   val certPath = s"${new File(".").getCanonicalPath}/localresources/cacerts"
 
@@ -185,7 +177,7 @@ abstract class BaseUnitTest()
 
   val repositories = new RepositoriesTest(system.settings.config, log)
 
-  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, queueAddFunction, "", certPath, TestItems.ddataMap)
+  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, "", certPath, TestItems.ddataMap)
 
   val mockActor = system.actorOf(Props.create(classOf[MockActor]), s"mock")
 
@@ -317,7 +309,7 @@ abstract class BaseUnitTest()
                                 ): NodoInviaFlussoRendicontazioneRisposta = {
     val act =
       system.actorOf(
-        Props.create(classOf[NodoInviaFlussoRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoInviaFlussoRendicontazione", routers = Map("ftp-senderRouter" -> mockActor))),
+        Props.create(classOf[NodoInviaFlussoRendicontazioneActor], repositories, props.copy(actorClassId = "nodoInviaFlussoRendicontazione", routers = Map("ftp-senderRouter" -> mockActor))),
         s"nodoInviaFlussoRendicontazione${Util.now()}"
       )
     val soapres = askActor(

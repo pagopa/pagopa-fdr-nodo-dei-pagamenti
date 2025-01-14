@@ -11,10 +11,13 @@ on:
         required: true
         description: The environment target of the job
         type: string
+      component:
+        required: true
+        description: The component to deploy
+        type: string
 
 env:
   APP_NAME: fdr-nodo
-
 
 permissions:
   id-token: write
@@ -50,8 +53,16 @@ jobs:
     name: Deploy on AKS
     environment: ${{ inputs.environment }}
     steps:
+
+      - name: Set Helm Component
+        id: get_wdir
+        run: |
+          echo "component=helm-${{ inputs.component }}" >> $GITHUB_ENV
+          echo "APP_NAME=${{ inputs.component }}-nodo" >> $GITHUB_ENV
+          echo "Component determined: $component"
+
       - name: Deploy
-        uses: pagopa/github-actions-template/aks-deploy@change-working-directory
+        uses: pagopa/github-actions-template/aks-deploy@a93315d4b293eb883c4f126c2bae7dcef2f70c20 #v1.21.0
         with:
           branch: ${{ github.ref_name }}
           client_id: ${{ secrets.CD_CLIENT_ID }}
@@ -62,8 +73,8 @@ jobs:
           cluster_name: ${{ vars.CLUSTER_NAME }}
           resource_group: ${{ vars.CLUSTER_RESOURCE_GROUP }}
           app_name: ${{ env.APP_NAME }}
-          working_directory: 'helm-fdr'
-          helm_upgrade_options: --debug --set-file fdrnodo.configMapFromFile.logback\\.xml=./helm/config/logback.xml --set-file fdrnodo.configMapFromFile.config-app\\.conf=./helm/config/config-app.conf
+          working_directory: ${{ env.component }}
+          helm_upgrade_options: --set-file ${{ inputs.component }}nodo.configMapFromFile.logback\\.xml=./helm/config/${{ inputs.environment }}/logback.xml --set-file ${{ inputs.component }}nodo.configMapFromFile.config-app\\.conf=./helm/config/${{ inputs.environment }}/config-app.conf
 
   cleanup_runner:
     name: Cleanup Runner

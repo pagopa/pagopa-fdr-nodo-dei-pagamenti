@@ -2,8 +2,8 @@ name: Release And Deploy
 
 # Controls when the workflow will run
 on:
-#  pull_request:
-#    types: [ closed ] CURRENTLY COMMENTED IN ORDER TO AVOID AUTOMATIC DEPLOY ON DEV AFTER PR CLOSING
+  #  pull_request:
+  #    types: [ closed ] CURRENTLY COMMENTED IN ORDER TO AVOID AUTOMATIC DEPLOY ON DEV AFTER PR CLOSING
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -16,6 +16,14 @@ on:
           - dev
           - uat
           - prod
+      component:
+        required: true
+        type: choice
+        description: Select fdr or cron
+        default: "fdr"
+        options:
+          - fdr
+          - cron
       beta:
         required: false
         type: boolean
@@ -44,6 +52,7 @@ jobs:
     outputs:
       semver: ${{ steps.get_semver.outputs.semver }}
       environment: ${{ steps.get_env.outputs.environment }}
+      working_dir: ${{ steps.set_working_directory.outputs.helm_folder }}
     steps:
       - name: pull request rejected
         if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged != true
@@ -83,7 +92,6 @@ jobs:
         name: Set Output
         run: echo "environment=${{env.ENVIRNOMENT}}" >> $GITHUB_OUTPUT
 
-
   release:
     name: Create a New Release
     runs-on: ubuntu-latest
@@ -93,13 +101,13 @@ jobs:
     steps:
       - name: Make Release
         id: release
-        uses: pagopa/github-actions-template/sbt-release@change-working-directory # v1.11.1 TODO set version
+        uses: pagopa/github-actions-template/sbt-release@a93315d4b293eb883c4f126c2bae7dcef2f70c20 # v1.21.0
         with:
           semver: ${{ needs.setup.outputs.semver }}
           github_token: ${{ secrets.BOT_TOKEN_GITHUB }}
           beta: ${{ inputs.beta }}
           skip_ci: false
-          working_directory: "helm-fdr"
+          working_directory: helm-${{ inputs.component }}
 
   image:
     needs: [ setup, release ]
@@ -107,7 +115,7 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ inputs.semver != 'skip' }}
     steps:
-    
+
       - name: Checkout Java
         uses: actions/checkout@v4
 
@@ -166,6 +174,7 @@ jobs:
     with:
       environment: ${{ matrix.environment }}
       target: ${{ needs.setup.outputs.environment }}
+      component: ${{ inputs.component }}
     secrets: inherit
 
   notify:

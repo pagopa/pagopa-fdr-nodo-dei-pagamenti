@@ -19,12 +19,12 @@ output*yaml
 akka-diagnostics
 lightbend.sbt
 /devops/deploy-local/kustomize-nodo-cron/dev/resources/
-/helm/Chart.lock
-/helm/charts/
-/helm/nodo-cron/Chart.lock
-/helm/nodo/Chart.lock
-/helm/nodo/charts/
-/helm/nodo-cron/charts/
+/helm-old-version/Chart.lock
+/helm-old-version/charts/
+/helm-old-version/nodo-cron/Chart.lock
+/helm-old-version/nodo/Chart.lock
+/helm-old-version/nodo/charts/
+/helm-old-version/nodo-cron/charts/
 *__pycache__
 .identity/.terraform/*!/.run/MainTest dev.run.xml
 .identity/.terraform/*

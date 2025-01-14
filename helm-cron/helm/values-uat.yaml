@@ -1,4 +1,4 @@
-cj-ftp-upload:
+cronnodo:
   namespace: "fdr"
   schedule: "0/5 * * * *"
   args: [ ftpUpload ]
@@ -8,7 +8,7 @@ cj-ftp-upload:
   parallelism: 1
   terminationGracePeriodSeconds: 140
   image:
-    repository: pagopapcommonacr.azurecr.io/pagopafdrnododeipagamenti
+    repository: pagopaucommonacr.azurecr.io/pagopafdrnododeipagamenti
     tag: "1.0.0-SNAPSHOT"
   tmpVolumeMount:
     create: true
@@ -41,28 +41,26 @@ cj-ftp-upload:
     AKKA_SYSTEM_NAME: "pagopafdrnodo"
     JAVA_OPTS: >-
       -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts -Duser.language=it -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=3000 -Dcom.sun.management.jmxremote.rmi.port=3000 -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
-    DB_FDR_URL: jdbc:postgresql://pagopa-p-weu-nodo-flexible-postgresql.postgres.database.azure.com:6432/nodo?sslmode=require&prepareThreshold=0&currentSchema=offline
+    DB_FDR_URL: jdbc:postgresql://pagopa-u-weu-fdr-flexible-postgresql.postgres.database.azure.com:6432/fdr?sslmode=require&prepareThreshold=0
     DB_FDR_USER: fdr
-    INSTANCE: PROD
+    INSTANCE: UAT
     EVENT_HUB_NAME: "fdr-re"
     BLOB_RE_CONTAINER_NAME: "payload"
     AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
     ADDITIONAL_FDR_VALIDATIONS: "true"
-    AZURE_QUEUE_NAME: "queueconversion"
   secretProvider:
     create: true
     envSecrets:
       APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-connection-string"
       EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
       AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
-      AZURE_QUEUE_CONNECTION_STRING: "fdr-sa-connection-string"
       BLOB_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       FDR_SUBSCRIPTION_KEY: "fdr-subscription-key-string"
       FDR_LEGACY_SUBSCRIPTION_KEY: "fdr-legacy-subscription-key"
       DB_FDR_PASSWORD: "db-fdr-password"
     keyvault:
-      name: "pagopa-p-fdr-kv"
+      name: "pagopa-u-fdr-kv"
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   envFieldRef:
     MANAGEMENT_HTTP_HOST: "status.podIP"

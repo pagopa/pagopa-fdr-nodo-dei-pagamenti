@@ -10,10 +10,10 @@ import java.time.LocalDateTime
 object EventUtil {
 
   def createIUVRendicontatiEvent(
-                             sessionId: String,
-                             nifr: NodoInviaFlussoRendicontazione,
-                             flussoRiversamento:CtFlussoRiversamento,
-                             insertedTimestamp: LocalDateTime)={
+                                  sessionId: String,
+                                  nifr: NodoInviaFlussoRendicontazione,
+                                  flussoRiversamento: CtFlussoRiversamento,
+                                  insertedTimestamp: LocalDateTime): Seq[IUVRendicontatiEvent] = {
     flussoRiversamento.datiSingoliPagamenti.map(dsp => {
       IUVRendicontatiEvent(
         dsp.identificativoUnivocoVersamento,
@@ -34,9 +34,10 @@ object EventUtil {
   }
 
   def createFlussiRendicontazioneEvent(
-                             nifr: NodoInviaFlussoRendicontazione,
-                             flussoRiversamento:CtFlussoRiversamento,
-                             insertedTimestamp: LocalDateTime)={
+                                        sessionId: String,
+                                        nifr: NodoInviaFlussoRendicontazione,
+                                        flussoRiversamento: CtFlussoRiversamento,
+                                        insertedTimestamp: LocalDateTime): FlussiRendicontazioneEvent = {
     FlussiRendicontazioneEvent(
       nifr.identificativoFlusso,
       nifr.dataOraFlusso.toGregorianCalendar.toZonedDateTime.toLocalDateTime,
@@ -48,7 +49,7 @@ object EventUtil {
       nifr.identificativoDominio,
       nifr.identificativoPSP,
       nifr.identificativoIntermediarioPSP,
-      s"${nifr.identificativoFlusso}${nifr.dataOraFlusso}${insertedTimestamp}",
+      sessionId,
       flussoRiversamento.datiSingoliPagamenti.map(dsp => dsp.dataEsitoSingoloPagamento.toGregorianCalendar.toZonedDateTime.toLocalDateTime.toString)
     )
   }
