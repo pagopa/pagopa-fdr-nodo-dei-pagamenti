@@ -5,10 +5,6 @@ microservice-chart: &microservice-chart
     tag: 2.1.9-42-PAGOPA-2394
   canaryDelivery:
     create: false
-fdrnodo:
-  !!merge <<: *microservice-chart
-  nameOverride: ""
-  fullnameOverride: ""
   terminationGracePeriodSeconds: 140
   livenessProbe:
     httpGet:
@@ -148,10 +144,25 @@ fdrnodo:
       - 8080 #http
       - 9091 #cinnamon
       - 9092 #micrometer
+fdrnodo:
+  !!merge <<: *microservice-chart
+  nameOverride: ""
+  fullnameOverride: ""
   ingress:
     create: true
     host: "weuuat.fdr.internal.uat.platform.pagopa.it"
     path: /pagopa-fdr-nodo-service(/|$)(.*)
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
+    proxyBodySize: 100m
+prfnodo:
+  !!merge <<: *microservice-chart
+  nameOverride: ""
+  fullnameOverride: ""
+  ingress:
+    create: true
+    host: "weuuat.fdr.internal.uat.platform.pagopa.it"
+    path: /pagopa-fdr-nodo-service-prf(/|$)(.*)
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m
