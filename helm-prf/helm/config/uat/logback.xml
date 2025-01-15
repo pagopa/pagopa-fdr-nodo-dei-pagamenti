@@ -52,9 +52,11 @@
 
     </appender>
 
+    <!--
     <appender name="CONSOLE_APPENDER_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="CONSOLE_APPENDER" />
     </appender>
+    -->
 
     <logger name="eu.sia.pagopa" level="INFO" />
     <logger name="eu.sia.pagopa.input" level="INFO" />
@@ -64,9 +66,9 @@
 
     <logger name="slick" level="INFO" />
     <logger name="slick.jdbc.DriverDataSource"              level="INFO" />
-    <logger name="slick.jdbc.JdbcBackend.statement"         level="INFO" />
+    <logger name="slick.jdbc.JdbcBackend.statement"         level="DEBUG" />
     <logger name="slick.jdbc.JdbcBackend.parameter"         level="INFO" />
-    <logger name="slick.jdbc.JdbcBackend.benchmark"         level="INFO" />
+    <logger name="slick.jdbc.JdbcBackend.benchmark"         level="DEBUG" />
     <logger name="slick.jdbc.StatementInvoker.result"       level="INFO" />
     <logger name="slick.compiler"                           level="INFO" />
     <logger name="slick.compiler.QueryCompilerBenchmark"    level="INFO" />
