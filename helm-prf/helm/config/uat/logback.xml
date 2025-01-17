@@ -11,7 +11,7 @@
 
 
     <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
-
+    <!--
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <message/>
@@ -42,25 +42,24 @@
                 </nestedField>
             </providers>
         </encoder>
+    -->
 
-        <!--
         <encoder>
             <pattern>${CONSOLE_PATTERN}</pattern>
             <charset>utf8</charset>
         </encoder>
-        -->
 
     </appender>
 
-    <!--
+
     <appender name="CONSOLE_APPENDER_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
         <appender-ref ref="CONSOLE_APPENDER" />
     </appender>
-    -->
 
     <logger name="eu.sia.pagopa" level="INFO" />
     <logger name="eu.sia.pagopa.input" level="INFO" />
     <logger name="eu.sia.pagopa.common.actor.HttpActorPerRequest" level="INFO" />
+    <logger name="eu.sia.pagopa.config.actor.ApiConfigActor" level="ERROR" />
 
     <logger name="com.zaxxer.hikari.HikariConfig" level="INFO"/>
 
