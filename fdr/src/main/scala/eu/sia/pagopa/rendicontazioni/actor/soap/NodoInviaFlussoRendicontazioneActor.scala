@@ -75,31 +75,31 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
 
       _ = MDC.put(Constant.MDCKey.FDR, nifr.identificativoFlusso)
       now = Util.now()
-//      re_ = Re(
-//        idDominio = Some(nifr.identificativoDominio),
-//        psp = Some(nifr.identificativoPSP),
-//        componente = Componente.NDP_FDR.toString,
-//        categoriaEvento = CategoriaEvento.INTERNO.toString,
-//        tipoEvento = Some(actorClassId),
-//        sottoTipoEvento = SottoTipoEvento.INTERN.toString,
-//        fruitore = Some(nifr.identificativoCanale),
-//        erogatore = Some(Componente.NDP_FDR.toString),
-//        canale = Some(nifr.identificativoCanale),
-//        esito = Some(EsitoRE.RICEVUTA.toString),
-//        sessionId = Some(req.sessionId),
-//        insertedTimestamp = now,
-//        businessProcess = Some(actorClassId),
-//        erogatoreDescr = Some(Componente.NDP_FDR.toString),
-//        flowName = Some(nifr.identificativoFlusso),
-//        flowAction = Some(req.primitive)
-//      )
-//      _ = reFlow = Some(re_)
+      re_ = Re(
+        idDominio = Some(nifr.identificativoDominio),
+        psp = Some(nifr.identificativoPSP),
+        componente = Componente.NDP_FDR.toString,
+        categoriaEvento = CategoriaEvento.INTERNO.toString,
+        tipoEvento = Some(actorClassId),
+        sottoTipoEvento = SottoTipoEvento.INTERN.toString,
+        fruitore = Some(nifr.identificativoCanale),
+        erogatore = Some(Componente.NDP_FDR.toString),
+        canale = Some(nifr.identificativoCanale),
+        esito = Some(EsitoRE.RICEVUTA.toString),
+        sessionId = Some(req.sessionId),
+        insertedTimestamp = now,
+        businessProcess = Some(actorClassId),
+        erogatoreDescr = Some(Componente.NDP_FDR.toString),
+        flowName = Some(nifr.identificativoFlusso),
+        flowAction = Some(req.primitive)
+      )
+      _ = reFlow = Some(re_)
 
       _ = log.info(FdrLogConstant.logSemantico(actorClassId))
       (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifr, checkPassword = true, actorClassId))
       _ <- Future.fromTry(checkFormatoIdFlussoRendicontazione(nifr.identificativoFlusso, nifr.identificativoPSP, actorClassId))
 
-//      _ = reFlow = reFlow.map(r => r.copy(fruitoreDescr = canale.flatMap(c => c.description), pspDescr = psp.flatMap(p => p.description)))
+      _ = reFlow = reFlow.map(r => r.copy(fruitoreDescr = canale.flatMap(c => c.description), pspDescr = psp.flatMap(p => p.description)))
 
       _ = log.debug("Check duplicates on db")
       _ <- checksDB(nifr)
@@ -154,7 +154,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         repositories.fdrRepository
       )
 
-     // _ <- actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log) TODO comment
+      _ <- actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log)
 
       _ = iuvRendicontatiEvent = EventUtil.createIUVRendicontatiEvent(
         req.sessionId,
@@ -173,7 +173,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
       _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
-//      _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
+      _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
       _ = traceInternalRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield sr
@@ -192,14 +192,14 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         replyTo ! sr
       })
       .map(_ => {
-//        Future.sequence(
-//          iuvRendicontatiEvent.map(event=>{
-//            AzureIuvRendicontatiProducer.send(log,event)
-//          }) ++
-//            flussiRendicontazioneEvent.map(event=>{
-//              AzureFlussiRendicontazioneProducer.send(log,event)
-//            })
-//        )
+        Future.sequence(
+          iuvRendicontatiEvent.map(event=>{
+            AzureIuvRendicontatiProducer.send(log,event)
+          }) ++
+            flussiRendicontazioneEvent.map(event=>{
+              AzureFlussiRendicontazioneProducer.send(log,event)
+            })
+        )
         complete()
       })
   }

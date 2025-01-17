@@ -28,8 +28,7 @@ object Util {
   }
 
   def logPayload(log: NodoLogger, payload: Option[String]): Unit = {
-    // TODO [FC] remove false
-    if (log.isDebugEnabled && false) {
+    if (log.isDebugEnabled) {
       log.debug(payload.map(Util.obfuscate).getOrElse("[NO PAYLOAD]"))
     }
   }
