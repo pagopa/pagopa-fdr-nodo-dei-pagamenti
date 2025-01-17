@@ -157,14 +157,3 @@ fdrnodo:
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m
-prfnodo:
-  !!merge <<: *microservice-chart
-  nameOverride: ""
-  fullnameOverride: ""
-  ingress:
-    create: true
-    host: "weuuat.fdr.internal.uat.platform.pagopa.it"
-    path: /pagopa-fdr-nodo-service-prf(/|$)(.*)
-    annotations:
-      nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
-    proxyBodySize: 100m
