@@ -192,14 +192,15 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         replyTo ! sr
       })
       .map(_ => {
-        Future.sequence(
-          iuvRendicontatiEvent.map(event=>{
-            AzureIuvRendicontatiProducer.send(log,event)
-          }) ++
-            flussiRendicontazioneEvent.map(event=>{
-              AzureFlussiRendicontazioneProducer.send(log,event)
-            })
-        )
+        // TODO [FC] to uncomment
+//        Future.sequence(
+//          iuvRendicontatiEvent.map(event=>{
+//            AzureIuvRendicontatiProducer.send(log,event)
+//          }) ++
+//            flussiRendicontazioneEvent.map(event=>{
+//              AzureFlussiRendicontazioneProducer.send(log,event)
+//            })
+//        )
         complete()
       })
   }
