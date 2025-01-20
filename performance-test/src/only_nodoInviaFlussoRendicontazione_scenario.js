@@ -33,7 +33,6 @@ const parameters = {
     url_nodo_ci: `${vars.app_host_nodo_ci}`,
 }
 
-
 export function setup() {
   // Before All
   // setup code (once)
@@ -68,7 +67,10 @@ export default function () {
   precondition();
 
   // Testing: nodoInviaFlussoRendicontazione
+  console.log("GENERATING FLOW")
   var request_nifr = generateNodoInviaFlussoRendicontazione(parameters, flow_id, flow_size);
+  console.log("FLOW GENERATED")
+  console.log("URL CALLED: " + parameters.url_nodo_psp)
   response = http.post(parameters.url_nodo_psp, request_nifr, params)
   check(response, {
     'check status is 200': (resp) => resp.status === 200,
