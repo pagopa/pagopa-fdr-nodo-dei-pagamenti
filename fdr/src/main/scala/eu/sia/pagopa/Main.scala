@@ -20,6 +20,7 @@ import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.config.actor.ApiConfigActor
 import eu.sia.pagopa.nodopoller.actor.PollerActor
+import eu.sia.pagopa.rendicontazioni.actor.async.EventHubActor
 import io.github.mweirauch.micrometer.jvm.extras.{ProcessMemoryMetrics, ProcessThreadMetrics}
 import io.micrometer.core.instrument.binder.jvm.{ClassLoaderMetrics, JvmGcMetrics, JvmMemoryMetrics, JvmThreadMetrics}
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
@@ -234,6 +235,7 @@ object Main extends App {
           Seq(
             BootstrapUtil.actorClassId(classOf[ApiConfigActor]) -> classOf[ApiConfigActor],
             BootstrapUtil.actorClassId(classOf[PollerActor]) -> classOf[PollerActor],
+            BootstrapUtil.actorClassId(classOf[EventHubActor]) -> classOf[EventHubActor],
             Constant.KeyName.FTP_SENDER -> classOf[PrimitiveActor]
           )
         case Some(j) =>

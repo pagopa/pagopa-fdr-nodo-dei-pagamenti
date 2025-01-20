@@ -2,7 +2,7 @@ package eu.sia.pagopa.rendicontazioni.actor.soap
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
@@ -16,6 +16,7 @@ import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.{AzureFlussiRendic
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
+import eu.sia.pagopa.rendicontazioni.actor.async.EventHubActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicontazioneResponse
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import org.slf4j.MDC
@@ -193,6 +194,8 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       })
       .map(_ => {
         // TODO [FC] to uncomment
+        actorSystem.actorSelection(BootstrapUtil.actorRouter(classOf[EventHubActor])).tell(iuvRendicontatiEvent, this.replyTo)
+
 //        Future.sequence(
 //          iuvRendicontatiEvent.map(event=>{
 //            AzureIuvRendicontatiProducer.send(log,event)
