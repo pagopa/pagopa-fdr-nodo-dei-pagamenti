@@ -137,7 +137,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
   }
 
   def checks(ddataMap: ConfigData, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, checkPassword: Boolean, actorClassId: String)(implicit log: NodoLogger) = {
-    log.info(FdrLogConstant.logSemantico(actorClassId))
+    log.info(FdrLogConstant.logSemantico(actorClassId) + " psp, broker, channel, password, ci")
     val paaa = for {
       (psp, canale) <- DDataChecks
         .checkPspIntermediarioPspCanale(
@@ -162,7 +162,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
   }
 
   def checkFormatoIdFlussoRendicontazione(identificativoFlusso: String, idPsp: String, actorClassId: String)(implicit log: NodoLogger) = {
-    log.info(FdrLogConstant.logSemantico(actorClassId))
+    log.info(FdrLogConstant.logSemantico(actorClassId) + " checkFormatoIdFlussoRendicontazione")
     (for {
       _ <- CheckRendicontazioni.checkFormatoIdFlussoRendicontazione(identificativoFlusso, idPsp)
     } yield ()).recoverWith({

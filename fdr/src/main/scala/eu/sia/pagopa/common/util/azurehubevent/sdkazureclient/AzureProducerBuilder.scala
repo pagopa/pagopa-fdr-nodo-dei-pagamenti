@@ -33,9 +33,9 @@ trait AzureEventProducer {
   protected var producer: Option[EventHubProducerAsyncClient] = None
   protected implicit var executionContext: MessageDispatcher = _
 
-  val QI_EVENT_MSG_PUBLISHED = "Positive Biz Event PUBLISHED \npayload:"
-  val QI_EVENT_MSG_FAILED = "Positive Biz Event FAILED \npayload:"
-  val QI_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED = "Positive Biz Event FAILED...Producer not initialized,call .init() method first \npayload:"
+  val QI_EVENT_MSG_PUBLISHED = "QI Event PUBLISHED \npayload:"
+  val QI_EVENT_MSG_FAILED = "QI Event FAILED \npayload:"
+  val QI_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED = "QI Event FAILED...Producer not initialized,call .init() method first \npayload:"
 
   val FAILED_ACT_VER_EVENT_MSG_FAILED = "FailedActivateVerify Biz Event FAILED \npayload:"
 
@@ -61,6 +61,7 @@ trait AzureEventProducer {
     }
   }
 
+  // TODO [FC] review this method!
   private def addOrNewBatch(producer: EventHubProducerAsyncClient, batch: EventDataBatch, eventDataSeq: Seq[EventData], log: NodoLogger): Mono[_ <: Seq[EventDataBatch]] = {
     if (eventDataSeq.isEmpty) {
       Mono.just(Seq(batch))
@@ -116,16 +117,18 @@ trait AzureEventProducer {
               })
               .collectList()
           })
-          .subscribe(
-            (f: java.util.List[Void]) => {
-              MDC.setContextMap(mdcMap)
-              items.foreach(x => log.info(logMessage(x, QI_EVENT_MSG_PUBLISHED)))
-            },
-            (ex: Throwable) => {
-              MDC.setContextMap(mdcMap)
-              items.foreach(x => log.error(ex, logMessage(x, FAILED_ACT_VER_EVENT_MSG_FAILED)))
-            }
-          )
+          // TODO [FC] it is necessary?
+//          .subscribe(
+//            (f: java.util.List[Void]) => {
+//              MDC.setContextMap(mdcMap)
+//
+//              items.foreach(x => log.info(logMessage(x, QI_EVENT_MSG_PUBLISHED)))
+//            },
+//            (ex: Throwable) => {
+//              MDC.setContextMap(mdcMap)
+//              items.foreach(x => log.error(ex, logMessage(x, FAILED_ACT_VER_EVENT_MSG_FAILED)))
+//            }
+//          )
       } else {
         items.foreach(x => log.warn(logMessage(x, QI_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED)))
       }
@@ -136,7 +139,8 @@ trait AzureEventProducer {
 
   }
 }
-object AzureIuvRendicontatiProducer extends AzureEventProducer{
+
+object AzureIuvRendicontatiProducer extends AzureEventProducer {
   override val configName = "fdr-qi-reported-iuv"
 
   def send(log: NodoLogger, event: IUVRendicontatiEvent) = {
@@ -290,7 +294,7 @@ object AzureProducerBuilder {
           Mono.empty[Void]
         } else {
           Mono.when({
-            log.debug(s"eventData not inserted to batch beacause is full,send all event and create new batch")
+            log.debug(s"eventData not inserted to batch because is full, send all event and create new batch")
             producer.send(batch)
             val eventDataBatch: Mono[EventDataBatch] = producer.createBatch()
             eventDataBatch.map(newBatch => {
@@ -299,7 +303,7 @@ object AzureProducerBuilder {
                 val ex = new IllegalArgumentException(s"EventData is too large for an empty batch. Max size: ${newBatch.getMaxSizeInBytes}")
                 log.error(
                   ex,
-                  s"eventData tot inserted to batch beacause is too large, record \nheaders=[\n\t${eventData.getProperties.entrySet().iterator().asScala.map(a => s"${a.getKey}=${a.getValue}").mkString("\n\t")}\n] \nvalue=${eventData.getBodyAsString}"
+                  s"eventData tot inserted to batch because is too large, record \nheaders=[\n\t${eventData.getProperties.entrySet().iterator().asScala.map(a => s"${a.getKey}=${a.getValue}").mkString("\n\t")}\n] \nvalue=${eventData.getBodyAsString}"
                 )
                 throw ex
               } else {

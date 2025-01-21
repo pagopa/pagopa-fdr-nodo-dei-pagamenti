@@ -7,7 +7,7 @@ import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
-import eu.sia.pagopa.common.json.model.{FlussiRendicontazioneEvent, IUVRendicontatiEvent}
+import eu.sia.pagopa.common.json.model.{FdREvent, FlussiRendicontazioneEvent, IUVRendicontatiEvent}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.re.model.Re
@@ -49,6 +49,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
   var flussiRendicontazioneEvent: Option[FlussiRendicontazioneEvent] = None
 
   override def receive: Receive = { case soapRequest: SoapRequest =>
+
     req = soapRequest
     replyTo = sender()
 
@@ -72,6 +73,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
     val pipeline = for {
       _ <- Future.successful(())
 
+      // syntax check
       nifr <- Future.fromTry(parseInput(soapRequest.payload, inputXsdValid))
 
       _ = MDC.put(Constant.MDCKey.FDR, nifr.identificativoFlusso)
@@ -96,7 +98,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       )
       _ = reFlow = Some(re_)
 
-      _ = log.info(FdrLogConstant.logSemantico(actorClassId))
+      // semantic check
       (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifr, checkPassword = true, actorClassId))
       _ <- Future.fromTry(checkFormatoIdFlussoRendicontazione(nifr.identificativoFlusso, nifr.identificativoPSP, actorClassId))
 
@@ -157,18 +159,29 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
 
       _ <- actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log)
 
-      _ = iuvRendicontatiEvent = EventUtil.createIUVRendicontatiEvent(
-        req.sessionId,
-        nifr,
-        flussoRiversamento,
-        rendicontazioneSaved.insertedTimestamp
-      )
-      _ = flussiRendicontazioneEvent = Some(EventUtil.createFlussiRendicontazioneEvent(
-        req.sessionId,
-        nifr,
-        flussoRiversamento,
-        rendicontazioneSaved.insertedTimestamp
-      ))
+      _ = {
+        actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[EventHubActor])))
+          .tell(
+            FdREvent(
+              req.sessionId,
+              nifr,
+              flussoRiversamento,
+              rendicontazioneSaved.insertedTimestamp),
+            replyTo)
+      }
+      // TODO [FC]
+//      _ = iuvRendicontatiEvent = EventUtil.createIUVRendicontatiEvent(
+//        req.sessionId,
+//        nifr,
+//        flussoRiversamento,
+//        rendicontazioneSaved.insertedTimestamp
+//      )
+//      _ = flussiRendicontazioneEvent = Some(EventUtil.createFlussiRendicontazioneEvent(
+//        req.sessionId,
+//        nifr,
+//        flussoRiversamento,
+//        rendicontazioneSaved.insertedTimestamp
+//      ))
 
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
@@ -194,7 +207,13 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       })
       .map(_ => {
         // TODO [FC] to uncomment
-        actorSystem.actorSelection(BootstrapUtil.actorRouter(classOf[EventHubActor])).tell(iuvRendicontatiEvent, this.replyTo)
+//        fdrEvent = FdREvent(
+//          req.sessionId,
+//          nifr,
+//          flussoRiversamento,
+//          rendicontazioneSaved.insertedTimestamp
+//        )
+//        actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[EventHubActor]))).tell(iuvRendicontatiEvent, replyTo)
 
 //        Future.sequence(
 //          iuvRendicontatiEvent.map(event=>{
@@ -206,6 +225,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
 //        )
         complete()
       })
+
   }
 
   override def actorError(e: DigitPaException): Unit = {
@@ -215,7 +235,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
   private def checksDB(nifr: NodoInviaFlussoRendicontazione) = {
     val datazoned =
       LocalDateTime.parse(nifr.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()))
-    CheckRendicontazioni.checkFlussoRendicontazioneNotPresentOnSamePsp(repositories.fdrRepository, nifr.identificativoFlusso, nifr.identificativoPSP, datazoned).flatMap {
+      CheckRendicontazioni.checkFlussoRendicontazioneNotPresentOnSamePsp(repositories.fdrRepository, nifr.identificativoFlusso, nifr.identificativoPSP, datazoned).flatMap {
       case Some(r) =>
         Future.failed(
           exception.DigitPaException(
