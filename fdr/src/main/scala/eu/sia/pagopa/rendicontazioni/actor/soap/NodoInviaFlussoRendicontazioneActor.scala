@@ -161,23 +161,6 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
 
       _ <- actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log)
 
-      _ = {
-
-      }
-      // TODO [FC]
-//      _ = iuvRendicontatiEvent = EventUtil.createIUVRendicontatiEvent(
-//        req.sessionId,
-//        nifr,
-//        flussoRiversamento,
-//        rendicontazioneSaved.insertedTimestamp
-//      )
-//      _ = flussiRendicontazioneEvent = Some(EventUtil.createFlussiRendicontazioneEvent(
-//        req.sessionId,
-//        nifr,
-//        flussoRiversamento,
-//        rendicontazioneSaved.insertedTimestamp
-//      ))
-
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
       _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
@@ -209,6 +192,9 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
               flussoRiversamento,
               rendicontazioneSaved.insertedTimestamp),
             replyTo)
+
+        // send data to container blob
+        actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log)
       }
   }
 

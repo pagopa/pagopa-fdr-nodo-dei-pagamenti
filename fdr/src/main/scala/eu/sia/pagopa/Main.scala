@@ -282,7 +282,7 @@ object Main extends App {
       val baseactors = BootstrapUtil.createActors(system, repositories, actorProps, baseActorsNamesAndTypes)
         .+("deadLetterMonitorActor"-> system.actorOf(Props.create(classOf[DeadLetterMonitorActor]), BootstrapUtil.actorClassId(classOf[DeadLetterMonitorActor]))
       )
-      log.info("BASE ACTORS: " + baseactors)
+
       val primitiveactors: Map[String, ActorRef] = BootstrapUtil.createActors(system, repositories, actorProps, primitiveActorsNamesAndTypes)
 
       log.info(s"Created Actors:\n${(baseactors.keys ++ primitiveactors.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
