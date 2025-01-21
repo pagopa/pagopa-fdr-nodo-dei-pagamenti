@@ -2,15 +2,15 @@
   "environment": [
     {
       "env": "local",
-      "app_host_nodo_psp": "http://localhost:8080",
-      "app_host_nodo_ci": "http://localhost:8080",
+      "app_host_nodo_psp": "http://localhost:8585/webservices/input",
+      "app_host_nodo_ci": "http://localhost:8585/webservices/input",
       "psp": "88888888888",
       "broker_psp": "88888888888",
       "channel": "88888888888_01",
       "password": "PLACEHOLDER",
-      "creditor_institution_code": "15376371009",
+      "creditor_institution": "15376371009",
       "broker_ci": "15376371009",
-      "station_id": "15376371009_03"
+      "station": "15376371009_09"
     }
   ]
 }

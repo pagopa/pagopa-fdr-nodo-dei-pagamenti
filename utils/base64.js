@@ -1,3 +1,9 @@
+PSP = "60000000001"
+BROKER_PSP="60000000001"
+CHANNEL="15376371009_04"
+PASSWORD="PLACEHOLDER"
+CI="15376371009"
+
 function makeid(length) {
     var result           = '';
     var characters       = '0123456789';
@@ -37,7 +43,8 @@ Date.prototype.addDays = function(days) {
 var dataOraFlusso = new Date().addDays(0);
 //console.log(dataOraFlusso);
 
-istitutoMittente="AGID_01"
+// istitutoMittente="AGID_01"
+istitutoMittente=PSP
 
 identificativoFlusso = `${dataRegolamento}${istitutoMittente}-S${makeid(9)}`;
 
@@ -60,7 +67,7 @@ xmlFlusso = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                     <istitutoRicevente>
                         <identificativoUnivocoRicevente>
                             <tipoIdentificativoUnivoco>G</tipoIdentificativoUnivoco>
-                            <codiceIdentificativoUnivoco>77777777777</codiceIdentificativoUnivoco>
+                            <codiceIdentificativoUnivoco>${CI}</codiceIdentificativoUnivoco>
                         </identificativoUnivocoRicevente>
                         <denominazioneRicevente>AGSM ENERGIA S.R.L. SOCIETA' UNIPERSONAL E</denominazioneRicevente>
                     </istitutoRicevente>
@@ -80,11 +87,11 @@ nodoInviaFlussoRendicontazione=`
     xmlns:ns3="http://PuntoAccessoPSP.spcoop.gov.it/BarCode_GS1_128_Modified"
     xmlns:ns4="http://PuntoAccessoPSP.spcoop.gov.it/QrCode"
     xmlns:ns5="http://ws.pagamenti.telematici.gov/">
-    <identificativoPSP>AGID_01</identificativoPSP>
-    <identificativoIntermediarioPSP>97735020584</identificativoIntermediarioPSP>
-    <identificativoCanale>97735020584_03</identificativoCanale>
-    <password>pwd_AgID</password>
-    <identificativoDominio>77777777777</identificativoDominio>
+    <identificativoPSP>${istitutoMittente}</identificativoPSP>
+    <identificativoIntermediarioPSP>${BROKER_PSP}</identificativoIntermediarioPSP>
+    <identificativoCanale>${CHANNEL}</identificativoCanale>
+    <password>${PASSWORD}</password>
+    <identificativoDominio>${CI}</identificativoDominio>
     <identificativoFlusso>${identificativoFlusso}</identificativoFlusso>
     <dataOraFlusso>${dataOraFlusso.toISOString().split('.')[0]}</dataOraFlusso>
     <xmlRendicontazione>${xmlFlusso}</xmlRendicontazione>

@@ -10,6 +10,7 @@ import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.json.model.{FdREvent, FlussiRendicontazioneEvent, IUVRendicontatiEvent}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
+import eu.sia.pagopa.common.repo.fdr.model.Rendicontazione
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.{AzureFlussiRendicontazioneProducer, AzureIuvRendicontatiProducer}
@@ -20,6 +21,7 @@ import eu.sia.pagopa.rendicontazioni.actor.async.EventHubActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicontazioneResponse
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import org.slf4j.MDC
+import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
 
 import java.time.format.DateTimeFormatter
@@ -160,14 +162,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       _ <- actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log)
 
       _ = {
-        actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[EventHubActor])))
-          .tell(
-            FdREvent(
-              req.sessionId,
-              nifr,
-              flussoRiversamento,
-              rendicontazioneSaved.insertedTimestamp),
-            replyTo)
+
       }
       // TODO [FC]
 //      _ = iuvRendicontatiEvent = EventUtil.createIUVRendicontatiEvent(
@@ -190,7 +185,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
       _ = traceInternalRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
-    } yield sr
+    } yield (sr, nifr, flussoRiversamento, rendicontazioneSaved)
 
     pipeline
       .recover({
@@ -200,32 +195,21 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         case e: Throwable =>
           log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
           errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
-      }).map(sr => {
+      }).map { case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
         log.info(FdrLogConstant.logEnd(actorClassId))
         traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
         replyTo ! sr
-      })
-      .map(_ => {
-        // TODO [FC] to uncomment
-//        fdrEvent = FdREvent(
-//          req.sessionId,
-//          nifr,
-//          flussoRiversamento,
-//          rendicontazioneSaved.insertedTimestamp
-//        )
-//        actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[EventHubActor]))).tell(iuvRendicontatiEvent, replyTo)
 
-//        Future.sequence(
-//          iuvRendicontatiEvent.map(event=>{
-//            AzureIuvRendicontatiProducer.send(log,event)
-//          }) ++
-//            flussiRendicontazioneEvent.map(event=>{
-//              AzureFlussiRendicontazioneProducer.send(log,event)
-//            })
-//        )
-        complete()
-      })
-
+        // send data to event hub for QI
+        actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[EventHubActor])))
+          .tell(
+            FdREvent(
+              req.sessionId,
+              nifr,
+              flussoRiversamento,
+              rendicontazioneSaved.insertedTimestamp),
+            replyTo)
+      }
   }
 
   override def actorError(e: DigitPaException): Unit = {
