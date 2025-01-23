@@ -1,5 +1,6 @@
 package eu.sia.pagopa.common.util.azurehubevent
 
+import com.azure.core.util.BinaryData
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.message.{CategoriaEvento, ReExtra, ReRequest, SottoTipoEvento}
@@ -25,7 +26,7 @@ object Appfunction {
   }
 
   type ReEventFunc = (ReRequest, NodoLogger, ConfigData) => Future[Unit]
-  type ContainerBlobFunc = (String, String, NodoLogger) => Future[Unit]
+  type ContainerBlobFunc = (String, BinaryData, NodoLogger) => Future[Unit]
   type IuvRendicontatiFunc = (String, String, String, NodoLogger) => Future[Unit]
   type FlussiRendicontazioneFunc = (String, String, String, NodoLogger) => Future[Unit]
 

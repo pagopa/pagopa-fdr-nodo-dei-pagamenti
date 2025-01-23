@@ -25,9 +25,11 @@ object AzureStorageBlobClient {
 
       val containerClient = blobServiceClient.getBlobContainerClient(containerName)
 
-      (fileName: String, fileContent: String, log: NodoLogger) => {
+      // TODO [FC]
+//      (fileName: String, fileContent: String, log: NodoLogger) => {
+      (fileName: String, fileContent: BinaryData, log: NodoLogger) => {
         val executionContext: MessageDispatcher = system.dispatchers.lookup("blobstorage-dispatcher")
-        Future(containerClient.getBlobClient(fileName).upload(BinaryData.fromString(fileContent)))(executionContext) recoverWith {
+        Future(containerClient.getBlobClient(fileName).upload(fileContent))(executionContext) recoverWith {
           case e: Throwable =>
             log.error(e, "Error calling azure-storage-blob")
             Future.failed(e)
@@ -35,7 +37,9 @@ object AzureStorageBlobClient {
       }
     } else {
       log.info("Azure Storage Blob Client Service not enabled: config-app [azure-storage-blob.enabled]=false")
-      (fileName: String, fileContent: String, log: NodoLogger) => {
+      // TODO [FC]
+//      (fileName: String, fileContent: String, log: NodoLogger) => {
+      (fileName: String, fileContent: BinaryData , log: NodoLogger) => {
         Future.successful(())
       }
     }

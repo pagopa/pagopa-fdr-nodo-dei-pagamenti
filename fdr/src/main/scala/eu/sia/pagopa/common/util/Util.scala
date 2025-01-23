@@ -78,7 +78,7 @@ object Util {
       .mkString("{", ", ", "}")
   }
 
-  def zipContent(bytes: Array[Byte]) = {
+  def gzipContent(bytes: Array[Byte]) = {
     val bais = new ByteArrayOutputStream(bytes.length)
     val gzipOut = new GZIPOutputStream(bais)
     gzipOut.write(bytes)
@@ -88,7 +88,7 @@ object Util {
     compressed
   }
 
-  def unzipContent(compressed: Array[Byte]) = {
+  def ungzipContent(compressed: Array[Byte]) = {
     Try {
       val bais = new ByteArrayInputStream(compressed)
       new GZIPInputStream(bais).readAllBytes()

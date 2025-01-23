@@ -3,6 +3,7 @@ package eu.sia.pagopa
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.event.Logging
 import akka.testkit.{ImplicitSender, TestKit}
+import com.azure.core.util.BinaryData
 import com.typesafe.config.{Config, ConfigFactory}
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.message._
@@ -165,7 +166,7 @@ abstract class BaseUnitTest()
   val reFunction = (a: ReRequest, b: NodoLogger, c: ConfigData) => {
     Future.successful(())
   }
-  val containerBlobFunction = (a: String, b: String, c: NodoLogger) => {
+  val containerBlobFunction = (a: String, b: BinaryData, c: NodoLogger) => {
     Future.successful(())
   }
 

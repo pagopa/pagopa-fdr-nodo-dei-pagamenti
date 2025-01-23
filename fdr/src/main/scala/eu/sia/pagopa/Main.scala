@@ -13,6 +13,7 @@ import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
+import eu.sia.pagopa.common.repo.re.MongoRepository
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, ReEventFunc}
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.{AzureFlussiRendicontazioneProducer, AzureIuvRendicontatiProducer, AzureProducerBuilder}
@@ -20,6 +21,7 @@ import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.config.actor.ApiConfigActor
 import eu.sia.pagopa.nodopoller.actor.PollerActor
+import eu.sia.pagopa.rendicontazioni.actor.async.FdREventActor
 import io.github.mweirauch.micrometer.jvm.extras.{ProcessMemoryMetrics, ProcessThreadMetrics}
 import io.micrometer.core.instrument.binder.jvm.{ClassLoaderMetrics, JvmGcMetrics, JvmMemoryMetrics, JvmThreadMetrics}
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
@@ -74,6 +76,8 @@ object Main extends App {
   implicit val system: ActorSystem = ActorSystem(actorSystemName, config)
   implicit val log: NodoLogger = new NodoLogger(Logging(system, getClass.getCanonicalName))
   val shutdown = CoordinatedShutdown(system)
+
+//  def mongoRepository = new MongoRepository(config, log)(executionContext)
 
   log.info(s"""using config:
               |configScheduleMinutes: ${config.getString("configScheduleMinutes")}
@@ -234,6 +238,7 @@ object Main extends App {
           Seq(
             BootstrapUtil.actorClassId(classOf[ApiConfigActor]) -> classOf[ApiConfigActor],
             BootstrapUtil.actorClassId(classOf[PollerActor]) -> classOf[PollerActor],
+            BootstrapUtil.actorClassId(classOf[FdREventActor]) -> classOf[FdREventActor],
             Constant.KeyName.FTP_SENDER -> classOf[PrimitiveActor]
           )
         case Some(j) =>
@@ -260,7 +265,6 @@ object Main extends App {
 
       val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
 
-
       AzureIuvRendicontatiProducer.init(system)
       AzureFlussiRendicontazioneProducer.init(system)
 
@@ -281,6 +285,7 @@ object Main extends App {
       val baseactors = BootstrapUtil.createActors(system, repositories, actorProps, baseActorsNamesAndTypes)
         .+("deadLetterMonitorActor"-> system.actorOf(Props.create(classOf[DeadLetterMonitorActor]), BootstrapUtil.actorClassId(classOf[DeadLetterMonitorActor]))
       )
+
       val primitiveactors: Map[String, ActorRef] = BootstrapUtil.createActors(system, repositories, actorProps, primitiveActorsNamesAndTypes)
 
       log.info(s"Created Actors:\n${(baseactors.keys ++ primitiveactors.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")

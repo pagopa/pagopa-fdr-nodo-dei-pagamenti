@@ -146,8 +146,8 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
           flussoRiversamento,
           repositories.fdrRepository
         )
-
-        _ <- actorProps.containerBlobFunction(s"${nifrSoap.identificativoFlusso}_${UUID.randomUUID().toString}", xmlPayload, log)
+        // TODO [FC]
+//        _ <- actorProps.containerBlobFunction(s"${nifrSoap.identificativoFlusso}_${UUID.randomUUID().toString}", xmlPayload, log)
 
         _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
         _ = traceInternalRequest(restRequest, reFlow.get, restRequest.reExtra, reEventFunc, ddataMap)
