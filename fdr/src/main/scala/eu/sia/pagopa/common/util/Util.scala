@@ -4,6 +4,8 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.{ContentType => _}
 import akka.routing.RoundRobinGroup
 import com.typesafe.config.Config
+import scala.reflect.runtime.universe._
+import scala.reflect.runtime.{currentMirror => cm}
 
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
 import java.time.LocalDateTime
@@ -93,5 +95,33 @@ object Util {
       val bais = new ByteArrayInputStream(compressed)
       new GZIPInputStream(bais).readAllBytes()
     }
+  }
+
+  def toMap(obj: Any): Map[String, Any] = {
+    val mirror = cm.reflect(obj)
+    val members = mirror.symbol.typeSignature.members.collect {
+      case m: MethodSymbol if m.isCaseAccessor => m
+    }
+
+    members.map { member =>
+      val fieldName = member.name.toString
+      val fieldValue = mirror.reflectMethod(member).apply()
+
+      fieldName -> convertValue(fieldValue)
+    }.toMap
+  }
+
+  private def convertValue(value: Any): Any = value match {
+    case Some(v)             => convertValue(v) // Unwrap Option
+    case None                => null            // Handle None
+    case l: List[_]          => l.map(convertValue) // Handle Lists
+    case m: Map[_, _]        => m.map { case (k, v) => k.toString -> convertValue(v) }
+    case p if isCaseClass(p) => toMap(p)        // Recursively handle case classes
+    case v                   => v              // Base case: return the value as is
+  }
+
+  private def isCaseClass(obj: Any): Boolean = {
+    val symbol = cm.reflect(obj).symbol
+    symbol.isClass && symbol.asClass.isCaseClass
   }
 }

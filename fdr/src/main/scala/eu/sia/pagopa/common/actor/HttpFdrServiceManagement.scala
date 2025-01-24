@@ -110,4 +110,49 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
     getPaymentResponseData
   }
 
+  def internalFdrToEventHub(
+                                                         sessionId: String,
+                                                         payload: String,
+                                                         actorProps: ActorProps,
+                                                         re: Re
+//                                                       )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
+                                                       )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
+    val receiver = "fdr"
+    val action = "internalFdrToEventHub"
+
+    val (url, timeout, headers) = loadServiceConfig(action, receiver)
+
+    // TODO add gzip compression in header?
+
+    val simpleHttpReq = SimpleHttpReq(
+      sessionId,
+      action,
+      ContentTypes.`application/json`,
+      HttpMethods.POST,
+      url,
+      Some(payload), // TODO verify
+      headers,
+      Some(receiver),
+      re,
+      timeout.seconds,
+      None
+    )
+
+    val getResponseData = for {
+          httpResponse <- callService(simpleHttpReq, action, receiver, actorProps, false)
+          res = {
+            if( httpResponse.statusCode != StatusCodes.OK.intValue ) {
+              throw new RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), s"Errore: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]", StatusCodes.InternalServerError.intValue)
+            } else {
+              Try(httpResponse.payload.get.parseJson.convertTo[GetResponse]) match {
+                case Success(res) => res
+                case Failure(e) =>
+                  throw new RestException(e.getMessage, DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, e)
+              }
+            }
+          }
+        } yield res
+    getResponseData
+  }
+
 }
