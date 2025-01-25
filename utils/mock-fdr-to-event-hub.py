@@ -7,8 +7,8 @@ class MockHandler(RequestHandler):
         # Recupera il JSON dal corpo della richiesta
         try:
             print(f"Dati ricevuti BODY: {self.request.body}")
-            data = json.loads(self.request.body)
-            print(f"Dati ricevuti: {data}")
+            # data = json.loads(self.request.body)
+            # print(f"Dati ricevuti: {data}")
 
             # Restituisce una risposta di successo con stato 200
             self.set_status(200)

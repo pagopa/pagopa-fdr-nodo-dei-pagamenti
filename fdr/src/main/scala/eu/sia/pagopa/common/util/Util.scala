@@ -55,29 +55,48 @@ object Util {
 
   }
 
+//  def mapToJson(map: Map[String, Any]): String = {
+//    map
+//      .map { i =>
+//        def quote(x: Any): String = "\"" + x + "\""
+//        val key: String = quote(i._1)
+//        val value: String = i._2 match {
+//          case elem: Seq[_] =>
+//            elem
+//              .map {
+//                case ee: Map[_, _] => mapToJson(ee.asInstanceOf[Map[String, Any]])
+//                case _             => quote(_)
+//              }
+//              .mkString("[", ",", "]")
+//          case elem: Option[_] =>
+//            elem.map(quote).getOrElse("null")
+//          case elem: Map[_, _] =>
+//            mapToJson(elem.asInstanceOf[Map[String, Any]])
+//          case elem =>
+//            quote(elem)
+//        }
+//        s"$key : $value"
+//      }
+//      .mkString("{", ", ", "}")
+//  }
+
   def mapToJson(map: Map[String, Any]): String = {
-    map
-      .map { i =>
-        def quote(x: Any): String = "\"" + x + "\""
-        val key: String = quote(i._1)
-        val value: String = i._2 match {
-          case elem: Seq[_] =>
-            elem
-              .map {
-                case ee: Map[_, _] => mapToJson(ee.asInstanceOf[Map[String, Any]])
-                case _             => quote(_)
-              }
-              .mkString("[", ",", "]")
-          case elem: Option[_] =>
-            elem.map(quote).getOrElse("null")
-          case elem: Map[_, _] =>
-            mapToJson(elem.asInstanceOf[Map[String, Any]])
-          case elem =>
-            quote(elem)
-        }
-        s"$key : $value"
+    def quote(value: Any): String =
+      value match {
+        case str: String => "\"" + str.replace("\"", "\\\"") + "\"" // Escape quotes
+        case other       => other.toString
       }
-      .mkString("{", ", ", "}")
+
+    map.map { case (key, value) =>
+      val quotedKey = quote(key)
+      val quotedValue = value match {
+        case null                 => "null"
+        case seq: Seq[_]          => seq.map(quote).mkString("[", ",", "]")
+        case subMap: Map[_, _]    => mapToJson(subMap.asInstanceOf[Map[String, Any]])
+        case sub                  => quote(sub)
+      }
+      s"$quotedKey : $quotedValue"
+    }.mkString("{", ", ", "}")
   }
 
   def gzipContent(bytes: Array[Byte]) = {

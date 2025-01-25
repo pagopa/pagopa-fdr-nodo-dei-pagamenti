@@ -189,7 +189,8 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
               req.sessionId,
               nifr,
               flussoRiversamento,
-              rendicontazioneSaved.insertedTimestamp),
+              rendicontazioneSaved.insertedTimestamp,
+              0),
             replyTo)
 
 
@@ -199,11 +200,12 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
             FdREventToHistory(
               nifr,
               soapRequest.payload,
-              rendicontazioneSaved.insertedTimestamp),
+              rendicontazioneSaved.insertedTimestamp,
+              0
+            ),
             replyTo)
 
-        // send data to container blob
-//        actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log)
+        complete()
       }
   }
 

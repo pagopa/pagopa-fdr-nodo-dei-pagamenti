@@ -8,6 +8,7 @@ import eu.sia.pagopa.common.json.model.rendicontazione.{GetPaymentResponse, GetR
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.NodoLogger
+import reactor.core.publisher.Signal.complete
 import spray.json._
 
 import scala.concurrent.ExecutionContext
@@ -138,21 +139,23 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       None
     )
 
-    val getResponseData = for {
-          httpResponse <- callService(simpleHttpReq, action, receiver, actorProps, false)
-          res = {
-            if( httpResponse.statusCode != StatusCodes.OK.intValue ) {
-              throw new RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), s"Errore: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]", StatusCodes.InternalServerError.intValue)
-            } else {
-              Try(httpResponse.payload.get.parseJson.convertTo[GetResponse]) match {
-                case Success(res) => res
-                case Failure(e) =>
-                  throw new RestException(e.getMessage, DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, e)
-              }
-            }
-          }
-        } yield res
-    getResponseData
+    val getResponse = for {
+      httpResponse <- callService(simpleHttpReq, action, receiver, actorProps, false)
+      res = {
+        // Se il codice di stato è 200 OK, restituisci "ok"
+        if (httpResponse.statusCode == StatusCodes.OK.intValue) {
+          true
+        } else {
+          // Se il codice di stato non è 200 OK, solleva un errore
+          throw new RestException(
+            DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR),
+            s"Errore: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]",
+            StatusCodes.InternalServerError.intValue
+          )
+        }
+      }
+    } yield res
+    getResponse
   }
 
 }

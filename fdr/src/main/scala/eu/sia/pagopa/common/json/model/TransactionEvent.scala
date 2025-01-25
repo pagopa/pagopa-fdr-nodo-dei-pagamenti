@@ -14,13 +14,15 @@ class Event()
 case class FdREventToHistory(
                               nifr: NodoInviaFlussoRendicontazione,
                               soapRequest: String,
-                              insertedTimestamp: LocalDateTime
+                              insertedTimestamp: LocalDateTime,
+                              retry: Integer
                             ) extends Event
 case class FdREventToEventHub(
                                sessionId: String,
                                nifr: NodoInviaFlussoRendicontazione,
                                flussoRiversamento: CtFlussoRiversamento,
-                               insertedTimestamp: LocalDateTime
+                               insertedTimestamp: LocalDateTime,
+                               retry: Integer
                              ) extends Event
 
 @JsonPropertyOrder(Array("IUV", "IUR", "IMPORTO", "COD_ESITO", "DATA_ESITO_SINGOLO_PAGAMENTO", "IDSP", "ID_FLUSSO", "DATA_ORA_FLUSSO", "ID_DOMINIO", "PSP", "INT_PSP", "UNIQUE_ID", "INSERTED_TIMESTAMP"))
