@@ -74,20 +74,6 @@ abstract class BaseUnitTest()
             }
             throughput = 1
         }
-        azure-hub-event {
-          azure-sdk-client {
-            re-event {
-              client-timeoput-ms = 5000
-              event-hub-name = "fdr-re"
-              connection-string = "fake"
-            }
-            blob-re {
-              enabled  = false
-              container-name = "payload"
-              connection-string = "fake"
-            }
-          }
-        }
         azure-storage-blob {
             enabled  = false
             container-name = "xmlsharefile"
