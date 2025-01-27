@@ -61,6 +61,7 @@ trait AzureEventProducer {
     }
   }
 
+  // TODO [FC] review this method!
   private def addOrNewBatch(producer: EventHubProducerAsyncClient, batch: EventDataBatch, eventDataSeq: Seq[EventData], log: NodoLogger): Mono[_ <: Seq[EventDataBatch]] = {
     if (eventDataSeq.isEmpty) {
       Mono.just(Seq(batch))
@@ -116,16 +117,18 @@ trait AzureEventProducer {
               })
               .collectList()
           })
-          .subscribe(
-            (f: java.util.List[Void]) => {
-              MDC.setContextMap(mdcMap)
-              items.foreach(x => log.info(logMessage(x, QI_EVENT_MSG_PUBLISHED)))
-            },
-            (ex: Throwable) => {
-              MDC.setContextMap(mdcMap)
-              items.foreach(x => log.error(ex, logMessage(x, FAILED_ACT_VER_EVENT_MSG_FAILED)))
-            }
-          )
+          // TODO [FC] it is necessary?
+//          .subscribe(
+//            (f: java.util.List[Void]) => {
+//              MDC.setContextMap(mdcMap)
+//
+//              items.foreach(x => log.info(logMessage(x, QI_EVENT_MSG_PUBLISHED)))
+//            },
+//            (ex: Throwable) => {
+//              MDC.setContextMap(mdcMap)
+//              items.foreach(x => log.error(ex, logMessage(x, FAILED_ACT_VER_EVENT_MSG_FAILED)))
+//            }
+//          )
       } else {
         items.foreach(x => log.warn(logMessage(x, QI_EVENT_MSG_FAILED_PRODUCER_NOT_INITIALIZED)))
       }
