@@ -169,6 +169,9 @@ abstract class BaseUnitTest()
   val containerBlobFunction = (a: String, m: Map[String, String], b: BinaryData, c: NodoLogger) => {
     Future.successful(())
   }
+  val reContainerBlobFunction = (a: ReRequest, b: Repositories, c: NodoLogger) => {
+    Future.successful(())
+  }
 
   val certPath = s"${new File(".").getCanonicalPath}/localresources/cacerts"
 
@@ -178,7 +181,7 @@ abstract class BaseUnitTest()
 
   val repositories = new RepositoriesTest(system.settings.config, log)
 
-  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, "", certPath, TestItems.ddataMap)
+  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, reContainerBlobFunction, "", certPath, TestItems.ddataMap)
 
   val mockActor = system.actorOf(Props.create(classOf[MockActor]), s"mock")
 

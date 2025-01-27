@@ -14,7 +14,7 @@ import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, ReEventFunc}
+import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{Fdr1FlowsContainerBlobFunc, ReEventFunc, RePayloadContainerBlobFunc}
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
 import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.web.NodoRoute
@@ -42,10 +42,8 @@ object Main extends App {
 
   val job = args.headOption
 
-  val actorSystemName: String =
-    sys.env.getOrElse("AKKA_SYSTEM_NAME", throw new IllegalArgumentException("Actor system name must be defined by the actorSystemName property"))
-  val httpHost =
-    sys.env.getOrElse("SERVICE_HTTP_BIND_HOST", throw new IllegalArgumentException("HTTP bind host must be defined by the SERVICE_HTTP_BIND_HOST property"))
+  val actorSystemName: String = sys.env.getOrElse("AKKA_SYSTEM_NAME", throw new IllegalArgumentException("Actor system name must be defined by the actorSystemName property"))
+  val httpHost = sys.env.getOrElse("SERVICE_HTTP_BIND_HOST", throw new IllegalArgumentException("HTTP bind host must be defined by the SERVICE_HTTP_BIND_HOST property"))
   val httpPort = sys.env.get("SERVICE_HTTP_BIND_PORT").map(_.toInt).getOrElse(throw new IllegalArgumentException("HTTP bind port must be defined by the SERVICE_HTTP_BIND_PORT property"))
 
   val file = new File(System.getProperty("config.app"))
@@ -261,7 +259,8 @@ object Main extends App {
       // TODO [FC] rivedere scrittura RE
       val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
 
-      val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
+      val fdr1FlowsContainerBlobFunction: Fdr1FlowsContainerBlobFunc = AzureStorageBlobClient.fdr1FlowsBuild()
+      val rePayloadContainerBlobFunction: RePayloadContainerBlobFunc = AzureStorageBlobClient.rePayloadBuild()(executionContext, system, log, repositories)
 
       val actorProps = ActorProps(
         http,
@@ -270,7 +269,8 @@ object Main extends App {
         actorUtility = new ActorUtility,
         routers = baserouters ++ primitiverouters,
         reEventFunc = reEventFunc,
-        containerBlobFunction = containerBlobFunction,
+        fdr1FlowsContainerBlobFunction = fdr1FlowsContainerBlobFunction,
+        rePayloadContainerBlobFunction = rePayloadContainerBlobFunction,
         actorClassId = "main",
         cacertsPath = cacertsPath,
         ddataMap = data
@@ -403,7 +403,8 @@ final case class ActorProps(
                              actorUtility: ActorUtility,
                              routers: Map[String, ActorRef],
                              reEventFunc: ReEventFunc,
-                             containerBlobFunction: ContainerBlobFunc,
+                             fdr1FlowsContainerBlobFunction: Fdr1FlowsContainerBlobFunc,
+                             rePayloadContainerBlobFunction: RePayloadContainerBlobFunc,
                              actorClassId: String,
                              cacertsPath: String,
                              var ddataMap: ConfigData

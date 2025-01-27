@@ -26,7 +26,6 @@ import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoR
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
-import java.util.UUID
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
@@ -161,7 +160,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
       _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
-      _ = traceInternalRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+      _ = traceInternalRequest(soapRequest, reFlow.get, soapRequest.reExtra, actorProps.rePayloadContainerBlobFunction, ddataMap)
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield (sr, nifr, flussoRiversamento, rendicontazioneSaved)
 
@@ -175,7 +174,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
           errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
       }).map { case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
         log.info(FdrLogConstant.logEnd(actorClassId))
-        traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+        traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, actorProps.rePayloadContainerBlobFunction, ddataMap)
         replyTo ! sr
 
         if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {

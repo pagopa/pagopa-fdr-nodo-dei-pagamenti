@@ -298,7 +298,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
     }) map (sr => {
-      traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+      traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, actorProps.rePayloadContainerBlobFunction, ddataMap)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()

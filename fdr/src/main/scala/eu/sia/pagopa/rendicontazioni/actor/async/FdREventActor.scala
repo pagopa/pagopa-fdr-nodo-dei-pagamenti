@@ -25,7 +25,7 @@ final case class FdREventActor(repositories: Repositories, actorProps: ActorProp
     )
 
     log.info(s"FdREventToHistory saving ${filename}")
-    actorProps.containerBlobFunction(filename, metadata, binaryData, log)
+    actorProps.fdr1FlowsContainerBlobFunction(filename, metadata, binaryData, log)
     log.info(s"FdREventToHistory ${filename} saved")
 
     log.debug(s"FdREventToHistory saving metadata")

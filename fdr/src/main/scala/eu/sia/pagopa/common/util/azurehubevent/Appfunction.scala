@@ -4,6 +4,7 @@ import com.azure.core.util.BinaryData
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.message.{CategoriaEvento, ReExtra, ReRequest, SottoTipoEvento}
+import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.{Constant, NodoLogger, Util}
 import org.slf4j.MDC
@@ -26,7 +27,8 @@ object Appfunction {
   }
 
   type ReEventFunc = (ReRequest, NodoLogger, ConfigData) => Future[Unit]
-  type ContainerBlobFunc = (String, Map[String, String], BinaryData, NodoLogger) => Future[Unit]
+  type Fdr1FlowsContainerBlobFunc = (String, Map[String, String], BinaryData, NodoLogger) => Future[Unit]
+  type RePayloadContainerBlobFunc = (ReRequest, Repositories, NodoLogger) => Future[Unit]
 
   def defaultOperation(request: ReRequest, log: NodoLogger, reXmlLog: Boolean, reJsonLog: Boolean, data: ConfigData)(implicit ec: ExecutionContext): Unit = {
     MDC.put(Constant.MDCKey.DATA_ORA_EVENTO, Appfunction.formatDate(request.re.insertedTimestamp))

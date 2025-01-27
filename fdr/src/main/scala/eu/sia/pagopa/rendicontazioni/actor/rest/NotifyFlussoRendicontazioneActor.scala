@@ -180,7 +180,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateResponse(Some(pmae)))
       }).map( res => {
-        traceInterfaceRequest(req, reFlow.get, req.reExtra, reEventFunc, ddataMap)
+        traceInterfaceRequest(req, reFlow.get, req.reExtra, actorProps.rePayloadContainerBlobFunction, ddataMap)
         log.info(FdrLogConstant.logEnd(actorClassId))
         replyTo ! res
         complete()
