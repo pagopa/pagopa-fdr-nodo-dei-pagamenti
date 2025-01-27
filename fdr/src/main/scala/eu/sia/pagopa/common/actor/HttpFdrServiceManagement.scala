@@ -111,47 +111,4 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
     getPaymentResponseData
   }
 
-  def internalFdrToEventHub(
-                                                         sessionId: String,
-                                                         payload: String,
-                                                         actorProps: ActorProps,
-                                                         re: Re
-                                                       )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
-    val receiver = "fdr"
-    val action = "internalFdrToEventHub"
-
-    val (url, timeout, headers) = loadServiceConfig(action, receiver)
-
-    val simpleHttpReq = SimpleHttpReq(
-      sessionId,
-      action,
-      ContentTypes.`application/json`,
-      HttpMethods.POST,
-      url,
-      Some(payload),
-      headers,
-      Some(receiver),
-      re,
-      timeout.seconds,
-      None
-    )
-
-    val getResponse = for {
-      httpResponse <- callService(simpleHttpReq, action, receiver, actorProps, false)
-      res = {
-        // if 200 then ok otherwise exception to retry to send
-        if (httpResponse.statusCode == StatusCodes.OK.intValue) {
-          true
-        } else {
-          throw new RestException(
-            DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR),
-            s"Error: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]",
-            StatusCodes.InternalServerError.intValue
-          )
-        }
-      }
-    } yield res
-    getResponse
-  }
-
 }
