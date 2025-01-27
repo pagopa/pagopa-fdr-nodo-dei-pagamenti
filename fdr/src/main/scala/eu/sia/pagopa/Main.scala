@@ -15,12 +15,12 @@ import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, ReEventFunc}
-import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.{AzureFlussiRendicontazioneProducer, AzureIuvRendicontatiProducer, AzureProducerBuilder}
+import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
 import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.config.actor.ApiConfigActor
 import eu.sia.pagopa.nodopoller.actor.PollerActor
-import eu.sia.pagopa.rendicontazioni.actor.async.EventHubActor
+import eu.sia.pagopa.rendicontazioni.actor.async.FdREventActor
 import io.github.mweirauch.micrometer.jvm.extras.{ProcessMemoryMetrics, ProcessThreadMetrics}
 import io.micrometer.core.instrument.binder.jvm.{ClassLoaderMetrics, JvmGcMetrics, JvmMemoryMetrics, JvmThreadMetrics}
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
@@ -235,7 +235,7 @@ object Main extends App {
           Seq(
             BootstrapUtil.actorClassId(classOf[ApiConfigActor]) -> classOf[ApiConfigActor],
             BootstrapUtil.actorClassId(classOf[PollerActor]) -> classOf[PollerActor],
-            BootstrapUtil.actorClassId(classOf[EventHubActor]) -> classOf[EventHubActor],
+            BootstrapUtil.actorClassId(classOf[FdREventActor]) -> classOf[FdREventActor],
             Constant.KeyName.FTP_SENDER -> classOf[PrimitiveActor]
           )
         case Some(j) =>
@@ -258,12 +258,10 @@ object Main extends App {
 
       log.info(s"Created Routers:\n${(baserouters.keys ++ primitiverouters.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
 
+      // TODO [FC] rivedere scrittura RE
       val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
 
       val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
-
-      AzureIuvRendicontatiProducer.init(system)
-      AzureFlussiRendicontazioneProducer.init(system)
 
       val actorProps = ActorProps(
         http,

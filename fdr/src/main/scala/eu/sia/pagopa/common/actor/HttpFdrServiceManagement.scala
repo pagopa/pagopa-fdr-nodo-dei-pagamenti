@@ -8,6 +8,7 @@ import eu.sia.pagopa.common.json.model.rendicontazione.{GetPaymentResponse, GetR
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.NodoLogger
+import reactor.core.publisher.Signal.complete
 import spray.json._
 
 import scala.concurrent.ExecutionContext

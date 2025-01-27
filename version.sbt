@@ -1,1 +1,1 @@
-ThisBuild / version := "2.1.9-70-PAGOPA-2590-manage-evh"
+ThisBuild / version := "2.1.9-69-PAGOPA-2394"

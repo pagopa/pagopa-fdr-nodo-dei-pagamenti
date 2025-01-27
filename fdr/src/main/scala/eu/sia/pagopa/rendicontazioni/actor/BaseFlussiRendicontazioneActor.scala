@@ -123,7 +123,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
           case Success(c) => c
           case Failure(e) => throw new DigitPaException("Errore decodifica rendicontazione", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
         }
-        val bf = BinaryFile(0, xmlRendicontazione.length, Some(Util.zipContent(content.getBytes)), None)
+        val bf = BinaryFile(0, xmlRendicontazione.length, Some(Util.gzipContent(content.getBytes)), None)
         fdrRepository
           .saveRendicontazioneAndBinaryFile(rendi, bf)
           .recoverWith({ case e =>

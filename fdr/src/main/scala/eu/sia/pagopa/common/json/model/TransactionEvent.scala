@@ -11,13 +11,16 @@ import java.time.LocalDateTime
 
 class Event()
 
-case class FdREvent(
-                     sessionId: String,
-                     nifr: NodoInviaFlussoRendicontazione,
-                     flussoRiversamento: CtFlussoRiversamento,
-                     insertedTimestamp: LocalDateTime
-     ) extends Event
+case class FdREventToHistory(
+                              sessionId: String,
+                              nifr: NodoInviaFlussoRendicontazione,
+                              soapRequest: String,
+                              insertedTimestamp: LocalDateTime,
+                              elaborate: Boolean,
+                              retry: Integer
+                            ) extends Event
 
+// TODO [FC] delete
 @JsonPropertyOrder(Array("IUV", "IUR", "IMPORTO", "COD_ESITO", "DATA_ESITO_SINGOLO_PAGAMENTO", "IDSP", "ID_FLUSSO", "DATA_ORA_FLUSSO", "ID_DOMINIO", "PSP", "INT_PSP", "UNIQUE_ID", "INSERTED_TIMESTAMP"))
 @JsonInclude(Include.NON_ABSENT)
 case class IUVRendicontatiEvent(
