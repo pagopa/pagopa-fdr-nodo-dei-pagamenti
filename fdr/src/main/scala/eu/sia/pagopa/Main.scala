@@ -76,8 +76,6 @@ object Main extends App {
   implicit val log: NodoLogger = new NodoLogger(Logging(system, getClass.getCanonicalName))
   val shutdown = CoordinatedShutdown(system)
 
-//  def mongoRepository = new MongoRepository(config, log)(executionContext)
-
   log.info(s"""using config:
               |configScheduleMinutes: ${config.getString("configScheduleMinutes")}
               |limitjobsSize: ${config.getString("limitjobsSize")}
