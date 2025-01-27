@@ -14,9 +14,7 @@ import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{Fdr1FlowsContainerBlobFunc, ReEventFunc, RePayloadContainerBlobFunc}
-import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
-import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
+import Appfunction.{Fdr1FlowsContainerBlobFunc, RePayloadContainerBlobFunc}
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.config.actor.ApiConfigActor
 import eu.sia.pagopa.nodopoller.actor.PollerActor
@@ -256,9 +254,6 @@ object Main extends App {
 
       log.info(s"Created Routers:\n${(baserouters.keys ++ primitiverouters.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
 
-      // TODO [FC] rivedere scrittura RE
-      val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
-
       val fdr1FlowsContainerBlobFunction: Fdr1FlowsContainerBlobFunc = AzureStorageBlobClient.fdr1FlowsBuild()
       val rePayloadContainerBlobFunction: RePayloadContainerBlobFunc = AzureStorageBlobClient.rePayloadBuild()(executionContext, system, log, repositories)
 
@@ -268,7 +263,6 @@ object Main extends App {
         actorMaterializer = materializer,
         actorUtility = new ActorUtility,
         routers = baserouters ++ primitiverouters,
-        reEventFunc = reEventFunc,
         fdr1FlowsContainerBlobFunction = fdr1FlowsContainerBlobFunction,
         rePayloadContainerBlobFunction = rePayloadContainerBlobFunction,
         actorClassId = "main",
@@ -301,7 +295,6 @@ object Main extends App {
             routers = baserouters ++ primitiverouters,
             httpHost = httpHost,
             httpPort = httpPort,
-            reEventFunc = reEventFunc,
             actorProps
           )
           import akka.http.scaladsl.server.Directives._
@@ -402,7 +395,6 @@ final case class ActorProps(
                              actorMaterializer: Materializer,
                              actorUtility: ActorUtility,
                              routers: Map[String, ActorRef],
-                             reEventFunc: ReEventFunc,
                              fdr1FlowsContainerBlobFunction: Fdr1FlowsContainerBlobFunc,
                              rePayloadContainerBlobFunction: RePayloadContainerBlobFunc,
                              actorClassId: String,

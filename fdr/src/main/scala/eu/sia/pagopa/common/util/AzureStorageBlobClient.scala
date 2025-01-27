@@ -1,17 +1,16 @@
-package eu.sia.pagopa.common.util.azurestorageblob
+package eu.sia.pagopa.common.util
 
 import akka.actor.ActorSystem
 import akka.dispatch.MessageDispatcher
 import com.azure.core.util.BinaryData
-import com.azure.storage.blob.{BlobAsyncClient, BlobClientBuilder, BlobServiceClientBuilder}
 import com.azure.storage.blob.models.BlobStorageException
-import eu.sia.pagopa.common.message.{BlobBodyRef, CategoriaEvento, CategoriaEventoEvh, ReEventHub, ReRequest, SottoTipoEvento}
+import com.azure.storage.blob.{BlobAsyncClient, BlobClientBuilder, BlobServiceClientBuilder}
+import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.util.{Constant, NodoLogger, Util}
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{Fdr1FlowsContainerBlobFunc, RePayloadContainerBlobFunc}
+import eu.sia.pagopa.common.util.Appfunction.{Fdr1FlowsContainerBlobFunc, RePayloadContainerBlobFunc}
 
-import scala.jdk.CollectionConverters._
 import scala.concurrent.{ExecutionContext, Future}
+import scala.jdk.CollectionConverters._
 
 object AzureStorageBlobClient {
 
