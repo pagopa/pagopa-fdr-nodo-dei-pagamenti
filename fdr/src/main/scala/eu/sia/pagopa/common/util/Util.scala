@@ -4,13 +4,16 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.{ContentType => _}
 import akka.routing.RoundRobinGroup
 import com.typesafe.config.Config
+
 import scala.reflect.runtime.universe._
 import scala.reflect.runtime.{currentMirror => cm}
-
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 import java.time.temporal.ChronoUnit
 import java.util.zip.{GZIPInputStream, GZIPOutputStream}
+import javax.xml.datatype.XMLGregorianCalendar
+import scala.collection.immutable.HashMap
 import scala.util.Try
 import scala.util.matching.Regex
 
@@ -80,21 +83,50 @@ object Util {
 //      .mkString("{", ", ", "}")
 //  }
 
-  def mapToJson(map: Map[String, Any]): String = {
-    def quote(value: Any): String =
-      value match {
-        case str: String => "\"" + str.replace("\"", "\\\"") + "\"" // Escape quotes
-        case other       => other.toString
-      }
+//  def mapToJson(map: Map[String, Any]): String = {
+//    def quote(value: Any): String =
+//      value match {
+//        case str: String => "\"" + str.replace("\"", "\\\"") + "\"" // Escape quotes
+//        case other       => other.toString
+//      }
+//
+//    map.map { case (key, value) =>
+//      val quotedKey = quote(key)
+//      val quotedValue = value match {
+//        case null                 => "null"
+//        case seq: Seq[_]          => seq.map(quote).mkString("[", ",", "]")
+//        case subMap: Map[_, _]    => mapToJson(subMap.asInstanceOf[Map[String, Any]])
+//        case sub                  => quote(sub)
+//      }
+//      s"$quotedKey : $quotedValue"
+//    }.mkString("{", ", ", "}")
+//  }
 
+  def mapToJson(map: Map[String, Any]): String = {
+    // Funzione per aggiungere le virgolette, se necessario
+    def quote(value: Any): String = value match {
+      case str: String =>
+        if (str.startsWith("\"") && str.endsWith("\"")) str
+        else "\"" + str.replace("\"", "\\\"") + "\"" // Escape delle virgolette
+//      case str: String => "\"" + str.replace("\\", "\\\\").replace("\"", "\\\"").replace("'", "\\\'") + "\"" // Escape di caratteri speciali
+      case date: LocalDate => "\"" + date.toString + "\"" // Formattazione date
+      case dateTime: LocalDateTime => "\"" + dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "\"" // Formattazione datetime
+      case xmlCal: XMLGregorianCalendar => "\"" + xmlCal.toXMLFormat + "\"" // Formattazione XMLGregorianCalendar
+      case other => other.toString
+    }
+
+    // Funzione per gestire valori complessi ricorsivamente
+    def toJson(value: Any): String = value match {
+      case null => "null"
+      case seq: Seq[_] => seq.map(toJson).mkString("[", ",", "]") // Array JSON
+      case subMap: Map[_, _] => mapToJson(subMap.asInstanceOf[Map[String, Any]]) // Oggetto JSON
+      case other => quote(other) // Quote per tutto il resto
+    }
+
+    // Creazione del JSON finale
     map.map { case (key, value) =>
-      val quotedKey = quote(key)
-      val quotedValue = value match {
-        case null                 => "null"
-        case seq: Seq[_]          => seq.map(quote).mkString("[", ",", "]")
-        case subMap: Map[_, _]    => mapToJson(subMap.asInstanceOf[Map[String, Any]])
-        case sub                  => quote(sub)
-      }
+      val quotedKey = quote(key) // Chiavi sempre con virgolette
+      val quotedValue = toJson(value) // Gestione valori
       s"$quotedKey : $quotedValue"
     }.mkString("{", ", ", "}")
   }

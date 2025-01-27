@@ -7,9 +7,10 @@ import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
-import eu.sia.pagopa.common.json.model.{FdREvent, FdREventToEventHub, FdREventToHistory, FlussiRendicontazioneEvent, IUVRendicontatiEvent}
+import eu.sia.pagopa.common.json.model.FdREventToHistory
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
+import eu.sia.pagopa.common.repo.fdr.enums.RendicontazioneStatus
 import eu.sia.pagopa.common.repo.fdr.model.Rendicontazione
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
@@ -45,9 +46,6 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
   val outputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean).getOrElse(false)
 
   val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"
-
-  var iuvRendicontatiEvent: Seq[IUVRendicontatiEvent] = Nil
-  var flussiRendicontazioneEvent: Option[FlussiRendicontazioneEvent] = None
 
   override def receive: Receive = { case soapRequest: SoapRequest =>
 
@@ -158,8 +156,6 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         repositories.fdrRepository
       )
 
-//      _ <- actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log)
-
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
       _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
@@ -182,28 +178,21 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
         replyTo ! sr
 
-        // send data to event hub for QI
-        actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdREventActor])))
-          .tell(
-            FdREventToEventHub(
-              req.sessionId,
-              nifr,
-              flussoRiversamento,
-              rendicontazioneSaved.insertedTimestamp,
-              0),
-            replyTo)
+        if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
 
-
-        // send data to history
-        actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdREventActor])))
-          .tell(
-            FdREventToHistory(
-              nifr,
-              soapRequest.payload,
-              rendicontazioneSaved.insertedTimestamp,
-              0
-            ),
-            replyTo)
+          // send data to history
+          actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdREventActor])))
+            .tell(
+              FdREventToHistory(
+                sessionId = req.sessionId,
+                nifr = nifr,
+                soapRequest = soapRequest.payload,
+                insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
+                elaborate = true,
+                retry = 0
+              ),
+              replyTo)
+        }
 
         complete()
       }

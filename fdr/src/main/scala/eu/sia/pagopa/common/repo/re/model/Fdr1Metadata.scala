@@ -17,8 +17,6 @@ case class Fdr1Metadata(
                          pspCreditorInstitution:String  // used for sharding
                        ) {
 
-//  @JsonProperty(value="PartitionKey")
-//  def getPartitionKey(): String = partitionKey
   def getPsp(): String = psp
   def getBrokerPsp(): String = brokerPsp
   def getChannel(): String = channel

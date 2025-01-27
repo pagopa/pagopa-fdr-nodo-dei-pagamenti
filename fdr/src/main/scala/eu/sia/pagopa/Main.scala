@@ -13,10 +13,9 @@ import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.repo.re.MongoRepository
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, ReEventFunc}
-import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.{AzureFlussiRendicontazioneProducer, AzureIuvRendicontatiProducer, AzureProducerBuilder}
+import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
 import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.config.actor.ApiConfigActor
@@ -261,12 +260,10 @@ object Main extends App {
 
       log.info(s"Created Routers:\n${(baserouters.keys ++ primitiverouters.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
 
+      // TODO [FC] rivedere scrittura RE
       val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
 
       val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
-
-      AzureIuvRendicontatiProducer.init(system)
-      AzureFlussiRendicontazioneProducer.init(system)
 
       val actorProps = ActorProps(
         http,

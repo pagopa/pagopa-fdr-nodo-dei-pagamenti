@@ -116,14 +116,11 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
                                                          payload: String,
                                                          actorProps: ActorProps,
                                                          re: Re
-//                                                       )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
                                                        )(implicit log: NodoLogger, ec: ExecutionContext, as: ActorSystem) = {
     val receiver = "fdr"
     val action = "internalFdrToEventHub"
 
     val (url, timeout, headers) = loadServiceConfig(action, receiver)
-
-    // TODO add gzip compression in header?
 
     val simpleHttpReq = SimpleHttpReq(
       sessionId,
@@ -131,7 +128,7 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
       ContentTypes.`application/json`,
       HttpMethods.POST,
       url,
-      Some(payload), // TODO verify
+      Some(payload),
       headers,
       Some(receiver),
       re,
@@ -142,14 +139,13 @@ object HttpFdrServiceManagement extends HttpBaseServiceManagement {
     val getResponse = for {
       httpResponse <- callService(simpleHttpReq, action, receiver, actorProps, false)
       res = {
-        // Se il codice di stato è 200 OK, restituisci "ok"
+        // if 200 then ok otherwise exception to retry to send
         if (httpResponse.statusCode == StatusCodes.OK.intValue) {
           true
         } else {
-          // Se il codice di stato non è 200 OK, solleva un errore
           throw new RestException(
             DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR),
-            s"Errore: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]",
+            s"Error: statusCode=[${httpResponse.statusCode}], message=[${httpResponse.payload.getOrElse("")}]",
             StatusCodes.InternalServerError.intValue
           )
         }

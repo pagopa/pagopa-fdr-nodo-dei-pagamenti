@@ -166,7 +166,7 @@ abstract class BaseUnitTest()
   val reFunction = (a: ReRequest, b: NodoLogger, c: ConfigData) => {
     Future.successful(())
   }
-  val containerBlobFunction = (a: String, b: BinaryData, c: NodoLogger) => {
+  val containerBlobFunction = (a: String, m: Map[String, String], b: BinaryData, c: NodoLogger) => {
     Future.successful(())
   }
 
