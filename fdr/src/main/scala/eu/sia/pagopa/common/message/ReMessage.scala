@@ -3,8 +3,7 @@ package eu.sia.pagopa.common.message
 import eu.sia.pagopa.common.repo.re.model.Re
 import org.mongodb.scala.bson._
 
-import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, ZoneOffset, ZonedDateTime}
+import java.time.LocalDateTime
 
 object CategoriaEvento extends Enumeration {
   val INTERNO, INTERFACCIA = Value
@@ -79,10 +78,7 @@ case class ReEventHub(
       "header" -> Document(header.map { case (key, values) =>
         key -> BsonArray.fromIterable(values.map(v => BsonString(v)))
       })
-    ).filter {
-      case (_, value: BsonNull) => false
-      case _ => true
-    }
+    )
   }
 }
 

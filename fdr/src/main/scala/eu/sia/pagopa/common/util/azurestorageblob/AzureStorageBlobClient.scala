@@ -3,18 +3,13 @@ package eu.sia.pagopa.common.util.azurestorageblob
 import akka.actor.ActorSystem
 import akka.dispatch.MessageDispatcher
 import com.azure.core.util.BinaryData
-import com.azure.messaging.eventhubs.EventHubProducerAsyncClient
 import com.azure.storage.blob.{BlobAsyncClient, BlobClientBuilder, BlobServiceClientBuilder}
 import com.azure.storage.blob.models.BlobStorageException
-import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.message.{BlobBodyRef, CategoriaEvento, CategoriaEventoEvh, ReEventHub, ReRequest, SottoTipoEvento}
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.util.{Constant, NodoLogger}
+import eu.sia.pagopa.common.util.{Constant, NodoLogger, Util}
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{Fdr1FlowsContainerBlobFunc, RePayloadContainerBlobFunc}
-import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder.{businessLogicForPublish, saveBlobToAzure}
 
-import java.io.ByteArrayInputStream
-import java.nio.charset.StandardCharsets
 import scala.jdk.CollectionConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -63,14 +58,6 @@ object AzureStorageBlobClient {
       val connectionString = system.settings.config.getString("azure-storage-blob.connection-string")
       val containerName = system.settings.config.getString("azure-storage-blob.re-payload-container-name")
       log.info(s"Starting Azure Storage Blob Client Service on ${containerName}...")
-
-      val blobServiceClient = new BlobServiceClientBuilder()
-        .connectionString(connectionString)
-        .buildClient()
-
-      val containerClient = blobServiceClient.getBlobContainerClient(containerName)
-
-      // TODO [FC] modify
 
       (request: ReRequest, repositories: Repositories, log: NodoLogger) => {
         val executionContext: MessageDispatcher = system.dispatchers.lookup("eventhub-dispatcher")
@@ -129,18 +116,21 @@ object AzureStorageBlobClient {
     val connectionString = system.settings.config.getString("azure-storage-blob.connection-string")
     val containerName = system.settings.config.getString("azure-storage-blob.re-payload-container-name")
 
-    val fileName = s"${r.sessionId}_${r.re.tipoEvento.get}_${r.re.sottoTipoEvento}"
+    val fileName = s"${r.sessionId}_${r.re.tipoEvento.get}_${r.re.sottoTipoEvento}.xml.zip"
 
     var blobAsyncClient: Option[BlobAsyncClient] = None
-    r.re.payload.foreach(v => {
+    var compressedBytes: Array[Byte] = Array.empty[Byte]
+    if (r.re.payload.isDefined) {
+      compressedBytes = Util.gzipContent(r.re.payload.get)
+
       blobAsyncClient = Some(new BlobClientBuilder()
         .connectionString(connectionString)
         .blobName(fileName).containerName(containerName)
         .buildAsyncClient())
-      blobAsyncClient.get.upload(BinaryData.fromStream(new ByteArrayInputStream(new String(v).getBytes(StandardCharsets.UTF_8)))).subscribe()
-    })
+      blobAsyncClient.get.upload(BinaryData.fromBytes(compressedBytes)).subscribe()
+    }
     blobAsyncClient.map(bc => {
-      BlobBodyRef(Some(bc.getAccountName), Some(bc.getContainerName), Some(fileName), (r.re.payload.map(_.length).getOrElse(0)))
+      BlobBodyRef(Some(bc.getAccountName), Some(bc.getContainerName), Some(fileName), compressedBytes.length)
     })
   }
 
