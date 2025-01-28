@@ -73,7 +73,7 @@ export default function () {
     'esito field is OK': (r) => parseHTML(response.body).find('esito').text() === 'OK',
   });
   //console.log(`nodoInviaFlussoRendicontazione request: ${request_nifr} to [${parameters.url_nodo_psp}]\n`)
-  //console.log(`nodoInviaFlussoRendicontazione response: ${response.body} to [${parameters.url_nodo_psp}]\n`)
+  console.log(`nodoInviaFlussoRendicontazione response: ${response.body} to [${parameters.url_nodo_psp}]\n`)
 
   // ending the execution
   postcondition();
