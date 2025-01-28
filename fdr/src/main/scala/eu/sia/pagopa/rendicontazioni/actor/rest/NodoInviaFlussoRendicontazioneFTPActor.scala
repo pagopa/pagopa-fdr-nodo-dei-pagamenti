@@ -17,8 +17,8 @@ import eu.sia.pagopa.common.repo.fdr.model.Rendicontazione
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.commonxml.XmlEnum
+import eu.sia.pagopa.config.actor.FdRMetadataActor
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
-import eu.sia.pagopa.rendicontazioni.actor.async.FdREventActor
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import org.slf4j.MDC
 import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
@@ -174,7 +174,7 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
 
           if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
             // send data to history
-            actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdREventActor])))
+            actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
               .tell(
                 FdREventToHistory(
                   sessionId = req.sessionId,

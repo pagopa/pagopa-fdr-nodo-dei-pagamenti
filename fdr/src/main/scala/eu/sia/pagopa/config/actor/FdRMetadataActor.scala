@@ -1,18 +1,17 @@
-package eu.sia.pagopa.rendicontazioni.actor.async
+package eu.sia.pagopa.config.actor
 
 import com.azure.core.util.BinaryData
-import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.BaseActor
 import eu.sia.pagopa.common.json.model.FdREventToHistory
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.re.model.Fdr1Metadata
 import eu.sia.pagopa.common.util.Util
-import yamusca.data
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 
 import java.util.UUID
 import scala.util.{Failure, Success}
 
-final case class FdREventActor(repositories: Repositories, actorProps: ActorProps) extends BaseActor {
+final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorProps) extends BaseActor {
 
   private def saveForHistory(event: FdREventToHistory): Unit = {
     // save on pagopaweufdrsa.fdr1flows as gzip
@@ -49,7 +48,7 @@ final case class FdREventActor(repositories: Repositories, actorProps: ActorProp
             log.info(s"FdR Metadata ${result} ${fdr1Metadata.getPsp()} ${fdr1Metadata.getFlowId()} saved")
           case Failure(exception) => {
             log.error(exception, s"Problem to save on Mongo ${fdr1Metadata.getPsp()} ${fdr1Metadata.getFlowId()}")
-            actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdREventActor])))
+            actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
               .tell(event.copy(retry = (event.retry + 1)), null)
           }
         }
