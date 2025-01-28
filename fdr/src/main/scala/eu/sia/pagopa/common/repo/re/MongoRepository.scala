@@ -3,6 +3,7 @@ package eu.sia.pagopa.common.repo.re
 import com.typesafe.config.Config
 import eu.sia.pagopa.common.repo.re.model.Fdr1Metadata
 import eu.sia.pagopa.common.util.NodoLogger
+import org.mongodb.scala.result.InsertOneResult
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase}
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -17,16 +18,16 @@ case class MongoRepository(config:Config, log: NodoLogger)(implicit ec: Executio
   val mongoClient: MongoClient = MongoClient(mongoConnectionString)
   val database: MongoDatabase = mongoClient.getDatabase(mongoMetadataDatabase)
 
-  def saveFdrMetadata(data: Fdr1Metadata): Unit = {
+  def saveFdrMetadata(data: Fdr1Metadata): Future[InsertOneResult] = {
     val document: MongoCollection[Document] = mongoClient.getDatabase(mongoMetadataDatabase).getCollection(mongoMetadataDocument)
-    val insertFuture = document.insertOne(data.toDocument).toFuture()
-
-    insertFuture.onComplete {
-      case Success(result) =>
-        log.info(s"FdR Metadata ${data.getPsp()} ${data.getFlowId()} saved")
-      case Failure(exception) =>
-        log.error(exception, s"Problem to save on Mongo ${data.getPsp()} ${data.getFlowId()}")
-    }
+    document.insertOne(data.toDocument).toFuture()
+//    insertFuture
+//    insertFuture.onComplete {
+//      case Success(result) =>
+//        log.info(s"FdR Metadata ${result} ${data.getPsp()} ${data.getFlowId()} saved")
+//      case Failure(exception) =>
+//        log.error(exception, s"Problem to save on Mongo ${data.getPsp()} ${data.getFlowId()}")
+//    }
 
   }
 

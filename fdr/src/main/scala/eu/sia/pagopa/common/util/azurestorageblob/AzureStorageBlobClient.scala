@@ -1,19 +1,18 @@
 package eu.sia.pagopa.common.util.azurestorageblob
 
 import akka.actor.ActorSystem
-import akka.dispatch.MessageDispatcher
 import com.azure.core.util.BinaryData
 import com.azure.storage.blob.BlobServiceClientBuilder
 import com.azure.storage.blob.models.BlobStorageException
 import eu.sia.pagopa.common.util.NodoLogger
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ContainerBlobFunc
+import eu.sia.pagopa.common.util.azurehubevent.Appfunction.FdR1FlowsContainerBlobFunc
 
 import scala.jdk.CollectionConverters._
 import scala.concurrent.{ExecutionContext, Future}
 
 object AzureStorageBlobClient {
 
-  def build()(implicit ec: ExecutionContext, system: ActorSystem, log: NodoLogger): ContainerBlobFunc = {
+  def fdr1FlowsBuild()(implicit ec: ExecutionContext, system: ActorSystem, log: NodoLogger): FdR1FlowsContainerBlobFunc = {
     val azureStorageBlobEnabled = system.settings.config.getBoolean("azure-storage-blob.enabled")
 
     if( azureStorageBlobEnabled ) {
@@ -28,17 +27,16 @@ object AzureStorageBlobClient {
       val containerClient = blobServiceClient.getBlobContainerClient(containerName)
 
       (fileName: String, metadata: Map[String, String],  fileContent: BinaryData, log: NodoLogger) => {
-//        val executionContext: MessageDispatcher = system.dispatchers.lookup("blobstorage-dispatcher")
         Future {
           val blobClient = containerClient.getBlobClient(fileName)
           blobClient.upload(fileContent)
           blobClient.setMetadata(metadata.asJava)
         }.recoverWith {
           case e: BlobStorageException =>
-            log.error(e, s"Error interacting with Azure Blob Storage: ${e.getMessage}")
+            log.error(e, s"Error interacting with Azure Blob Storage FdR1-Flows: ${e.getMessage}")
             Future.failed(e)
           case e: Throwable =>
-            log.error(e, "Unexpected error")
+            log.error(e, "Unexpected error on FdR1-Flows")
             Future.failed(e)
         }
 

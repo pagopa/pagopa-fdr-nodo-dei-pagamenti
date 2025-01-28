@@ -1,14 +1,16 @@
 package eu.sia.pagopa.rendicontazioni.actor.async
 
 import com.azure.core.util.BinaryData
-import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.BaseActor
 import eu.sia.pagopa.common.json.model.FdREventToHistory
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.re.model.Fdr1Metadata
 import eu.sia.pagopa.common.util.Util
+import yamusca.data
 
 import java.util.UUID
+import scala.util.{Failure, Success}
 
 final case class FdREventActor(repositories: Repositories, actorProps: ActorProps) extends BaseActor {
 
@@ -25,7 +27,8 @@ final case class FdREventActor(repositories: Repositories, actorProps: ActorProp
     )
 
     log.info(s"FdREventToHistory saving ${filename}")
-    actorProps.containerBlobFunction(filename, metadata, binaryData, log)
+    // TODO [FC] use uploadWithResponse in order to retrieve status
+    actorProps.fdr1FlowsContainerBlobFunction(filename, metadata, binaryData, log)
     log.info(s"FdREventToHistory ${filename} saved")
 
     log.debug(s"FdREventToHistory saving metadata")
@@ -40,7 +43,16 @@ final case class FdREventActor(repositories: Repositories, actorProps: ActorProp
       s"${event.nifr.identificativoPSP}${event.nifr.identificativoDominio}"
     )
 
-    repositories.mongoRepository.saveFdrMetadata(fdr1Metadata)
+    val insertFuture = repositories.mongoRepository.saveFdrMetadata(fdr1Metadata)
+        insertFuture.onComplete {
+          case Success(result) =>
+            log.info(s"FdR Metadata ${result} ${fdr1Metadata.getPsp()} ${fdr1Metadata.getFlowId()} saved")
+          case Failure(exception) => {
+            log.error(exception, s"Problem to save on Mongo ${fdr1Metadata.getPsp()} ${fdr1Metadata.getFlowId()}")
+            actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdREventActor])))
+              .tell(event.copy(retry = (event.retry + 1)), null)
+          }
+        }
     log.info(s"FdREventToHistory metadata saved")
   }
 

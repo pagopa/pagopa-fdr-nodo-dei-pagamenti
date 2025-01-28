@@ -14,7 +14,7 @@ import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, ReEventFunc}
+import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{FdR1FlowsContainerBlobFunc, ReEventFunc}
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
 import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.web.NodoRoute
@@ -261,7 +261,7 @@ object Main extends App {
       // TODO [FC] rivedere scrittura RE
       val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
 
-      val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
+      val containerBlobFunction: FdR1FlowsContainerBlobFunc = AzureStorageBlobClient.fdr1FlowsBuild()
 
       val actorProps = ActorProps(
         http,
@@ -270,7 +270,7 @@ object Main extends App {
         actorUtility = new ActorUtility,
         routers = baserouters ++ primitiverouters,
         reEventFunc = reEventFunc,
-        containerBlobFunction = containerBlobFunction,
+        fdr1FlowsContainerBlobFunction = containerBlobFunction,
         actorClassId = "main",
         cacertsPath = cacertsPath,
         ddataMap = data
@@ -403,7 +403,7 @@ final case class ActorProps(
                              actorUtility: ActorUtility,
                              routers: Map[String, ActorRef],
                              reEventFunc: ReEventFunc,
-                             containerBlobFunction: ContainerBlobFunc,
+                             fdr1FlowsContainerBlobFunction: FdR1FlowsContainerBlobFunc,
                              actorClassId: String,
                              cacertsPath: String,
                              var ddataMap: ConfigData
