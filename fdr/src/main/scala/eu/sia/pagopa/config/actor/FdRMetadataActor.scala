@@ -60,7 +60,7 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
       saveForHistory(event)
     case _ =>
       log.error(s"""########################
-                   |EVH ACT unmanaged message type
+                   |FDR METADATA ACT unmanaged message type
                    |########################""".stripMargin)
   }
 

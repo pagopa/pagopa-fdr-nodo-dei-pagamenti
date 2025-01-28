@@ -16,7 +16,7 @@ import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.config.actor.FdRMetadataActor
+import eu.sia.pagopa.config.actor.{FdRMetadataActor, ReActor}
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicontazioneResponse
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
@@ -26,7 +26,6 @@ import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoR
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
-import java.util.UUID
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
@@ -46,6 +45,8 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
   val outputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_output").toBoolean).getOrElse(false)
 
   val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"
+
+  val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
 
   override def receive: Receive = { case soapRequest: SoapRequest =>
 
@@ -97,6 +98,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       )
       _ = reFlow = Some(re_)
 
+      // semantic check
       // semantic check
       (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifr, checkPassword = true, actorClassId))
       _ <- Future.fromTry(checkFormatoIdFlussoRendicontazione(nifr.identificativoFlusso, nifr.identificativoPSP, actorClassId))
@@ -161,7 +163,8 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
       _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
-      _ = traceInternalRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+//      _ = traceInternalRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+      _ = traceInternalRequestTest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield (sr, nifr, flussoRiversamento, rendicontazioneSaved)
 
@@ -175,7 +178,8 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
           errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
       }).map { case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
         log.info(FdrLogConstant.logEnd(actorClassId))
-        traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+//        traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+        traceInterfaceRequestTest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
         replyTo ! sr
 
         if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {

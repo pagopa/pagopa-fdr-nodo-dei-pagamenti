@@ -1,6 +1,7 @@
 package eu.sia.pagopa.common.message
 
 import eu.sia.pagopa.common.repo.re.model.Re
+import org.mongodb.scala.bson.{BsonArray, BsonInt32, BsonString, Document}
 
 import java.time.LocalDateTime
 
@@ -49,7 +50,34 @@ case class ReEventHub(
                        httpUrl: Option[String] = None,
                        blobBodyRef: Option[BlobBodyRef] = None,
                        header: Map[String, Seq[String]]
-                     )
+                     ) {
+  def toDocument: Document = {
+    Document(
+      "serviceIdentifier" -> serviceIdentifier,
+      "uniqueId" -> uniqueId,
+      "created" -> created.toString,
+      "sessionId" -> sessionId.map(BsonString(_)),
+      "eventType" -> eventType,
+      "fdrStatus" -> fdrStatus.map(BsonString(_)),
+      "fdr" -> fdr.map(BsonString(_)),
+      "pspId" -> pspId.map(BsonString(_)),
+      "organizationId" -> organizationId.map(BsonString(_)),
+      "fdrAction" -> fdrAction.map(BsonString(_)),
+      "httpType" -> httpType,
+      "httpMethod" -> httpMethod.map(BsonString(_)),
+      "httpUrl" -> httpUrl.map(BsonString(_)),
+      "blobBodyRef" -> blobBodyRef.map(blob => Document(
+        "storageAccount" -> blob.storageAccount.map(BsonString(_)),
+        "containerName" -> blob.containerName.map(BsonString(_)),
+        "fileName" -> blob.fileName.map(BsonString(_)),
+        "fileLength" -> BsonInt32(blob.fileLength)
+      )),
+      "header" -> Document(header.map { case (key, values) =>
+        key -> BsonArray.fromIterable(values.map(v => BsonString(v)))
+      })
+    )
+  }
+}
 
 case class BlobBodyRef(
                         storageAccount: Option[String],

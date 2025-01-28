@@ -178,7 +178,7 @@ abstract class BaseUnitTest()
 
   val repositories = new RepositoriesTest(system.settings.config, log)
 
-  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, "", certPath, TestItems.ddataMap)
+  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, containerBlobFunction, "", certPath, TestItems.ddataMap)
 
   val mockActor = system.actorOf(Props.create(classOf[MockActor]), s"mock")
 

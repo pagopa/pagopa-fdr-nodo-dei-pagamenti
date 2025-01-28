@@ -14,11 +14,11 @@ import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{FdR1FlowsContainerBlobFunc, ReEventFunc}
+import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, ReEventFunc}
 import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
 import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.web.NodoRoute
-import eu.sia.pagopa.config.actor.{ApiConfigActor, FdRMetadataActor}
+import eu.sia.pagopa.config.actor.{ApiConfigActor, FdRMetadataActor, ReActor}
 import eu.sia.pagopa.nodopoller.actor.PollerActor
 import io.github.mweirauch.micrometer.jvm.extras.{ProcessMemoryMetrics, ProcessThreadMetrics}
 import io.micrometer.core.instrument.binder.jvm.{ClassLoaderMetrics, JvmGcMetrics, JvmMemoryMetrics, JvmThreadMetrics}
@@ -235,6 +235,7 @@ object Main extends App {
             BootstrapUtil.actorClassId(classOf[ApiConfigActor]) -> classOf[ApiConfigActor],
             BootstrapUtil.actorClassId(classOf[PollerActor]) -> classOf[PollerActor],
             BootstrapUtil.actorClassId(classOf[FdRMetadataActor]) -> classOf[FdRMetadataActor],
+            BootstrapUtil.actorClassId(classOf[ReActor]) -> classOf[ReActor],
             Constant.KeyName.FTP_SENDER -> classOf[PrimitiveActor]
           )
         case Some(j) =>
@@ -257,10 +258,11 @@ object Main extends App {
 
       log.info(s"Created Routers:\n${(baserouters.keys ++ primitiverouters.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
 
-      // TODO [FC] rivedere scrittura RE
+      // TODO [FC] to remove
       val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
 
-      val containerBlobFunction: FdR1FlowsContainerBlobFunc = AzureStorageBlobClient.fdr1FlowsBuild()
+      val fdr1FlowsContainerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.fdr1FlowsBuild()
+      val rePayloadContainerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.rePayloadBuild()
 
       val actorProps = ActorProps(
         http,
@@ -269,7 +271,8 @@ object Main extends App {
         actorUtility = new ActorUtility,
         routers = baserouters ++ primitiverouters,
         reEventFunc = reEventFunc,
-        fdr1FlowsContainerBlobFunction = containerBlobFunction,
+        fdr1FlowsContainerBlobFunction = fdr1FlowsContainerBlobFunction,
+        rePayloadContainerBlobFunction = rePayloadContainerBlobFunction,
         actorClassId = "main",
         cacertsPath = cacertsPath,
         ddataMap = data
@@ -293,7 +296,7 @@ object Main extends App {
 
       job match {
         case None =>
-          log.info(s"Starting HTTP Service (Seed,Soap,Rest)...")
+          log.info(s"Starting HTTP Service (Seed, Soap, Rest)...")
           val routes = NodoRoute(
             system = system,
             fdrRepository = repositories.fdrRepository,
@@ -402,7 +405,8 @@ final case class ActorProps(
                              actorUtility: ActorUtility,
                              routers: Map[String, ActorRef],
                              reEventFunc: ReEventFunc,
-                             fdr1FlowsContainerBlobFunction: FdR1FlowsContainerBlobFunc,
+                             fdr1FlowsContainerBlobFunction: ContainerBlobFunc,
+                             rePayloadContainerBlobFunction: ContainerBlobFunc,
                              actorClassId: String,
                              cacertsPath: String,
                              var ddataMap: ConfigData

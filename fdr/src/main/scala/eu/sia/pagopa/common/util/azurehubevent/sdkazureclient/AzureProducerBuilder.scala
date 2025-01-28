@@ -205,30 +205,30 @@ object AzureProducerBuilder {
 
   private def businessLogicForPublish(reProducer: EventHubProducerAsyncClient, ddataMap: ConfigData, request: ReRequest, clientTimeoutMs: Long, system: ActorSystem)(implicit log: NodoLogger): Unit = {
     // TODO [FC] uncomment
-//    request.re.tipoEvento match {
-//      case Some(reTipoEvento) =>
-//        val key = ConfigUtil.getGdeConfigKey(reTipoEvento, request.re.sottoTipoEvento)
-//        ddataMap.gdeConfigurations.get(key) match {
-//          case Some(gdeConfig) =>
-//            if (gdeConfig.eventHubEnabled) {
-//              if (gdeConfig.eventHubPayloadEnabled) {
-//                publish(reProducer, Array(request).toSeq, clientTimeoutMs, log, system)
-//              } else {
-//                log.debug("Clean re payload")
-//                val newRe = request.re.copy(payload = None)
-//                publish(reProducer,Array(request.copy(re = newRe)).toSeq, clientTimeoutMs, log, system)
-//              }
-//            } else {
-//              log.debug(s"GDE_CONFIG key '$key', eventHub not enabled. Not forward to Azure")
-//            }
-//          case None =>
-//            log.debug(s"Cache GDE_CONFIG found but not found key '$key'. Forward to Azure")
-//            publish(reProducer,Array(request).toSeq, clientTimeoutMs, log, system)
-//        }
-//      case None =>
-//        log.debug(s"RE tipoEvento empty. Forward to Azure")
-//        publish(reProducer,  Array(request).toSeq, clientTimeoutMs, log, system)
-//    }
+    request.re.tipoEvento match {
+      case Some(reTipoEvento) =>
+        val key = ConfigUtil.getGdeConfigKey(reTipoEvento, request.re.sottoTipoEvento)
+        ddataMap.gdeConfigurations.get(key) match {
+          case Some(gdeConfig) =>
+            if (gdeConfig.eventHubEnabled) {
+              if (gdeConfig.eventHubPayloadEnabled) {
+                publish(reProducer, Array(request).toSeq, clientTimeoutMs, log, system)
+              } else {
+                log.debug("Clean re payload")
+                val newRe = request.re.copy(payload = None)
+                publish(reProducer,Array(request.copy(re = newRe)).toSeq, clientTimeoutMs, log, system)
+              }
+            } else {
+              log.debug(s"GDE_CONFIG key '$key', eventHub not enabled. Not forward to Azure")
+            }
+          case None =>
+            log.debug(s"Cache GDE_CONFIG found but not found key '$key'. Forward to Azure")
+            publish(reProducer,Array(request).toSeq, clientTimeoutMs, log, system)
+        }
+      case None =>
+        log.debug(s"RE tipoEvento empty. Forward to Azure")
+        publish(reProducer,  Array(request).toSeq, clientTimeoutMs, log, system)
+    }
 
   }
 
