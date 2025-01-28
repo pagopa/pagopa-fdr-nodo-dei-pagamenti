@@ -153,8 +153,8 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
 
         _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
         _ = traceInternalRequest(restRequest, reFlow.get, restRequest.reExtra, actorProps.rePayloadContainerBlobFunction, ddataMap)
-        sr = RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
-      } yield (sr, nifrSoap, flussoRiversamento, rendicontazioneSaved))
+        rr = RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
+      } yield (rr, nifrSoap, flussoRiversamento, rendicontazioneSaved))
         .recoverWith({
           case rex: RestException =>
             Future.successful(generateErrorResponse(Some(rex)))
@@ -164,10 +164,10 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
           case cause: Throwable =>
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateErrorResponse(Some(pmae)))
-      }).map { case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, rendicontazioneSaved: Rendicontazione) =>
+      }).map { case (rr: RestResponse, nifr: NodoInviaFlussoRendicontazione, rendicontazioneSaved: Rendicontazione) =>
           traceInterfaceRequest(req, reFlow.get, req.reExtra, actorProps.rePayloadContainerBlobFunction, ddataMap)
           log.info(FdrLogConstant.logEnd(actorClassId))
-          replyTo ! sr
+          replyTo ! rr
 
           if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
             // send data to history
