@@ -2,7 +2,7 @@ package eu.sia.pagopa.rendicontazioni.actor.soap
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.{HttpSoapServiceManagement, PerRequestActor}
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
@@ -14,6 +14,7 @@ import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XmlUtil.XsdDatePattern
 import eu.sia.pagopa.common.util.xml.{XmlUtil, XsdValid}
 import eu.sia.pagopa.commonxml.XmlEnum
+import eu.sia.pagopa.config.actor.ReActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoChiediElencoFlussiRendicontazioneResponse
 import scalaxbmodel.nodoperpa.{NodoChiediElencoFlussiRendicontazione, NodoChiediElencoFlussiRendicontazioneRisposta, TipoElencoFlussiRendicontazione, TipoIdRendicontazione}
 
@@ -37,6 +38,8 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
   var re: Option[Re] = None
 
   val RESPONSE_NAME = "nodoChiediElencoFlussiRendicontazioneRisposta"
+
+  val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
 
   override def receive: Receive = { case soapRequest: SoapRequest =>
     req = soapRequest
@@ -151,8 +154,7 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, DigitPaErrorCodes.PPT_SYSTEM_ERROR, re)
     }) map (sr => {
-//       TODO [FC]
-//      traceInterfaceRequest(soapRequest, re.get, soapRequest.reExtra, reEventFunc, ddataMap)
+      traceInterfaceRequest(reActor, soapRequest, re.get, soapRequest.reExtra, ddataMap)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
