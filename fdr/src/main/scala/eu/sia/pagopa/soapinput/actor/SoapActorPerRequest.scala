@@ -14,6 +14,7 @@ import eu.sia.pagopa.common.util.StringUtils._
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 import eu.sia.pagopa.commonxml.XmlEnum
+import eu.sia.pagopa.config.actor.ReActor
 import eu.sia.pagopa.soapinput.message.SoapRouterRequest
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import org.slf4j.MDC
@@ -28,12 +29,13 @@ class SoapActorPerRequest(
     override val requestContext: RequestContext,
     override val donePromise: Promise[RouteResult],
     allRouters: Map[String, ActorRef],
-//    reEventFunc: ReEventFunc,
     actorProps: ActorProps
 ) extends FuturePerRequestActor {
 
   var message: SoapRouterRequest = _
   var bundleResponse: SoapResponse = _
+
+  val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
 
   override def actorError(dpe: DigitPaException): Unit = {
     MDC.put(Constant.MDCKey.SESSION_ID, message.sessionId)
@@ -59,7 +61,7 @@ class SoapActorPerRequest(
   def reExtra(message: SoapRouterRequest): ReExtra =
     ReExtra(uri = message.uri, headers = message.headers.getOrElse(Nil), httpMethod = Some(HttpMethods.POST.value), callRemoteAddress = message.callRemoteAddress, soapProtocol = true)
 
-  def traceRequest(message: SoapRouterRequest, reEventFunc: ReEventFunc): Unit = {
+  def traceRequest(message: SoapRouterRequest): Unit = {
     Util.logPayload(log, Some(message.payload))
     val reRequestReq = ReRequest(
       sessionId = message.sessionId,
@@ -77,7 +79,7 @@ class SoapActorPerRequest(
       ),
       reExtra = Some(reExtra(message))
     )
-    reEventFunc(reRequestReq, log, actorProps.ddataMap)
+    reActor.tell(reRequestReq, null)
   }
 
   override def receive: Receive = {
@@ -90,7 +92,7 @@ class SoapActorPerRequest(
       log.debug("RECEIVE SoapResponse")
       sres.payload match {
         case Some(_) =>
-          //risposta dal bundle positiva o negativa
+          // risposta dal bundle positiva o negativa
           bundleResponse = sres
 
           val now = Util.now()
@@ -126,16 +128,14 @@ class SoapActorPerRequest(
 
           Util.logPayload(log, sres.payload)
           log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
-          // TODO [FC]
-//          reEventFunc(reRequest, log, actorProps.ddataMap)
+          reActor.tell(reRequest, null)
           complete(createHttpResponse(StatusCode.int2StatusCode(bundleResponse.statusCode), bundleResponse.payload.getOrElse(""), sres.sessionId), Constant.KeyName.SOAP_INPUT)
         case None =>
           sres.throwable match {
             case Some(e) =>
-              //risposta dal dead letter
+              // risposta dal dead letter
               log.error(s"Soap Response in errore [${e.getMessage}]")
-              // TODO [FC]
-//              traceRequest(message, reEventFunc)
+              traceRequest(message)
 
               val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
               val payload = Util.faultXmlResponse(dpe.faultCode, dpe.faultString, Some(dpe.message))
@@ -157,16 +157,14 @@ class SoapActorPerRequest(
                 ),
                 reExtra = Some(ReExtra(statusCode = Some(StatusCodes.OK.intValue), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
               )
-              // TODO [FC]
-//              reEventFunc(reRequest, log, actorProps.ddataMap)
+              reActor.tell(reRequest, null)
 
               complete(createHttpResponse(StatusCodes.OK.intValue, payload, sres.sessionId), Constant.KeyName.SOAP_INPUT)
             case None =>
-              //qualche bundle ha risposto in modo sbagliato
+              // qualche bundle ha risposto in modo sbagliato
               log.error(s"Soap Response in errore")
 
-              // TODO [FC]
-//              traceRequest(message, reEventFunc)
+              traceRequest(message)
 
               val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
               val payload = Util.faultXmlResponse(dpe.faultCode, dpe.faultString, Some(dpe.message))
@@ -188,8 +186,7 @@ class SoapActorPerRequest(
                 ),
                 reExtra = Some(ReExtra(statusCode = Some(StatusCodes.OK.intValue), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
               )
-              // TODO [FC]
-//              reEventFunc(reRequest, log, actorProps.ddataMap)
+              reActor.tell(reRequest, null)
 
               complete(createHttpResponse(StatusCodes.OK.intValue, payload, sres.sessionId), Constant.KeyName.SOAP_INPUT)
           }
@@ -259,9 +256,7 @@ class SoapActorPerRequest(
     } recover {
       case sre: SoapRouterException =>
         log.error(sre, "SoapRouterException")
-
-        // TODO [FC]
-//        traceRequest(message, reEventFunc)
+        traceRequest(message)
 
         val payload = Util.faultXmlResponse(sre.faultcode, sre.faultstring, sre.detail)
         Util.logPayload(log, Some(payload))
@@ -282,16 +277,14 @@ class SoapActorPerRequest(
           reExtra = Some(ReExtra(statusCode = Some(sre.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
         )
 
-        // TODO [FC]
-//        reEventFunc(reRequestResp, log, actorProps.ddataMap)
+        reActor.tell(reRequestResp, null)
 
         complete(createHttpResponse(sre.statusCode, payload, message.sessionId), Constant.KeyName.SOAP_INPUT)
 
       case e: Throwable =>
         log.error(e, "General Error Throwable")
 
-        // TODO [FC]
-//        traceRequest(message, reEventFunc)
+        traceRequest(message)
 
         val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
         val payload = Util.faultXmlResponse(dpe.faultCode, dpe.faultString, Some(dpe.message))
@@ -312,8 +305,8 @@ class SoapActorPerRequest(
           ),
           reExtra = Some(ReExtra(statusCode = Some(StatusCodes.InternalServerError.intValue), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
         )
-//         TODO [FC]
-//        reEventFunc(reRequest, log, actorProps.ddataMap)
+        reActor.tell(reRequest, null)
+
         complete(createHttpResponse(StatusCodes.InternalServerError.intValue, payload, message.sessionId), Constant.KeyName.SOAP_INPUT)
     }
   }
