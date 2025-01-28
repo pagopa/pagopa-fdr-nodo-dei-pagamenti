@@ -10,9 +10,9 @@ import scala.util.{Failure, Success}
 
 case class MongoRepository(config:Config, log: NodoLogger)(implicit ec: ExecutionContext) {
 
-  lazy val mongoConnectionString = config.getString("azure-mongo-metadata.connection-string")
-  lazy val mongoMetadataDatabase = config.getString("azure-mongo-metadata.db-name")
-  lazy val mongoMetadataDocument = config.getString("azure-mongo-metadata.document-name")
+  lazy val mongoConnectionString = config.getString("azure-mongo.connection-string")
+  lazy val mongoMetadataDatabase = config.getString("azure-mongo.db-name")
+  lazy val mongoMetadataDocument = config.getString("azure-mongo.metadata-document-name")
 
   val mongoClient: MongoClient = MongoClient(mongoConnectionString)
   val database: MongoDatabase = mongoClient.getDatabase(mongoMetadataDatabase)

@@ -17,8 +17,8 @@ object AzureStorageBlobClient {
     val azureStorageBlobEnabled = system.settings.config.getBoolean("azure-storage-blob.enabled")
 
     if( azureStorageBlobEnabled ) {
-      log.info("Starting Azure Storage Blob Client Service ...")
-      val containerName = system.settings.config.getString("azure-storage-blob.container-name")
+      log.info("Starting Azure Storage Blob Client FdR1-Flows Service...")
+      val containerName = system.settings.config.getString("azure-storage-blob.fdr1-flows-container-name")
       val connectionString = system.settings.config.getString("azure-storage-blob.connection-string")
 
       val blobServiceClient = new BlobServiceClientBuilder()
