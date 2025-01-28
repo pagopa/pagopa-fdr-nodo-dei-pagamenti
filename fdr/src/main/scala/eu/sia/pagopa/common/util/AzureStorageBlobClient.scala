@@ -54,7 +54,6 @@ object AzureStorageBlobClient {
     val azureStorageBlobEnabled = system.settings.config.getBoolean("azure-storage-blob.enabled")
 
     if( azureStorageBlobEnabled ) {
-      val connectionString = system.settings.config.getString("azure-storage-blob.connection-string")
       val containerName = system.settings.config.getString("azure-storage-blob.re-payload-container-name")
       log.info(s"Starting Azure Storage Blob Client Service on ${containerName}...")
 
@@ -68,7 +67,6 @@ object AzureStorageBlobClient {
 
     } else {
       log.info("Azure Storage Blob Client Service not enabled: config-app [azure-storage-blob.enabled]=false")
-//      (fileName: String, metadata: Map[String, String], fileContent: BinaryData, log: NodoLogger) => {
       (request: ReRequest, repositories: Repositories, log: NodoLogger) => {
         Future.successful(())
       }

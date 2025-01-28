@@ -27,7 +27,7 @@ case class MongoRepository(config:Config, log: NodoLogger)(implicit ec: Executio
       case Success(result) =>
         log.info(s"FdR Metadata ${data.getPsp()} ${data.getFlowId()} saved")
       case Failure(exception) =>
-        log.error(exception, s"Problem to save on Mongo ${data.getPsp()} ${data.getFlowId()}")
+        log.error(exception, s"Problem to save on Mongo Metadata ${data.getPsp()} ${data.getFlowId()}")
     }
 
   }
@@ -38,9 +38,9 @@ case class MongoRepository(config:Config, log: NodoLogger)(implicit ec: Executio
 
     insertFuture.onComplete {
       case Success(result) =>
-        log.info(s"RE Event ${data.sessionId} ${data.fdrAction} saved")
+        log.info(s"RE Event ${data.sessionId} ${data.fdr} ${data.fdrAction} saved ${result}")
       case Failure(exception) =>
-        log.error(exception, s"Problem to save on Mongo ${data.sessionId} ${data.fdrAction}")
+        log.error(exception, s"Problem to save on Mongo RE ${data.sessionId} ${data.fdr} ${data.fdrAction}")
     }
 
   }
