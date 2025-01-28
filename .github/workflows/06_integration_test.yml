@@ -13,7 +13,7 @@ on:
         options:
           - dev
           - uat
-        default: dev
+        default: uat
       tags:
         description: 'run the tests tagged with'
         required: false
@@ -22,10 +22,7 @@ on:
       junit:
         description: 'enable junit'
         required: false
-        type: choice
-        options:
-          - true
-          - false
+        type: boolean
         default: false
 
 
@@ -34,12 +31,14 @@ permissions:
   contents: read
   deployments: write
 
+env:
+  ENVIRONMENT: ${{(github.event.inputs == null && 'uat') || inputs.environment }}
 
 jobs:
   integration_test:
-    name: Test ${{(github.event.inputs == null && 'dev') || inputs.environment }}
+    name: Test $ENVIRONMENT
     runs-on: ubuntu-latest
-    environment: ${{(github.event.inputs == null && 'dev') || inputs.environment }}
+    environment: $ENVIRONMENT
     steps:
       - name: Checkout
         id: checkout
@@ -83,8 +82,8 @@ jobs:
           docker run \
           -e INTEGRATION_TEST_SUBSCRIPTION_KEY="${{ secrets.INTEGRATION_TEST_SUBSCRIPTION_KEY }}" \
           -e TAGS="${{ inputs.tags }}" \
-          -e ENV="${{( github.event.inputs == null && 'dev') || inputs.environment }}" \
-          -e CONFIG_FILE="/config/${{( github.event.inputs == null && 'dev') || inputs.environment }}.json" \
+          -e ENV="$ENVIRONMENT" \
+          -e CONFIG_FILE="/config/$ENVIRONMENT.json" \
           -v  ./reports:/app/reports fdr1_test
 
       - name: Login
@@ -140,7 +139,7 @@ jobs:
           status: ${{ needs.integration_test.result }}
           token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: 'failure,skipped'
-          notification_title: '<{run_url}|Scheduled Integration Test> has {status_message}'
+          notification_title: '<{run_url}|Scheduled Integration Test> has {status_message} in $ENVIRONMENT'
           message_format: '{emoji} <{run_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
           footer: 'Linked to <{workflow_url}| workflow file>'
         env:
