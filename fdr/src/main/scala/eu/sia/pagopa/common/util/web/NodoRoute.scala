@@ -638,8 +638,6 @@ case class NodoRoute(
                           createSystemActorPerRequestAndTell[RestRouterRequest](
                             restRouterRequest,
                             Constant.KeyName.REST_INPUT,
-//                            TODO [FC]
-//                            Props(classOf[RestActorPerRequest], ctx, p, routers, reEventFunc, actorProps)
                             Props(classOf[RestActorPerRequest], ctx, p, routers, actorProps)
                           )(log, system)
                           _ => p.future

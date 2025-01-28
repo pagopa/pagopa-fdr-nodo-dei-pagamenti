@@ -163,8 +163,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
       _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
-//      _ = traceInternalRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
-      _ = traceInternalRequestTest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+      _ = traceInternalRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield (sr, nifr, flussoRiversamento, rendicontazioneSaved)
 
@@ -178,8 +177,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
           errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
       }).map { case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
         log.info(FdrLogConstant.logEnd(actorClassId))
-//        traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
-        traceInterfaceRequestTest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+        traceInterfaceRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
         replyTo ! sr
 
         if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {

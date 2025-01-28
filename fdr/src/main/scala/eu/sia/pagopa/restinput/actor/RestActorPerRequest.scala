@@ -26,7 +26,6 @@ class RestActorPerRequest(
     override val requestContext: RequestContext,
     override val donePromise: Promise[RouteResult],
     allRouters: Map[String, ActorRef],
-    reEventFunc: ReEventFunc,
     actorProps: ActorProps
 ) extends FuturePerRequestActor {
 
@@ -77,6 +76,7 @@ class RestActorPerRequest(
       ),
       reExtra = Some(reExtra(rrr))
     )
+    // TODO [FC]
     reEventFunc(reRequestReq, log, ddataMap)
   }
 
@@ -198,7 +198,8 @@ class RestActorPerRequest(
 
   private def traceErrorResponse(e: Throwable, statusCode: Int): Unit = {
     log.error(e, s"Error response: [${e.getMessage}]")
-    traceRequest(message, reEventFunc, actorProps.ddataMap)
+    // TODO [FC]
+//    traceRequest(message, reEventFunc, actorProps.ddataMap)
     log.info("Generating negative response")
     traceResponse(None, Error(e.getMessage).toJson.toString(), statusCode, EsitoRE.INVIATA_KO)
   }

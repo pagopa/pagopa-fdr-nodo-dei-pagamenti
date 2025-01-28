@@ -63,6 +63,7 @@ trait AzureEventProducer {
 
   // TODO [FC] review this method!
   private def addOrNewBatch(producer: EventHubProducerAsyncClient, batch: EventDataBatch, eventDataSeq: Seq[EventData], log: NodoLogger): Mono[_ <: Seq[EventDataBatch]] = {
+    log.info("METHOD TO DELETE")
     if (eventDataSeq.isEmpty) {
       Mono.just(Seq(batch))
     } else {
@@ -87,6 +88,7 @@ trait AzureEventProducer {
   }
 
   protected def publish(items: Seq[Event], log: NodoLogger): Unit = {
+    log.info("METHOD TO DELETE")
     val logMessage: (Event, String) => String = (event: Event, msg: String) => event match {
       case _: IUVRendicontatiEvent =>
         s"$msg${AppObjectMapper.objectMapper.writeValueAsString(event)}"

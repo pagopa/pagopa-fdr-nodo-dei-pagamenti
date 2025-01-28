@@ -77,10 +77,7 @@ class ActorUtility {
           reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.value), soapProtocol = isSoapProtocol))
         )
         log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER))
-//        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
-        // TODO [FC]
-        actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor]))).tell(reRequest, null)
-
+        sendReEvent(actorProps, reRequest)
       }
 
       payloadResponse =
@@ -112,9 +109,7 @@ class ActorUtility {
           ),
           reExtra = Some(ReExtra(uri = None, httpMethod = None, statusCode = Some(httpResponse.status.intValue()), elapsed = Some(redate.until(now, ChronoUnit.MILLIS)), soapProtocol = isSoapProtocol))
         )
-//        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
-        // TODO [FC]
-        actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor]))).tell(reRequest, null)
+        sendReEvent(actorProps, reRequest)
       }
 
       response = SimpleHttpRes(req.sessionId, httpResponse.status.intValue(), httpResponse.headers, Some(payload), None, req.testCaseId)
@@ -144,9 +139,7 @@ class ActorUtility {
         ),
         reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.value), soapProtocol = isSoapProtocol, statusCode = Some(response.statusCode)))
       )
-//      actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
-      // TODO [FC]
-      actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor]))).tell(reRequest, null)
+      sendReEvent(actorProps, reRequest)
 
       log.debug(s"callHttp - end")
       response
@@ -202,6 +195,10 @@ class ActorUtility {
       case e: Throwable =>
         exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
     }
+  }
+
+  private def sendReEvent(actorProps: ActorProps, reRequest: ReRequest): Unit = {
+    actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor]))).tell(reRequest, null)
   }
 
 }
