@@ -1,6 +1,6 @@
 scalacOptions := Seq("-feature", "-unchecked", "-deprecation", "-encoding", "utf8")
 
-val lightbendKey = sys.env.getOrElse("LIGHTBEND_KEY","5IDMAq0poMpRYz1HD58Y7c8jQ9kjlFs_yKCMkg3tdeBTeqiL")
+val lightbendKey = sys.env("LIGHTBEND_KEY")
 
 ThisBuild / resolvers += "lightbend-commercial-mvn" at s"https://repo.lightbend.com/pass/${lightbendKey}/commercial-releases"
 ThisBuild / resolvers += Resolver.url(
