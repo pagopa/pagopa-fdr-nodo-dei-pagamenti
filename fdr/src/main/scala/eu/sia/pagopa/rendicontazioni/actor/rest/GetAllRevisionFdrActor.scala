@@ -3,7 +3,7 @@ package eu.sia.pagopa.rendicontazioni.actor.rest
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import com.nimbusds.jose.util.StandardCharset
-import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
@@ -15,6 +15,7 @@ import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, Rendicontazione}
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.DDataChecks.checkPA
 import eu.sia.pagopa.common.util._
+import eu.sia.pagopa.config.actor.ReActor
 import org.slf4j.MDC
 import spray.json._
 
@@ -28,6 +29,8 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
   var replyTo: ActorRef = _
 
   var reFlow: Option[Re] = None
+
+  val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
 
   override def receive: Receive = {
     case restRequest: RestRequest =>
@@ -115,8 +118,7 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateErrorResponse(Some(pmae)))
       }).map( res => {
-          // TODO [FC]
-//        traceInterfaceRequest(req, reFlow.get, req.reExtra, reEventFunc, ddataMap)
+        traceInterfaceRequest(reActor, req, reFlow.get, req.reExtra, ddataMap)
         log.info(FdrLogConstant.logEnd(actorClassId))
         replyTo ! res
         complete()

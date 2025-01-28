@@ -2,7 +2,7 @@ package eu.sia.pagopa.rendicontazioni.actor.rest
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.{HttpFdrServiceManagement, PerRequestActor}
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
@@ -15,6 +15,7 @@ import eu.sia.pagopa.common.util.DDataChecks.checkPsp
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XmlUtil
 import eu.sia.pagopa.commonxml.XmlEnum
+import eu.sia.pagopa.config.actor.ReActor
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import org.slf4j.MDC
@@ -40,6 +41,8 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
   private var _retry: Integer = _
 
   var reFlow: Option[Re] = None
+
+  val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
 
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
 
@@ -180,8 +183,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateResponse(Some(pmae)))
       }).map( res => {
-          // TODO [FC]
-//        traceInterfaceRequest(req, reFlow.get, req.reExtra, reEventFunc, ddataMap)
+        traceInterfaceRequest(reActor, req, reFlow.get, req.reExtra, ddataMap)
         log.info(FdrLogConstant.logEnd(actorClassId))
         replyTo ! res
         complete()
