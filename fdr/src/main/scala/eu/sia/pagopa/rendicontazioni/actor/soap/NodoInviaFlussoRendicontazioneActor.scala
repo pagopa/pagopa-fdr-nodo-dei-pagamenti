@@ -172,7 +172,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         case e: Throwable =>
           log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
           errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
-      }).map { case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
+      }).map { case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, rendicontazioneSaved: Rendicontazione) =>
         log.info(FdrLogConstant.logEnd(actorClassId))
         traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, actorProps.rePayloadContainerBlobFunction, ddataMap)
         replyTo ! sr

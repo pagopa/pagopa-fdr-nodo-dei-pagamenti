@@ -2,20 +2,24 @@ package eu.sia.pagopa.rendicontazioni.actor.rest
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.{HttpFdrServiceManagement, PerRequestActor}
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
+import eu.sia.pagopa.common.json.model.FdREventToHistory
 import eu.sia.pagopa.common.json.model.rendicontazione._
 import eu.sia.pagopa.common.json.{JsonEnum, JsonValid}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
+import eu.sia.pagopa.common.repo.fdr.enums.RendicontazioneStatus
+import eu.sia.pagopa.common.repo.fdr.model.Rendicontazione
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.DDataChecks.checkPsp
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XmlUtil
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
+import eu.sia.pagopa.rendicontazioni.actor.async.FdREventActor
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import org.slf4j.MDC
 import scalaxbmodel.flussoriversamento.{CtDatiSingoliPagamenti, CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number1u461}
@@ -154,7 +158,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
 
         (pa, _, _) <- Future.fromTry(checks(ddataMap, nifr, false, actorClassId))
 
-        (esito, _, sftpFile, _) <- saveRendicontazione(
+        (esito, rendicontazioneSaved, sftpFile, _) <- saveRendicontazione(
           getResponse.fdr,
           getResponse.sender.pspId,
           getResponse.sender.pspBrokerId,
@@ -167,24 +171,41 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
           repositories.fdrRepository
         )
 
-        _ = if (esito == Constant.KO) {
+        rr = if (esito == Constant.KO) {
           throw RestException("Error saving fdr on Db", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
         } else {
-          Future.successful(())
+          val restResponse = RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
+          Future.successful(restResponse)
         }
-      } yield RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
+      } yield (rr, nifr, flussoRiversamento, rendicontazioneSaved))
         .recoverWith({
           case rex: RestException =>
             Future.successful(generateResponse(Some(rex)))
           case cause: Throwable =>
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateResponse(Some(pmae)))
-      }).map( res => {
+        }).map { case (rr: RestResponse, nifr: NodoInviaFlussoRendicontazione, rendicontazioneSaved: Rendicontazione) =>
         traceInterfaceRequest(req, reFlow.get, req.reExtra, actorProps.rePayloadContainerBlobFunction, ddataMap)
         log.info(FdrLogConstant.logEnd(actorClassId))
-        replyTo ! res
+        replyTo ! rr
+
+        if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
+          // send data to history
+          actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdREventActor])))
+            .tell(
+              FdREventToHistory(
+                sessionId = req.sessionId,
+                nifr = nifr,
+                soapRequest = req.payload.get,
+                insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
+                elaborate = false,
+                retry = 0
+              ),
+              replyTo)
+        }
+
         complete()
-      })
+      }
   }
 
   private def parseInput(restRequest: RestRequest) = {
