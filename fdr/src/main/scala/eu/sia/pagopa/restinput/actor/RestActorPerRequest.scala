@@ -191,7 +191,8 @@ class RestActorPerRequest(
       ),
       reExtra = Some(ReExtra(statusCode = Some(statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
     )
-    reEventFunc(reRequestOpt.getOrElse(reRequest), log, actorProps.ddataMap)
+//    TODO [FC]
+//    reEventFunc(reRequestOpt.getOrElse(reRequest), log, actorProps.ddataMap)
     complete(createHttpResponse(statusCode, payload, sessionId), Constant.KeyName.REST_INPUT)
   }
 

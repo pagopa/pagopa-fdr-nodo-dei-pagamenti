@@ -259,7 +259,7 @@ object Main extends App {
       log.info(s"Created Routers:\n${(baserouters.keys ++ primitiverouters.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
 
       // TODO [FC] to remove
-      val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
+//      val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
 
       val fdr1FlowsContainerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.fdr1FlowsBuild()
       val rePayloadContainerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.rePayloadBuild()
@@ -270,7 +270,7 @@ object Main extends App {
         actorMaterializer = materializer,
         actorUtility = new ActorUtility,
         routers = baserouters ++ primitiverouters,
-        reEventFunc = reEventFunc,
+//        reEventFunc = reEventFunc,
         fdr1FlowsContainerBlobFunction = fdr1FlowsContainerBlobFunction,
         rePayloadContainerBlobFunction = rePayloadContainerBlobFunction,
         actorClassId = "main",
@@ -303,7 +303,7 @@ object Main extends App {
             routers = baserouters ++ primitiverouters,
             httpHost = httpHost,
             httpPort = httpPort,
-            reEventFunc = reEventFunc,
+//            reEventFunc = reEventFunc,
             actorProps
           )
           import akka.http.scaladsl.server.Directives._
@@ -404,7 +404,7 @@ final case class ActorProps(
                              actorMaterializer: Materializer,
                              actorUtility: ActorUtility,
                              routers: Map[String, ActorRef],
-                             reEventFunc: ReEventFunc,
+//                             reEventFunc: ReEventFunc,
                              fdr1FlowsContainerBlobFunction: ContainerBlobFunc,
                              rePayloadContainerBlobFunction: ContainerBlobFunc,
                              actorClassId: String,

@@ -11,7 +11,7 @@ import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 
 trait ReUtil { this: NodoLogging =>
 
-  def traceInternalRequestTest(reActor: ActorRef, message: SoapRequest, re: Re, reExtra: ReExtra, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
+  def traceInternalRequestTest(reActor: ActorRef, message: SoapRequest, re: Re, reExtra: ReExtra, ddataMap: ConfigData): Unit = {
     import StringUtils.Utf8String
     Util.logPayload(log, Some(message.payload))
     val reRequestReq = ReRequest(
@@ -69,7 +69,7 @@ trait ReUtil { this: NodoLogging =>
     reEventFunc(reRequestReq, log, ddataMap)
   }
 
-  def traceInterfaceRequestTest(reActor: ActorRef, message: SoapRequest, re: Re, reExtra: ReExtra, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
+  def traceInterfaceRequestTest(reActor: ActorRef, message: SoapRequest, re: Re, reExtra: ReExtra, ddataMap: ConfigData): Unit = {
     import StringUtils.Utf8String
     Util.logPayload(log, Some(message.payload))
     val reRequestReq = ReRequest(

@@ -10,13 +10,14 @@ import akka.http.scaladsl.unmarshalling.Unmarshaller
 import akka.http.scaladsl.{ClientTransport, HttpsConnectionContext}
 import akka.stream.StreamTcpException
 import akka.stream.scaladsl.TcpIdleTimeoutException
-import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.util.StringUtils.Utf8String
 import eu.sia.pagopa.common.util._
+import eu.sia.pagopa.config.actor.ReActor
 
 import java.net.InetSocketAddress
 import java.time.temporal.ChronoUnit
@@ -76,7 +77,10 @@ class ActorUtility {
           reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.value), soapProtocol = isSoapProtocol))
         )
         log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER))
-        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+//        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+        // TODO [FC]
+        actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor]))).tell(reRequest, null)
+
       }
 
       payloadResponse =
@@ -108,7 +112,9 @@ class ActorUtility {
           ),
           reExtra = Some(ReExtra(uri = None, httpMethod = None, statusCode = Some(httpResponse.status.intValue()), elapsed = Some(redate.until(now, ChronoUnit.MILLIS)), soapProtocol = isSoapProtocol))
         )
-        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+//        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+        // TODO [FC]
+        actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor]))).tell(reRequest, null)
       }
 
       response = SimpleHttpRes(req.sessionId, httpResponse.status.intValue(), httpResponse.headers, Some(payload), None, req.testCaseId)
@@ -138,7 +144,9 @@ class ActorUtility {
         ),
         reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.value), soapProtocol = isSoapProtocol, statusCode = Some(response.statusCode)))
       )
-      actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+//      actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+      // TODO [FC]
+      actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor]))).tell(reRequest, null)
 
       log.debug(s"callHttp - end")
       response

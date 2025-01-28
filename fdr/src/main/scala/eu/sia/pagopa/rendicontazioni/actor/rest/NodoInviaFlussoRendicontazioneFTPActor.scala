@@ -154,7 +154,8 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
 //        _ <- actorProps.containerBlobFunction(s"${nifrSoap.identificativoFlusso}_${UUID.randomUUID().toString}", xmlPayload, log)
 
         _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
-        _ = traceInternalRequest(restRequest, reFlow.get, restRequest.reExtra, reEventFunc, ddataMap)
+        // TODO [FC]
+//        _ = traceInternalRequest(restRequest, reFlow.get, restRequest.reExtra, reEventFunc, ddataMap)
         sr = RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
       } yield (sr, nifrSoap, flussoRiversamento, rendicontazioneSaved))
         .recoverWith({
@@ -168,7 +169,8 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
             Future.successful(generateErrorResponse(Some(pmae)))
 //      }).map( res => {
       }).map { case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
-          traceInterfaceRequest(req, reFlow.get, req.reExtra, reEventFunc, ddataMap)
+          // TODO [FC]
+//          traceInterfaceRequest(req, reFlow.get, req.reExtra, reEventFunc, ddataMap)
           log.info(FdrLogConstant.logEnd(actorClassId))
           replyTo ! sr
 

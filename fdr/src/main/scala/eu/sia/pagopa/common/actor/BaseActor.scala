@@ -76,6 +76,7 @@ trait BaseActor extends Actor with NodoLogging {
   val actorProps: ActorProps
   val repositories: Repositories
   val ddataMap: ConfigData = actorProps.ddataMap
-  val reEventFunc: ReEventFunc = actorProps.reEventFunc
+  // TODO [FC]
+//  val reEventFunc: ReEventFunc = actorProps.reEventFunc
 
 }

@@ -27,7 +27,7 @@ trait PerRequestActor extends Actor with NodoLogging {
 
   def actorClassId: String = actorProps.actorClassId
   val ddataMap: ConfigData = actorProps.ddataMap
-  val reEventFunc: ReEventFunc = actorProps.reEventFunc
+//  val reEventFunc: ReEventFunc = actorProps.reEventFunc
   val actorUtility: ActorUtility = actorProps.actorUtility
 
   val httpConnectTimeout: FiniteDuration = context.system.settings.config.getInt("config.http.connect-timeout").seconds

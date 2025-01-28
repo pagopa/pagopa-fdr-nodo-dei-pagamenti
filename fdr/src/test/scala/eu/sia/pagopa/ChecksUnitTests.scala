@@ -35,7 +35,8 @@ class ChecksUnitTests  extends AnyFlatSpec with should.Matchers {
     when(config.getInt("config.http.server-request-timeout")).thenReturn(10)
     val ec = mock[ExecutionContext]
     val log = mock[NodoLogger]
-    val nr = new NodoRoute(as,fdrRepository,Map(),"",200,mock[ReEventFunc],mock[ActorProps])(ec,log,mock[Materializer])
+//    val nr = new NodoRoute(as,fdrRepository,Map(),"",200,mock[ReEventFunc],mock[ActorProps])(ec,log,mock[Materializer])
+    val nr = new NodoRoute(as,fdrRepository,Map(),"",200,mock[ActorProps])(ec,log,mock[Materializer])
     val timeout = nr.akkaHttpTimeout("sid")
     val enc = nr.akkaErrorEncoding("sid","UTF-8")
     assert(timeout.status.isFailure())
