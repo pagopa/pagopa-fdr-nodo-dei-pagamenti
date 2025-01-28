@@ -4,7 +4,7 @@ import akka.actor.ActorRef
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.{RequestContext, RouteResult}
-import eu.sia.pagopa.Main.ConfigData
+import eu.sia.pagopa.Main.{ConfigData, repositories}
 import eu.sia.pagopa.common.actor.FuturePerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
@@ -14,7 +14,7 @@ import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.StringUtils._
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ReEventFunc, sessionId}
+import Appfunction.{RePayloadContainerBlobFunc, sessionId}
 import eu.sia.pagopa.restinput.message.RestRouterRequest
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import spray.json._
@@ -26,7 +26,6 @@ class RestActorPerRequest(
     override val requestContext: RequestContext,
     override val donePromise: Promise[RouteResult],
     allRouters: Map[String, ActorRef],
-    reEventFunc: ReEventFunc,
     actorProps: ActorProps
 ) extends FuturePerRequestActor {
 
@@ -60,7 +59,7 @@ class RestActorPerRequest(
   def reExtra(rrr: RestRouterRequest): ReExtra =
     ReExtra(uri = rrr.uri.map(_.toString), headers = rrr.headers, httpMethod = rrr.httpMethod, callRemoteAddress = rrr.callRemoteAddress)
 
-  def traceRequest(rrr: RestRouterRequest, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
+  def traceRequest(rrr: RestRouterRequest, rePayloadContainerBlobFunc: RePayloadContainerBlobFunc, ddataMap: ConfigData): Unit = {
     Util.logPayload(log, message.payload)
     val reRequestReq = ReRequest(
       sessionId = rrr.sessionId,
@@ -77,7 +76,7 @@ class RestActorPerRequest(
       ),
       reExtra = Some(reExtra(rrr))
     )
-    reEventFunc(reRequestReq, log, ddataMap)
+    rePayloadContainerBlobFunc(reRequestReq, repositories, log)
   }
 
   override def receive: Receive = {
@@ -191,13 +190,14 @@ class RestActorPerRequest(
       ),
       reExtra = Some(ReExtra(statusCode = Some(statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
     )
-    reEventFunc(reRequestOpt.getOrElse(reRequest), log, actorProps.ddataMap)
+
+    actorProps.rePayloadContainerBlobFunction(reRequestOpt.getOrElse(reRequest), repositories, log)
     complete(createHttpResponse(statusCode, payload, sessionId), Constant.KeyName.REST_INPUT)
   }
 
   private def traceErrorResponse(e: Throwable, statusCode: Int): Unit = {
     log.error(e, s"Error response: [${e.getMessage}]")
-    traceRequest(message, reEventFunc, actorProps.ddataMap)
+    traceRequest(message, actorProps.rePayloadContainerBlobFunction, actorProps.ddataMap)
     log.info("Generating negative response")
     traceResponse(None, Error(e.getMessage).toJson.toString(), statusCode, EsitoRE.INVIATA_KO)
   }

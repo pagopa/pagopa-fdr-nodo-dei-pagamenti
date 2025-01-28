@@ -74,20 +74,6 @@ abstract class BaseUnitTest()
             }
             throughput = 1
         }
-        azure-hub-event {
-          azure-sdk-client {
-            re-event {
-              client-timeoput-ms = 5000
-              event-hub-name = "fdr-re"
-              connection-string = "fake"
-            }
-            blob-re {
-              enabled  = false
-              container-name = "payload"
-              connection-string = "fake"
-            }
-          }
-        }
         azure-storage-blob {
             enabled  = false
             container-name = "xmlsharefile"
@@ -169,6 +155,9 @@ abstract class BaseUnitTest()
   val containerBlobFunction = (a: String, m: Map[String, String], b: BinaryData, c: NodoLogger) => {
     Future.successful(())
   }
+  val reContainerBlobFunction = (a: ReRequest, b: Repositories, c: NodoLogger) => {
+    Future.successful(())
+  }
 
   val certPath = s"${new File(".").getCanonicalPath}/localresources/cacerts"
 
@@ -178,7 +167,7 @@ abstract class BaseUnitTest()
 
   val repositories = new RepositoriesTest(system.settings.config, log)
 
-  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, "", certPath, TestItems.ddataMap)
+  val props = ActorProps(null, null, null, actorUtility, Map(), containerBlobFunction, reContainerBlobFunction, "", certPath, TestItems.ddataMap)
 
   val mockActor = system.actorOf(Props.create(classOf[MockActor]), s"mock")
 

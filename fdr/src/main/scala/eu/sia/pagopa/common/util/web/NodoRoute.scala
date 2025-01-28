@@ -4,7 +4,7 @@ import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.http.scaladsl.coding.Coders
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.RawHeader
-import akka.http.scaladsl.server.Directives.{path, _}
+import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.RouteDirectives
 import akka.http.scaladsl.server.{PathMatcher, PathMatchers, Route, RouteResult}
 import akka.pattern.{AskTimeoutException, ask}
@@ -16,7 +16,6 @@ import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.fdr.FdrRepository
 import eu.sia.pagopa.common.repo.fdr.enums.SchedulerFireCheckStatus
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 import eu.sia.pagopa.nodopoller.actor.PollerActor
 import eu.sia.pagopa.restinput.actor.RestActorPerRequest
 import eu.sia.pagopa.restinput.message.RestRouterRequest
@@ -40,7 +39,6 @@ case class NodoRoute(
                       routers: Map[String, ActorRef],
                       httpHost: String,
                       httpPort: Int,
-                      reEventFunc: ReEventFunc,
                       actorProps: ActorProps
 )(implicit val ec: ExecutionContext, log: NodoLogger, materializer: Materializer)
     extends CORSHandler {
@@ -538,7 +536,7 @@ case class NodoRoute(
                               createSystemActorPerRequestAndTell[SoapRouterRequest](
                                 soapRouterRequest,
                                 Constant.KeyName.SOAP_INPUT,
-                                Props(classOf[SoapActorPerRequest], ctx, promise, routers, reEventFunc, actorProps)
+                                Props(classOf[SoapActorPerRequest], ctx, promise, routers, actorProps)
                               )(log, system)
                               _ => promise.future
                             case Failure(e) =>
@@ -637,7 +635,7 @@ case class NodoRoute(
                           createSystemActorPerRequestAndTell[RestRouterRequest](
                             restRouterRequest,
                             Constant.KeyName.REST_INPUT,
-                            Props(classOf[RestActorPerRequest], ctx, p, routers, reEventFunc, actorProps)
+                            Props(classOf[RestActorPerRequest], ctx, p, routers, actorProps)
                           )(log, system)
                           _ => p.future
                         case Failure(_) =>
