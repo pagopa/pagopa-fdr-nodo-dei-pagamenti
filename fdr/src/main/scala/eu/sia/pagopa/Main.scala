@@ -14,8 +14,7 @@ import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, ReEventFunc}
-import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.AzureProducerBuilder
+import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ContainerBlobFunc
 import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.config.actor.{ApiConfigActor, FdRMetadataActor, ReActor}
@@ -399,7 +398,6 @@ final case class ActorProps(
                              actorMaterializer: Materializer,
                              actorUtility: ActorUtility,
                              routers: Map[String, ActorRef],
-//                             reEventFunc: ReEventFunc,
                              fdr1FlowsContainerBlobFunction: ContainerBlobFunc,
                              rePayloadContainerBlobFunction: ContainerBlobFunc,
                              actorClassId: String,
