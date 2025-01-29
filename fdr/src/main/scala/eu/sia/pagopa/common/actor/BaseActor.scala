@@ -5,7 +5,6 @@ import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 import eu.sia.pagopa.ftpsender.actor.FtpSenderActorPerRequest
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import org.slf4j.MDC
@@ -76,6 +75,5 @@ trait BaseActor extends Actor with NodoLogging {
   val actorProps: ActorProps
   val repositories: Repositories
   val ddataMap: ConfigData = actorProps.ddataMap
-  val reEventFunc: ReEventFunc = actorProps.reEventFunc
 
 }

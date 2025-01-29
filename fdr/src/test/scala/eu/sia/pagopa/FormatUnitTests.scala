@@ -2,8 +2,7 @@ package eu.sia.pagopa
 
 import eu.sia.pagopa.common.message.ReExtra
 import eu.sia.pagopa.common.repo.re.model.Re
-import eu.sia.pagopa.common.util.NodoLogger
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction
+import eu.sia.pagopa.common.util.{Appfunction, NodoLogger}
 import org.mockito.MockitoSugar.mock
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should

@@ -295,7 +295,8 @@ lazy val `fdr` = (project in file("fdr"))
         "org.scala-lang.modules" %% "scala-xml" % scalaXmlVersion % Test,
         "org.mockito" %% s"mockito-scala" % "1.17.30" % Test,
         "com.softwaremill.sttp.client4" %% "core" % "4.0.0-M11" % Test,
-        "org.mock-server" % s"mockserver-netty" % "5.14.0" % Test
+        "org.mock-server" % s"mockserver-netty" % "5.14.0" % Test,
+        "org.mongodb.scala" %% "mongo-scala-driver" % "4.11.5"
       )
     }
   )

@@ -11,6 +11,7 @@ import akka.http.scaladsl.{ClientTransport, HttpsConnectionContext}
 import akka.stream.StreamTcpException
 import akka.stream.scaladsl.TcpIdleTimeoutException
 import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.Main.repositories
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
@@ -76,7 +77,7 @@ class ActorUtility {
           reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.value), soapProtocol = isSoapProtocol))
         )
         log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER))
-        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+        actorProps.rePayloadContainerBlobFunction(reRequest, repositories, log)
       }
 
       payloadResponse =
@@ -108,7 +109,7 @@ class ActorUtility {
           ),
           reExtra = Some(ReExtra(uri = None, httpMethod = None, statusCode = Some(httpResponse.status.intValue()), elapsed = Some(redate.until(now, ChronoUnit.MILLIS)), soapProtocol = isSoapProtocol))
         )
-        actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+        actorProps.rePayloadContainerBlobFunction(reRequest, repositories, log)
       }
 
       response = SimpleHttpRes(req.sessionId, httpResponse.status.intValue(), httpResponse.headers, Some(payload), None, req.testCaseId)
@@ -138,7 +139,7 @@ class ActorUtility {
         ),
         reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.value), soapProtocol = isSoapProtocol, statusCode = Some(response.statusCode)))
       )
-      actorProps.reEventFunc(reRequest, log, actorProps.ddataMap)
+      actorProps.rePayloadContainerBlobFunction(reRequest, repositories, log)
 
       log.debug(s"callHttp - end")
       response

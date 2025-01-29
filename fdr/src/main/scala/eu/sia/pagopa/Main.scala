@@ -14,12 +14,11 @@ import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ContainerBlobFunc, ReEventFunc}
-import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.{AzureFlussiRendicontazioneProducer, AzureIuvRendicontatiProducer, AzureProducerBuilder}
-import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
+import Appfunction.{Fdr1FlowsContainerBlobFunc, RePayloadContainerBlobFunc}
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.config.actor.ApiConfigActor
 import eu.sia.pagopa.nodopoller.actor.PollerActor
+import eu.sia.pagopa.rendicontazioni.actor.async.FdREventActor
 import io.github.mweirauch.micrometer.jvm.extras.{ProcessMemoryMetrics, ProcessThreadMetrics}
 import io.micrometer.core.instrument.binder.jvm.{ClassLoaderMetrics, JvmGcMetrics, JvmMemoryMetrics, JvmThreadMetrics}
 import io.micrometer.core.instrument.binder.system.ProcessorMetrics
@@ -41,10 +40,8 @@ object Main extends App {
 
   val job = args.headOption
 
-  val actorSystemName: String =
-    sys.env.getOrElse("AKKA_SYSTEM_NAME", throw new IllegalArgumentException("Actor system name must be defined by the actorSystemName property"))
-  val httpHost =
-    sys.env.getOrElse("SERVICE_HTTP_BIND_HOST", throw new IllegalArgumentException("HTTP bind host must be defined by the SERVICE_HTTP_BIND_HOST property"))
+  val actorSystemName: String = sys.env.getOrElse("AKKA_SYSTEM_NAME", throw new IllegalArgumentException("Actor system name must be defined by the actorSystemName property"))
+  val httpHost = sys.env.getOrElse("SERVICE_HTTP_BIND_HOST", throw new IllegalArgumentException("HTTP bind host must be defined by the SERVICE_HTTP_BIND_HOST property"))
   val httpPort = sys.env.get("SERVICE_HTTP_BIND_PORT").map(_.toInt).getOrElse(throw new IllegalArgumentException("HTTP bind port must be defined by the SERVICE_HTTP_BIND_PORT property"))
 
   val file = new File(System.getProperty("config.app"))
@@ -234,6 +231,7 @@ object Main extends App {
           Seq(
             BootstrapUtil.actorClassId(classOf[ApiConfigActor]) -> classOf[ApiConfigActor],
             BootstrapUtil.actorClassId(classOf[PollerActor]) -> classOf[PollerActor],
+            BootstrapUtil.actorClassId(classOf[FdREventActor]) -> classOf[FdREventActor],
             Constant.KeyName.FTP_SENDER -> classOf[PrimitiveActor]
           )
         case Some(j) =>
@@ -256,13 +254,8 @@ object Main extends App {
 
       log.info(s"Created Routers:\n${(baserouters.keys ++ primitiverouters.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
 
-      val reEventFunc: ReEventFunc = AzureProducerBuilder.build()
-
-      val containerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.build()
-
-
-      AzureIuvRendicontatiProducer.init(system)
-      AzureFlussiRendicontazioneProducer.init(system)
+      val fdr1FlowsContainerBlobFunction: Fdr1FlowsContainerBlobFunc = AzureStorageBlobClient.fdr1FlowsBuild()
+      val rePayloadContainerBlobFunction: RePayloadContainerBlobFunc = AzureStorageBlobClient.rePayloadBuild()(executionContext, system, log, repositories)
 
       val actorProps = ActorProps(
         http,
@@ -270,8 +263,8 @@ object Main extends App {
         actorMaterializer = materializer,
         actorUtility = new ActorUtility,
         routers = baserouters ++ primitiverouters,
-        reEventFunc = reEventFunc,
-        containerBlobFunction = containerBlobFunction,
+        fdr1FlowsContainerBlobFunction = fdr1FlowsContainerBlobFunction,
+        rePayloadContainerBlobFunction = rePayloadContainerBlobFunction,
         actorClassId = "main",
         cacertsPath = cacertsPath,
         ddataMap = data
@@ -281,6 +274,7 @@ object Main extends App {
       val baseactors = BootstrapUtil.createActors(system, repositories, actorProps, baseActorsNamesAndTypes)
         .+("deadLetterMonitorActor"-> system.actorOf(Props.create(classOf[DeadLetterMonitorActor]), BootstrapUtil.actorClassId(classOf[DeadLetterMonitorActor]))
       )
+
       val primitiveactors: Map[String, ActorRef] = BootstrapUtil.createActors(system, repositories, actorProps, primitiveActorsNamesAndTypes)
 
       log.info(s"Created Actors:\n${(baseactors.keys ++ primitiveactors.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
@@ -301,7 +295,6 @@ object Main extends App {
             routers = baserouters ++ primitiverouters,
             httpHost = httpHost,
             httpPort = httpPort,
-            reEventFunc = reEventFunc,
             actorProps
           )
           import akka.http.scaladsl.server.Directives._
@@ -402,8 +395,8 @@ final case class ActorProps(
                              actorMaterializer: Materializer,
                              actorUtility: ActorUtility,
                              routers: Map[String, ActorRef],
-                             reEventFunc: ReEventFunc,
-                             containerBlobFunction: ContainerBlobFunc,
+                             fdr1FlowsContainerBlobFunction: Fdr1FlowsContainerBlobFunc,
+                             rePayloadContainerBlobFunction: RePayloadContainerBlobFunc,
                              actorClassId: String,
                              cacertsPath: String,
                              var ddataMap: ConfigData

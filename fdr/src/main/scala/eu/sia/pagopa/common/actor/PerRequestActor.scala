@@ -8,7 +8,7 @@ import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
+import eu.sia.pagopa.common.util.Appfunction.RePayloadContainerBlobFunc
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.{FiniteDuration, _}
@@ -27,7 +27,9 @@ trait PerRequestActor extends Actor with NodoLogging {
 
   def actorClassId: String = actorProps.actorClassId
   val ddataMap: ConfigData = actorProps.ddataMap
-  val reEventFunc: ReEventFunc = actorProps.reEventFunc
+  // TODO [FC]
+//  val reEventFunc: ReEventFunc = actorProps.reEventFunc
+  val rePayloadContainerBlobFunction: RePayloadContainerBlobFunc = actorProps.rePayloadContainerBlobFunction
   val actorUtility: ActorUtility = actorProps.actorUtility
 
   val httpConnectTimeout: FiniteDuration = context.system.settings.config.getInt("config.http.connect-timeout").seconds

@@ -73,7 +73,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         } else {
           log.info("NOT FTP reporting")
           if (binaryFileOption.isDefined) {
-            val unzippedFilecontent = Util.unzipContent(binaryFileOption.get.fileContent.get) match {
+            val unzippedFilecontent = Util.ungzipContent(binaryFileOption.get.fileContent.get) match {
               case Success(content) => content
               case Failure(e) => throw new exception.DigitPaException("Error during unzip xml content from db", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
             }
@@ -87,7 +87,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
       case None =>
         log.info("Identificativo dominio NON presente")
         if (binaryFileOption.isDefined) {
-          val unzippedFilecontent = Util.unzipContent(binaryFileOption.get.fileContent.get) match {
+          val unzippedFilecontent = Util.ungzipContent(binaryFileOption.get.fileContent.get) match {
             case Success(content) => content
             case Failure(e) => throw new exception.DigitPaException("Error during unzip xml content from db", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
           }
@@ -298,7 +298,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
     }) map (sr => {
-      traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+      traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, actorProps.rePayloadContainerBlobFunction, ddataMap)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()

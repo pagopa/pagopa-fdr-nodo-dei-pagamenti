@@ -3,12 +3,24 @@ package eu.sia.pagopa.common.json.model
 import com.fasterxml.jackson.annotation.JsonInclude.Include
 import com.fasterxml.jackson.annotation.{JsonInclude, JsonProperty, JsonPropertyOrder}
 import eu.sia.pagopa.common.json.model.rendicontazione.Sender
+import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
+import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
 import spray.json.{DefaultJsonProtocol, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
 
 import java.time.LocalDateTime
 
 class Event()
 
+case class FdREventToHistory(
+                              sessionId: String,
+                              nifr: NodoInviaFlussoRendicontazione,
+                              soapRequest: String,
+                              insertedTimestamp: LocalDateTime,
+                              elaborate: Boolean,
+                              retry: Integer
+                            ) extends Event
+
+// TODO [FC] delete
 @JsonPropertyOrder(Array("IUV", "IUR", "IMPORTO", "COD_ESITO", "DATA_ESITO_SINGOLO_PAGAMENTO", "IDSP", "ID_FLUSSO", "DATA_ORA_FLUSSO", "ID_DOMINIO", "PSP", "INT_PSP", "UNIQUE_ID", "INSERTED_TIMESTAMP"))
 @JsonInclude(Include.NON_ABSENT)
 case class IUVRendicontatiEvent(

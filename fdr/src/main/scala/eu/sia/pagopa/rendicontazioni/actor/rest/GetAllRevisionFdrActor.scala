@@ -115,7 +115,7 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateErrorResponse(Some(pmae)))
       }).map( res => {
-        traceInterfaceRequest(req, reFlow.get, req.reExtra, reEventFunc, ddataMap)
+        traceInterfaceRequest(req, reFlow.get, req.reExtra, actorProps.rePayloadContainerBlobFunction, ddataMap)
         log.info(FdrLogConstant.logEnd(actorClassId))
         replyTo ! res
         complete()

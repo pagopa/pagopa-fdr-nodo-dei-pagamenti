@@ -5,7 +5,6 @@ import akka.stream.Materializer
 import com.typesafe.config.Config
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.repo.fdr.FdrRepository
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
 import eu.sia.pagopa.common.util.xml.XsdValid
@@ -35,7 +34,7 @@ class ChecksUnitTests  extends AnyFlatSpec with should.Matchers {
     when(config.getInt("config.http.server-request-timeout")).thenReturn(10)
     val ec = mock[ExecutionContext]
     val log = mock[NodoLogger]
-    val nr = new NodoRoute(as,fdrRepository,Map(),"",200,mock[ReEventFunc],mock[ActorProps])(ec,log,mock[Materializer])
+    val nr = new NodoRoute(as,fdrRepository,Map(),"",200,mock[ActorProps])(ec,log,mock[Materializer])
     val timeout = nr.akkaHttpTimeout("sid")
     val enc = nr.akkaErrorEncoding("sid","UTF-8")
     assert(timeout.status.isFailure())
