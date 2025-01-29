@@ -99,7 +99,6 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       _ = reFlow = Some(re_)
 
       // semantic check
-      // semantic check
       (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifr, checkPassword = true, actorClassId))
       _ <- Future.fromTry(checkFormatoIdFlussoRendicontazione(nifr.identificativoFlusso, nifr.identificativoPSP, actorClassId))
 
@@ -165,7 +164,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
       _ = traceInternalRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
-    } yield (sr, nifr, flussoRiversamento, rendicontazioneSaved)
+    } yield (sr, nifr, rendicontazioneSaved)
 
     pipeline
       .recover({
@@ -175,28 +174,35 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         case e: Throwable =>
           log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
           errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
-      }).map { case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
-        log.info(FdrLogConstant.logEnd(actorClassId))
-        traceInterfaceRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
-        replyTo ! sr
+      })
+      .map {
+        case sr: SoapResponse =>
+          log.info(FdrLogConstant.logEnd(actorClassId))
+          traceInterfaceRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+          replyTo ! sr
+        case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, rendicontazioneSaved: Rendicontazione) =>
+          log.info(FdrLogConstant.logEnd(actorClassId))
+          traceInterfaceRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+          replyTo ! sr
+          Future {
+            if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
+              // send data to history
+              actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
+                .tell(
+                  FdREventToHistory(
+                    sessionId = req.sessionId,
+                    nifr = nifr,
+                    soapRequest = soapRequest.payload,
+                    insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
+                    elaborate = true,
+                    retry = 0
+                  ),
+                  replyTo)
+            }
+          }
 
-        if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
-
-          // send data to history
-          actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
-            .tell(
-              FdREventToHistory(
-                sessionId = req.sessionId,
-                nifr = nifr,
-                soapRequest = soapRequest.payload,
-                insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
-                elaborate = true,
-                retry = 0
-              ),
-              replyTo)
-        }
-
-        complete()
+        case _ =>
+          log.info("TODO [FC] MANAGE HERE")
       }
   }
 

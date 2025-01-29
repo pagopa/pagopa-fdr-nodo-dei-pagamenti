@@ -166,27 +166,35 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
           case cause: Throwable =>
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateErrorResponse(Some(pmae)))
-      }).map { case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
-          traceInterfaceRequest(reActor, req, reFlow.get, req.reExtra, ddataMap)
-          log.info(FdrLogConstant.logEnd(actorClassId))
-          replyTo ! sr
+      }).map {
+          case sr: SoapResponse =>
+            traceInterfaceRequest(reActor, req, reFlow.get, req.reExtra, ddataMap)
+            log.info(FdrLogConstant.logEnd(actorClassId))
+            replyTo ! sr
+          case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
+            traceInterfaceRequest(reActor, req, reFlow.get, req.reExtra, ddataMap)
+            log.info(FdrLogConstant.logEnd(actorClassId))
+            replyTo ! sr
+            Future {
+              if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
+                // send data to history
+                actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
+                  .tell(
+                    FdREventToHistory(
+                      sessionId = req.sessionId,
+                      nifr = nifr,
+                      soapRequest = req.payload.get,
+                      insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
+                      elaborate = true,
+                      retry = 0
+                    ),
+                    replyTo)
+              }
+            }
 
-          if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
-            // send data to history
-            actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
-              .tell(
-                FdREventToHistory(
-                  sessionId = req.sessionId,
-                  nifr = nifr,
-                  soapRequest = req.payload.get,
-                  insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
-                  elaborate = true,
-                  retry = 0
-                ),
-                replyTo)
-          }
-
-          complete()
+            complete()
+          case _ =>
+            log.info("TODO [FC] MANAGE HERE")
         }
       }
 //  }
