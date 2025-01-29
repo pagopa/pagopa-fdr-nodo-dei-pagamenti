@@ -60,7 +60,7 @@ cronnodo:
       FDR_SUBSCRIPTION_KEY: "fdr-internal-product-subscription-key"
       FDR_LEGACY_SUBSCRIPTION_KEY: "fdr-legacy-subscription-key"
       DB_FDR_PASSWORD: "db-fdr-password"
-      MONGO_CONNECTION_STRING: "mongodb-connection-string"
+      MONGO_CONNECTION_STRING: "mongodb-re-connection-string"
     keyvault:
       name: "pagopa-d-fdr-kv"
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
