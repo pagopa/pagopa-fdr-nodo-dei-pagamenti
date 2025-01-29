@@ -2,6 +2,7 @@ package eu.sia.pagopa.rendicontazioni.actor.soap
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
+import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
@@ -21,7 +22,6 @@ import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicontazioneResponse
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import org.slf4j.MDC
-import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
 
 import java.time.format.DateTimeFormatter
@@ -47,6 +47,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
   val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"
 
   val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
+  val fdrMetadataActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
 
   override def receive: Receive = { case soapRequest: SoapRequest =>
 
@@ -162,7 +163,8 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
       _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
-      _ = traceInternalRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+//      _ = traceInternalRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+      _ = callTrace(traceInternalRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield (sr, nifr, rendicontazioneSaved)
 
@@ -178,27 +180,28 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       .map {
         case sr: SoapResponse =>
           log.info(FdrLogConstant.logEnd(actorClassId))
-          traceInterfaceRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+          callTrace(traceInterfaceRequest,reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+//          traceInterfaceRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
           replyTo ! sr
         case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, rendicontazioneSaved: Rendicontazione) =>
           log.info(FdrLogConstant.logEnd(actorClassId))
-          traceInterfaceRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+//          traceInterfaceRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+          callTrace(traceInterfaceRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
           replyTo ! sr
           Future {
             if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
               // send data to history
-              actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
-                .tell(
-                  FdREventToHistory(
-                    sessionId = req.sessionId,
-                    nifr = nifr,
-                    soapRequest = soapRequest.payload,
-                    insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
-                    elaborate = true,
-                    retry = 0
-                  ),
-                  replyTo)
+              fdrMetadataActor ! FdREventToHistory(
+                sessionId = req.sessionId,
+                nifr = nifr,
+                soapRequest = soapRequest.payload,
+                insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
+                elaborate = true,
+                retry = 0
+              )
             }
+          }.recover {
+            case e: Throwable => log.error(e, "Problem to send message to fdrMetadataActor")
           }
 
         case _ =>
@@ -208,6 +211,17 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
 
   override def actorError(e: DigitPaException): Unit = {
     actorError(req, replyTo, ddataMap, e, reFlow)
+  }
+
+  private def callTrace(callback: (ActorRef, SoapRequest, Re, ReExtra, ConfigData) => Unit,
+                        reActor: ActorRef, soapRequest: SoapRequest, re: Re,
+                        reExtra: ReExtra, ddataMap: ConfigData): Unit = {
+    Future {
+      callback(reActor, soapRequest, re, reExtra, ddataMap)
+    }.recover {
+      case e: Throwable =>
+        log.error(e, s"Execution error in ${callback.getClass.getSimpleName}")
+    }
   }
 
   private def checksDB(nifr: NodoInviaFlussoRendicontazione) = {

@@ -8,6 +8,8 @@ import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 
+import scala.concurrent.{ExecutionContext, Future}
+
 
 trait ReUtil { this: NodoLogging =>
 

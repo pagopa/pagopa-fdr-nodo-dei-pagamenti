@@ -39,7 +39,7 @@ case class MongoRepository(config:Config, log: NodoLogger)(implicit ec: Executio
 
     insertFuture.onComplete {
       case Success(result) =>
-        log.info(s"RE Event ${data.sessionId} ${data.fdr} ${data.fdrAction} saved ${result}")
+        log.debug(s"RE Event ${data.sessionId} ${data.fdr} ${data.fdrAction} saved ${result}")
       case Failure(exception) =>
         log.error(exception, s"Problem to save on Mongo RE ${data.sessionId} ${data.fdr} ${data.fdrAction}")
     }
