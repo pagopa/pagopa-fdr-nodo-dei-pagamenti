@@ -21,35 +21,41 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
   private def saveForHistory(event: FdREventToHistory): Unit = {
     // save on pagopaweufdrsa.fdr1flows as gzip
     // save on fdr-re.fdr1metadata
-    val blobBodyRef: Option[BlobBodyRef] = saveBlob(event, system)
+    val maxRetry = 3
+    if (event.retry < maxRetry) {
+      val blobBodyRef: Option[BlobBodyRef] = saveBlob(event, system)
 
-    if (blobBodyRef.isDefined) {
-      log.debug(s"FdREventToHistory saving metadata ${blobBodyRef.get}")
-      val fdr1Metadata = Fdr1Metadata(
-        event.nifr.identificativoPSP,
-        event.nifr.identificativoIntermediarioPSP,
-        event.nifr.identificativoCanale,
-        event.nifr.identificativoDominio,
-        event.nifr.identificativoFlusso,
-        event.nifr.dataOraFlusso,
-        blobBodyRef,
-        s"${event.nifr.identificativoPSP}${event.nifr.identificativoDominio}"
-      )
+      if (blobBodyRef.isDefined) {
+        log.debug(s"FdREventToHistory saving metadata ${blobBodyRef.get}")
+        val fdr1Metadata = Fdr1Metadata(
+          event.nifr.identificativoPSP,
+          event.nifr.identificativoIntermediarioPSP,
+          event.nifr.identificativoCanale,
+          event.nifr.identificativoDominio,
+          event.nifr.identificativoFlusso,
+          event.nifr.dataOraFlusso,
+          blobBodyRef,
+          s"${event.nifr.identificativoPSP}${event.nifr.identificativoDominio}"
+        )
 
-      val insertFuture = repositories.mongoRepository.saveFdrMetadata(fdr1Metadata)
-      insertFuture.onComplete {
-        case Success(result) =>
-          log.debug(s"FdR Metadata ${result} ${fdr1Metadata.getPsp()} ${fdr1Metadata.getFlowId()} saved")
-        case Failure(exception) => {
-          log.error(exception, s"Problem to save on Mongo ${fdr1Metadata.getPsp()} ${fdr1Metadata.getFlowId()}")
-          self.tell(event.copy(retry = (event.retry + 1)), self)
+        val insertFuture = repositories.mongoRepository.saveFdrMetadata(fdr1Metadata)
+        insertFuture.onComplete {
+          case Success(result) =>
+            log.debug(s"FdR Metadata ${result} ${fdr1Metadata.getPsp()} ${fdr1Metadata.getFlowId()} saved")
+          case Failure(exception) => {
+            log.error(exception, s"Problem to save on Mongo ${fdr1Metadata.getPsp()} ${fdr1Metadata.getFlowId()}")
+            self.tell(event.copy(retry = (event.retry + 1)), self)
+          }
         }
-      }
-      log.debug(s"FdREventToHistory metadata ${event.sessionId} saved")
+        log.debug(s"FdREventToHistory metadata with sessionId ${event.sessionId} saved")
 
-    } else {
-      log.debug("Reschedule save fdr1-flow blob")
-      self.tell(event.copy(retry = event.retry + 1), self)
+      } else {
+        log.debug("Reschedule save fdr1-flow blob")
+        self.tell(event.copy(retry = event.retry + 1), self)
+      }
+    }
+    else {
+      log.error(s"[ALERT] FdREventToHistory with sessionId ${event.sessionId} retried more than ${maxRetry}.")
     }
   }
 
@@ -84,7 +90,6 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
     }
     else {
       log.debug("Reschedule save fdr1-flow blob - problem to initialize blob async client")
-      self.tell(event.copy(retry = event.retry + 1), self)
       Option.empty
     }
   }

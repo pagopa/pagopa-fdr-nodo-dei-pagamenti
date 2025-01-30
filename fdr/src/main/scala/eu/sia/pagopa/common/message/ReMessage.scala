@@ -31,7 +31,8 @@ case class ReRequest(
                       override val sessionId: String,
                       override val testCaseId: Option[String] = None,
                       re: Re,
-                      reExtra: Option[ReExtra] = None
+                      reExtra: Option[ReExtra] = None,
+                      retry: Int = 0
                     ) extends BaseMessage
 
 case class ReEventHub(

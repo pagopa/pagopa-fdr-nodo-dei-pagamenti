@@ -23,27 +23,11 @@ case class MongoRepository(config:Config, log: NodoLogger)(implicit ec: Executio
   def saveFdrMetadata(data: Fdr1Metadata): Future[InsertOneResult] = {
     val document: MongoCollection[Document] = mongoClient.getDatabase(mongoMetadataDatabase).getCollection(mongoMetadataDocument)
     document.insertOne(data.toDocument).toFuture()
-//    insertFuture
-//    insertFuture.onComplete {
-//      case Success(result) =>
-//        log.info(s"FdR Metadata ${result} ${data.getPsp()} ${data.getFlowId()} saved")
-//      case Failure(exception) =>
-//        log.error(exception, s"Problem to save on Mongo ${data.getPsp()} ${data.getFlowId()}")
-//    }
-
   }
 
-  def saveReEvent(data: ReEventHub): Unit = {
+  def saveReEvent(data: ReEventHub): Future[InsertOneResult] = {
     val document: MongoCollection[Document] = mongoClient.getDatabase(mongoMetadataDatabase).getCollection(mongoEventsDocument)
-    val insertFuture = document.insertOne(data.toDocument).toFuture()
-
-    insertFuture.onComplete {
-      case Success(result) =>
-        log.debug(s"RE Event ${data.sessionId} ${data.fdr} ${data.fdrAction} saved ${result}")
-      case Failure(exception) =>
-        log.error(exception, s"Problem to save on Mongo RE ${data.sessionId} ${data.fdr} ${data.fdrAction}")
-        // TODO [FC] insert retry
-    }
+    document.insertOne(data.toDocument).toFuture()
   }
 
 }
