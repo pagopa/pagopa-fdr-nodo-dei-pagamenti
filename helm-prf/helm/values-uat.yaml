@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "fdr"
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.1.9-82-PAGOPA-2600-housekeeping-evh-qi
+    tag: 2.1.9-83-PAGOPA-2600-housekeeping-evh-qi
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
