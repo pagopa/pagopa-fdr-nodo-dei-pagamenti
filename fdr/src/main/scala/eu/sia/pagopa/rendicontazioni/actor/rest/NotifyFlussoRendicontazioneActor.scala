@@ -183,11 +183,22 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateResponse(Some(pmae)))
       }).map( res => {
-        traceInterfaceRequest(reActor, req, reFlow.get, req.reExtra, ddataMap)
+        callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
         log.info(FdrLogConstant.logEnd(actorClassId))
         replyTo ! res
         complete()
       })
+  }
+
+  private def callTrace(callback: (ActorRef, RestRequest, Re, ReExtra) => Unit,
+                        reActor: ActorRef, restRequest: RestRequest, re: Re,
+                        reExtra: ReExtra): Unit = {
+    Future {
+      callback(reActor, restRequest, re, reExtra)
+    }.recover {
+      case e: Throwable =>
+        log.error(e, s"Execution error in ${callback.getClass.getSimpleName}")
+    }
   }
 
   private def parseInput(restRequest: RestRequest) = {

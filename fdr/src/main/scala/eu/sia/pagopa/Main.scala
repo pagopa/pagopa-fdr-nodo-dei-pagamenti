@@ -14,8 +14,6 @@ import eu.sia.pagopa.common.actor._
 import eu.sia.pagopa.common.message.{TriggerJobRequest, TriggerJobResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ContainerBlobFunc
-import eu.sia.pagopa.common.util.azurestorageblob.AzureStorageBlobClient
 import eu.sia.pagopa.common.util.web.NodoRoute
 import eu.sia.pagopa.config.actor.{ApiConfigActor, FdRMetadataActor, ReActor}
 import eu.sia.pagopa.nodopoller.actor.PollerActor
@@ -255,17 +253,12 @@ object Main extends App {
 
       log.info(s"Created Routers:\n${(baserouters.keys ++ primitiverouters.keys).grouped(5).map(_.mkString(",")).mkString("\n")}")
 
-      val fdr1FlowsContainerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.fdr1FlowsBuild()
-      val rePayloadContainerBlobFunction: ContainerBlobFunc = AzureStorageBlobClient.rePayloadBuild()
-
       val actorProps = ActorProps(
         http,
         SSlContext,
         actorMaterializer = materializer,
         actorUtility = new ActorUtility,
         routers = baserouters ++ primitiverouters,
-        fdr1FlowsContainerBlobFunction = fdr1FlowsContainerBlobFunction,
-        rePayloadContainerBlobFunction = rePayloadContainerBlobFunction,
         actorClassId = "main",
         cacertsPath = cacertsPath,
         ddataMap = data
@@ -356,9 +349,6 @@ object Main extends App {
       Future.failed(e)
     })
 
-  def getBootstrapFuture = bootstrapFuture
-
-  def getSystem: ActorSystem = system
 }
 
 object BootstrapUtil {
@@ -396,8 +386,6 @@ final case class ActorProps(
                              actorMaterializer: Materializer,
                              actorUtility: ActorUtility,
                              routers: Map[String, ActorRef],
-                             fdr1FlowsContainerBlobFunction: ContainerBlobFunc,
-                             rePayloadContainerBlobFunction: ContainerBlobFunc,
                              actorClassId: String,
                              cacertsPath: String,
                              var ddataMap: ConfigData

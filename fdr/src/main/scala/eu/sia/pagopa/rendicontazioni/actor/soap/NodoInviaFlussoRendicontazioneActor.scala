@@ -163,8 +163,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
       _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
-//      _ = traceInternalRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
-      _ = callTrace(traceInternalRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+      _ = callTrace(traceInternalRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield (sr, nifr, rendicontazioneSaved)
 
@@ -180,12 +179,11 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       .map {
         case sr: SoapResponse =>
           log.info(FdrLogConstant.logEnd(s"Only SR ${actorClassId}"))
-          callTrace(traceInterfaceRequest,reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+          callTrace(traceInterfaceRequest,reActor, soapRequest, reFlow.get, soapRequest.reExtra)
           replyTo ! sr
         case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, rendicontazioneSaved: Rendicontazione) =>
           log.info(FdrLogConstant.logEnd(s"SR, NIFR, RENDICONTAZIONE ${actorClassId}"))
-          log.info(s"AAAAAAA ${replyTo.path.name}")
-          callTrace(traceInterfaceRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+          callTrace(traceInterfaceRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
           replyTo ! sr
           Future {
             if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
@@ -212,11 +210,11 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
     actorError(req, replyTo, ddataMap, e, reFlow)
   }
 
-  private def callTrace(callback: (ActorRef, SoapRequest, Re, ReExtra, ConfigData) => Unit,
+  private def callTrace(callback: (ActorRef, SoapRequest, Re, ReExtra) => Unit,
                         reActor: ActorRef, soapRequest: SoapRequest, re: Re,
-                        reExtra: ReExtra, ddataMap: ConfigData): Unit = {
+                        reExtra: ReExtra): Unit = {
     Future {
-      callback(reActor, soapRequest, re, reExtra, ddataMap)
+      callback(reActor, soapRequest, re, reExtra)
     }.recover {
       case e: Throwable =>
         log.error(e, s"Execution error in ${callback.getClass.getSimpleName}")

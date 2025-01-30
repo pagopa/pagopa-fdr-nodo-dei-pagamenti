@@ -1,19 +1,16 @@
 package eu.sia.pagopa.common.util
 
 import akka.actor.ActorRef
-import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.actor.NodoLogging
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.re.model.Re
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 
-import scala.concurrent.{ExecutionContext, Future}
-
+import scala.concurrent.Future
 
 trait ReUtil { this: NodoLogging =>
 
-  def traceInternalRequest(reActor: ActorRef, message: SoapRequest, re: Re, reExtra: ReExtra, ddataMap: ConfigData): Unit = {
+  def traceInternalRequest(reActor: ActorRef, message: SoapRequest, re: Re, reExtra: ReExtra): Unit = {
     import StringUtils.Utf8String
     Util.logPayload(log, Some(message.payload))
     val reRequestReq = ReRequest(
@@ -33,7 +30,7 @@ trait ReUtil { this: NodoLogging =>
     reActor.tell(reRequestReq, null)
   }
 
-  def traceInternalRequest(reActor: ActorRef, message: RestRequest, re: Re, reExtra: ReExtra, ddataMap: ConfigData): Unit = {
+  def traceInternalRequest(reActor: ActorRef, message: RestRequest, re: Re, reExtra: ReExtra): Unit = {
     //    import StringUtils.Utf8String
     //Util.logPayload(log, Some(message.payload.get))
     val reRequestReq = ReRequest(
@@ -52,7 +49,7 @@ trait ReUtil { this: NodoLogging =>
     reActor.tell(reRequestReq, null)
   }
 
-  def traceInterfaceRequest(reActor: ActorRef, message: SoapRequest, re: Re, reExtra: ReExtra, ddataMap: ConfigData): Unit = {
+  def traceInterfaceRequest(reActor: ActorRef, message: SoapRequest, re: Re, reExtra: ReExtra): Unit = {
     import StringUtils.Utf8String
     Util.logPayload(log, Some(message.payload))
     val reRequestReq = ReRequest(
@@ -71,7 +68,7 @@ trait ReUtil { this: NodoLogging =>
     reActor.tell(reRequestReq, null)
   }
 
-  def traceInterfaceRequest(reActor: ActorRef, message: RestRequest, re: Re, reExtra: ReExtra, ddataMap: ConfigData): Unit = {
+  def traceInterfaceRequest(reActor: ActorRef, message: RestRequest, re: Re, reExtra: ReExtra): Unit = {
     import StringUtils.Utf8String
     Util.logPayload(log, message.payload)
     val reRequestReq = ReRequest(

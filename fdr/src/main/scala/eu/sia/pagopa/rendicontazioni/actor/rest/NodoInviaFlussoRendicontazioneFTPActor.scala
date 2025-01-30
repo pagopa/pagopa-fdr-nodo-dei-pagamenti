@@ -154,7 +154,7 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
         )
 
         _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
-        _ = traceInternalRequest(reActor, restRequest, reFlow.get, restRequest.reExtra, ddataMap)
+        _ = callTrace(traceInternalRequest, reActor, restRequest, reFlow.get, restRequest.reExtra)
         sr = RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
       } yield (sr, nifrSoap, flussoRiversamento, rendicontazioneSaved))
         .recoverWith({
@@ -168,11 +168,11 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
             Future.successful(generateErrorResponse(Some(pmae)))
       }).map {
           case sr: SoapResponse =>
-            traceInterfaceRequest(reActor, req, reFlow.get, req.reExtra, ddataMap)
+            callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
             log.info(FdrLogConstant.logEnd(actorClassId))
             replyTo ! sr
           case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
-            traceInterfaceRequest(reActor, req, reFlow.get, req.reExtra, ddataMap)
+            callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
             log.info(FdrLogConstant.logEnd(actorClassId))
             replyTo ! sr
             Future {
@@ -197,7 +197,17 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
             log.info("TODO [FC] MANAGE HERE")
         }
       }
-//  }
+
+  private def callTrace(callback: (ActorRef, RestRequest, Re, ReExtra) => Unit,
+                        reActor: ActorRef, restRequest: RestRequest, re: Re,
+                        reExtra: ReExtra): Unit = {
+    Future {
+      callback(reActor, restRequest, re, reExtra)
+    }.recover {
+      case e: Throwable =>
+        log.error(e, s"Execution error in ${callback.getClass.getSimpleName}")
+    }
+  }
 
   private def parseInput(restRequest: RestRequest) = {
     Try({

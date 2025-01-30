@@ -301,11 +301,22 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
     }) map (sr => {
-      traceInterfaceRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+      callTrace(traceInterfaceRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
     })
+  }
+
+  private def callTrace(callback: (ActorRef, SoapRequest, Re, ReExtra) => Unit,
+                        reActor: ActorRef, soapRequest: SoapRequest, re: Re,
+                        reExtra: ReExtra): Unit = {
+    Future {
+      callback(reActor, soapRequest, re, reExtra)
+    }.recover {
+      case e: Throwable =>
+        log.error(e, s"Execution error in ${callback.getClass.getSimpleName}")
+    }
   }
 
   private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediFlussoRendicontazioneRisposta]] = {

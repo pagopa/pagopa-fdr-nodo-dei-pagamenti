@@ -154,7 +154,7 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, DigitPaErrorCodes.PPT_SYSTEM_ERROR, re)
     }) map (sr => {
-      traceInterfaceRequest(reActor, soapRequest, re.get, soapRequest.reExtra, ddataMap)
+      callTrace(traceInterfaceRequest, reActor, soapRequest, re.get, soapRequest.reExtra)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
@@ -163,6 +163,17 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
 
   override def actorError(e: DigitPaException): Unit = {
     actorError(req, replyTo, ddataMap, e, re)
+  }
+
+  private def callTrace(callback: (ActorRef, SoapRequest, Re, ReExtra) => Unit,
+                        reActor: ActorRef, soapRequest: SoapRequest, re: Re,
+                        reExtra: ReExtra): Unit = {
+    Future {
+      callback(reActor, soapRequest, re, reExtra)
+    }.recover {
+      case e: Throwable =>
+        log.error(e, s"Execution error in ${callback.getClass.getSimpleName}")
+    }
   }
 
   private def parseInput(br: SoapRequest): Try[NodoChiediElencoFlussiRendicontazione] = {
