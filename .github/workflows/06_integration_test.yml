@@ -31,14 +31,11 @@ permissions:
   contents: read
   deployments: write
 
-env:
-  ENVIRONMENT: ${{(github.event.inputs == null && 'uat') || inputs.environment }}
-
 jobs:
   integration_test:
-    name: Test $ENVIRONMENT
+    name: Test ${{(github.event.inputs == null && 'uat') || inputs.environment }}
     runs-on: ubuntu-latest
-    environment: $ENVIRONMENT
+    environment: ${{(github.event.inputs == null && 'uat') || inputs.environment }}
     steps:
       - name: Checkout
         id: checkout
@@ -82,8 +79,8 @@ jobs:
           docker run \
           -e INTEGRATION_TEST_SUBSCRIPTION_KEY="${{ secrets.INTEGRATION_TEST_SUBSCRIPTION_KEY }}" \
           -e TAGS="${{ inputs.tags }}" \
-          -e ENV="$ENVIRONMENT" \
-          -e CONFIG_FILE="/config/$ENVIRONMENT.json" \
+          -e ENV="${{(github.event.inputs == null && 'uat') || inputs.environment }}" \
+          -e CONFIG_FILE="/config/${{(github.event.inputs == null && 'uat') || inputs.environment }}.json" \
           -v  ./reports:/app/reports fdr1_test
 
       - name: Login
@@ -139,7 +136,7 @@ jobs:
           status: ${{ needs.integration_test.result }}
           token: ${{ secrets.GITHUB_TOKEN }}
           notify_when: 'failure,skipped'
-          notification_title: '<{run_url}|Scheduled Integration Test> has {status_message} in $ENVIRONMENT'
+          notification_title: '<{run_url}|Scheduled Integration Test> has {status_message} in ${{(github.event.inputs == null && "uat") || inputs.environment }}'
           message_format: '{emoji} <{run_url}|{workflow}> {status_message} in <{repo_url}|{repo}>'
           footer: 'Linked to <{workflow_url}| workflow file>'
         env:
