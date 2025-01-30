@@ -26,7 +26,6 @@ trait ReUtil { this: NodoLogging =>
       ),
       reExtra = Some(reExtra)
     )
-    log.info("traceInternalRequestTest")
     reActor.tell(reRequestReq, null)
   }
 
