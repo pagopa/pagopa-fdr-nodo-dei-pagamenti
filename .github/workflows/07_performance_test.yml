@@ -32,7 +32,7 @@ on:
         options:
           - happy_case_scenario
           - only_nodoInviaFlussoRendicontazione_scenario
-          - only_nodoInviaFlussoRendicontazione_scenario_payments_ramp
+          - only_nodoInviaFlussoRendicontazione_payments_ramp_scenario
       flow-size:
         required: true
         type: number

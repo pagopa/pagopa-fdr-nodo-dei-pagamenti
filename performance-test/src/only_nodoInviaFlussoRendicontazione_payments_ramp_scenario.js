@@ -17,7 +17,7 @@ const varsArray = new SharedArray('vars', function () {
 const vars = varsArray[0];
 const app_host = `${vars.app_host}`;
 const subkey = `${__ENV.API_SUBSCRIPTION_KEY}`;
-const flow_size = Number(`${__ENV.FLOW_SIZE}`);
+let flow_size = Number(`${__ENV.FLOW_SIZE}`);
 
 const parameters = {
     pspId: `${vars.psp}`,
@@ -54,7 +54,7 @@ export default function () {
     flow_size = 5000
   }
 
-  if (getCurrentStageIndex() === 1) {
+  if (getCurrentStageIndex() === 2) {
     flow_size = 10000
   }
   console.log("Flow size is now " + flow_size)
