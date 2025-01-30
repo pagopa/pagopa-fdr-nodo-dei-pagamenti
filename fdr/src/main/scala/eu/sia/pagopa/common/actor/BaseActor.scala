@@ -23,8 +23,9 @@ final case class PrimitiveActor(repositories: Repositories, actorProps: ActorPro
     val pr = s"pr-$actorClassId-${UUID.randomUUID().toString}-${request.sessionId}"
     log.debug(s"CREATE ActorPerRequest [$pr]")
     val perrequest = context.actorOf(props, pr)
-    log.debug(s"TELL ActorPerRequest [$pr]")
+    log.debug(s"TELL ActorPerRequest [$pr] [${perrequest.path.name}]")
     perrequest.forward(request)
+//    perrequest.tell(request, self)
     perrequest
   }
 
@@ -32,7 +33,7 @@ final case class PrimitiveActor(repositories: Repositories, actorProps: ActorPro
 
     MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, actorClassId)
 
-    log.debug(s"Creating actor per request ${actorClassId}${extraData.map(d => s"[$d]").getOrElse("")} of class ${clazz.getSimpleName}")
+    log.debug(s"Creating actor per request ${sender.path.name} ${actorClassId}${extraData.map(d => s"[$d]").getOrElse("")} of class ${clazz.getSimpleName}")
     Try({
       val a = createActorPerRequestAndTell(request, BootstrapUtil.actorClassId(clazz), Props(clazz, repositories, actorProps.copy(actorClassId = actorClassId)))(log, context)
       context.watch(a)

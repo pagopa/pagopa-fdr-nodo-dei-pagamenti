@@ -46,8 +46,8 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
 
   val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"
 
-  val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
-  val fdrMetadataActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
+  val reActor: ActorRef = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
+  private val fdrMetadataActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
 
   override def receive: Receive = { case soapRequest: SoapRequest =>
 
@@ -179,13 +179,12 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       })
       .map {
         case sr: SoapResponse =>
-          log.info(FdrLogConstant.logEnd(actorClassId))
+          log.info(FdrLogConstant.logEnd(s"Only SR ${actorClassId}"))
           callTrace(traceInterfaceRequest,reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
-//          traceInterfaceRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
           replyTo ! sr
         case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, rendicontazioneSaved: Rendicontazione) =>
-          log.info(FdrLogConstant.logEnd(actorClassId))
-//          traceInterfaceRequest(reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
+          log.info(FdrLogConstant.logEnd(s"SR, NIFR, RENDICONTAZIONE ${actorClassId}"))
+          log.info(s"AAAAAAA ${replyTo.path.name}")
           callTrace(traceInterfaceRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra, ddataMap)
           replyTo ! sr
           Future {

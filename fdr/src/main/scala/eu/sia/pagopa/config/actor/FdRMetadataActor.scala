@@ -91,6 +91,7 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
 
   override def receive: Receive = {
     case event: FdREventToHistory =>
+      log.info(s"FdREventToHistory ${event.retry}")
       saveForHistory(event)
     case _ =>
       log.error(s"""########################

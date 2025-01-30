@@ -50,6 +50,7 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
     )
 
     repositories.mongoRepository.saveReEvent(reEventHub)
+    // TODO [FC]
   }
 
   private def saveBlob(r: ReRequest, system: ActorSystem): Option[BlobBodyRef] = {

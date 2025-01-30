@@ -42,6 +42,7 @@ case class MongoRepository(config:Config, log: NodoLogger)(implicit ec: Executio
         log.debug(s"RE Event ${data.sessionId} ${data.fdr} ${data.fdrAction} saved ${result}")
       case Failure(exception) =>
         log.error(exception, s"Problem to save on Mongo RE ${data.sessionId} ${data.fdr} ${data.fdrAction}")
+        // TODO [FC] insert retry
     }
   }
 
