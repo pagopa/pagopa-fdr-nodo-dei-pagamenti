@@ -57,7 +57,6 @@ export default function () {
   if (getCurrentStageIndex() === 2) {
     flow_size = 10000
   }
-  console.log("Flow size is now " + flow_size)
 
   // Initialize response variable
   let response = '';
