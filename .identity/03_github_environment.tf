@@ -62,6 +62,12 @@ resource "github_actions_environment_variable" "github_environment_runner_variab
   value         = each.value
 }
 
+resource "github_actions_secret" "lightbend_key" {
+  repository       = local.github.repository
+  secret_name      = "LIGHTBEND_KEY"
+  plaintext_value  = data.azurerm_key_vault_secret.key_vault_lightbend_key.value
+}
+
 
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
 resource "github_actions_secret" "secret_sonar_token" {
@@ -75,7 +81,7 @@ resource "github_actions_secret" "secret_bot_token" {
 
   repository       = local.github.repository
   secret_name      = "BOT_TOKEN_GITHUB"
-  plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_token.value
+  plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_cd_token.value
 }
 
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret

@@ -1,11 +1,11 @@
-fdrnodo:
+microservice-chart: &microservice-chart
   namespace: "fdr"
-  nameOverride: ""
-  fullnameOverride: ""
-  terminationGracePeriodSeconds: 140
   image:
-    repository: pagopapcommonacr.azurecr.io/pagopafdrnododeipagamenti
-    tag: 1.0.0-SNAPSHOT
+    repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
+    tag: 2.1.9-63-PAGOPA-2394
+  canaryDelivery:
+    create: false
+  terminationGracePeriodSeconds: 140
   livenessProbe:
     httpGet:
       path: /alive
@@ -29,15 +29,15 @@ fdrnodo:
     create: true
   resources:
     requests:
-      memory: "6Gi"
-      cpu: "2048m"
+      memory: "640M"
+      cpu: "512m"
     limits:
       memory: "8Gi"
       cpu: "2560m"
   autoscaling:
     enable: true
-    minReplica: 4
-    maxReplica: 18
+    minReplica: 1
+    maxReplica: 1
     pollingInterval: 10 # seconds
     triggers:
       - type: cpu
@@ -80,14 +80,15 @@ fdrnodo:
     TZ: "Europe/Rome"
     AKKA_SYSTEM_NAME: "pagopafdrnodo"
     JAVA_OPTS: >-
-      -Dlogback.configurationFile=/mnt/file-config/logback.xml  -Dconfig.app=/mnt/file-config/config-app.conf  -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts  -Duser.language=it  -Duser.country=IT  -Duser.timezone=Europe/Rome  -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
-    DB_FDR_URL: jdbc:postgresql://fdr-db.p.internal.postgresql.pagopa.it:6432/nodo?sslmode=require&prepareThreshold=0&currentSchema=offline
+      -Xmx3560m -Xms64m -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts -Duser.language=it -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
+    DB_FDR_URL: jdbc:postgresql://fdr-db.u.internal.postgresql.pagopa.it:6432/fdr?sslmode=require&prepareThreshold=0
     DB_FDR_USER: fdr
-    INSTANCE: PROD
+    INSTANCE: UAT
     EVENT_HUB_NAME: "fdr-re"
     BLOB_RE_CONTAINER_NAME: "payload"
     AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
     ADDITIONAL_FDR_VALIDATIONS: "true"
+    AZURE_QUEUE_NAME: "queueconversion"
     EVENT_HUB_FLOWTX_NAME: "fdr-qi-flows"
     EVENT_HUB_REPORTEDIUV_NAME: "fdr-qi-reported-iuv"
   secretProvider:
@@ -97,6 +98,7 @@ fdrnodo:
       EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
       AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
       BLOB_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
+      AZURE_QUEUE_CONNECTION_STRING: "fdr-sa-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       FDR_SUBSCRIPTION_KEY: "fdr-internal-product-subscription-key"
       FDR_LEGACY_SUBSCRIPTION_KEY: "fdr-legacy-subscription-key"
@@ -104,7 +106,7 @@ fdrnodo:
       EVENT_HUB_REPORTEDIUV_CONNECTION_STRING: "fdr-qi-reported-iuv-tx-connection-string"
       EVENT_HUB_FLOWTX_CONNECTION_STRING: "fdr-qi-flows-tx-connection-string"
     keyvault:
-      name: "pagopa-p-fdr-kv"
+      name: "pagopa-u-fdr-kv"
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   envFieldRef:
     MANAGEMENT_HTTP_HOST: "status.podIP"
@@ -144,10 +146,14 @@ fdrnodo:
       - 8080 #http
       - 9091 #cinnamon
       - 9092 #micrometer
+prfnodo:
+  !!merge <<: *microservice-chart
+  nameOverride: ""
+  fullnameOverride: ""
   ingress:
     create: true
-    host: "weuprod.fdr.internal.platform.pagopa.it"
-    path: /pagopa-fdr-nodo-service(/|$)(.*)
+    host: "weuuat.fdr.internal.uat.platform.pagopa.it"
+    path: /pagopa-fdr-nodo-service-prf(/|$)(.*)
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m

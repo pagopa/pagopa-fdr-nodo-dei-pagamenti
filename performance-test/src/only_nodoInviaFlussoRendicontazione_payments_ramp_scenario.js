@@ -2,6 +2,7 @@ import http from 'k6/http';
 import { check } from 'k6';
 import { SharedArray } from 'k6/data';
 import { parseHTML } from 'k6/html';
+import exec from 'k6/execution';
 import { generateNodoInviaFlussoRendicontazione, getRandom } from './helpers/fdr_helpers.js';
 
 export let options = JSON.parse(open(__ENV.TEST_TYPE));
@@ -16,8 +17,7 @@ const varsArray = new SharedArray('vars', function () {
 const vars = varsArray[0];
 const app_host = `${vars.app_host}`;
 const subkey = `${__ENV.API_SUBSCRIPTION_KEY}`;
-const flow_size = Number(`${__ENV.FLOW_SIZE}`);
-
+let flow_size = Number(`${__ENV.FLOW_SIZE}`);
 
 const parameters = {
     pspId: `${vars.psp}`,
@@ -49,6 +49,15 @@ function postcondition() {
 
 export default function () {
 
+  // Manage flow size with respect to the various stages
+  if (exec.scenario.progress >= 0.33 && exec.scenario.progress < 0.66) {
+    flow_size = 5000
+  }
+
+  if (exec.scenario.progress >= 0.66) {
+    flow_size = 10000
+  }
+
   // Initialize response variable
   let response = '';
   var flow_id = `${parameters.today}${parameters.pspId}-${getRandom(1000000, 9999999) + __VU}`;
@@ -60,6 +69,7 @@ export default function () {
       'SOAPAction': 'nodoInviaFlussoRendicontazione',
       "Ocp-Apim-Subscription-Key": subkey,
     },
+    tags: { primitiva: "nodoInviaFlussoRendicontazione"}
   };
 
   // starting the execution

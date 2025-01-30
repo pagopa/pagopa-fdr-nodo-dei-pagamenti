@@ -2,7 +2,7 @@
   "environment": [
     {
       "env": "uat",
-      "app_host_nodo_psp": "https://api.uat.platform.pagopa.it/nodo-auth/nodo-per-psp/v1",
+      "app_host_nodo_psp": "https://api.uat.platform.pagopa.it/nodo-ndp/nodo-per-psp/v1",
       "app_host_nodo_ci": "https://api.uat.platform.pagopa.it/nodo-auth/nodo-per-pa/v1",
       "psp": "88888888888",
       "broker_psp": "88888888888",
