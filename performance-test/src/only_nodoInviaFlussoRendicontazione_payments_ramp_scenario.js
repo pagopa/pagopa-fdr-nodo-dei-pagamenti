@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check } from 'k6';
 import { SharedArray } from 'k6/data';
 import { parseHTML } from 'k6/html';
-import { getCurrentStageIndex } from 'https://jslib.k6.io/k6-utils/1.3.0/index.js';
+import exec from 'k6/execution';
 import { generateNodoInviaFlussoRendicontazione, getRandom } from './helpers/fdr_helpers.js';
 
 export let options = JSON.parse(open(__ENV.TEST_TYPE));
@@ -50,11 +50,11 @@ function postcondition() {
 export default function () {
 
   // Manage flow size with respect to the various stages
-  if (getCurrentStageIndex() === 1) {
+  if (exec.scenario.progress >= 0.33 && exec.scenario.progress < 0.66) {
     flow_size = 5000
   }
 
-  if (getCurrentStageIndex() === 2) {
+  if (exec.scenario.progress >= 0.66) {
     flow_size = 10000
   }
 
