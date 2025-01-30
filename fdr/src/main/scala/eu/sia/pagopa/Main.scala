@@ -40,10 +40,8 @@ object Main extends App {
 
   val job = args.headOption
 
-  val actorSystemName: String =
-    sys.env.getOrElse("AKKA_SYSTEM_NAME", throw new IllegalArgumentException("Actor system name must be defined by the actorSystemName property"))
-  val httpHost =
-    sys.env.getOrElse("SERVICE_HTTP_BIND_HOST", throw new IllegalArgumentException("HTTP bind host must be defined by the SERVICE_HTTP_BIND_HOST property"))
+  val actorSystemName: String = sys.env.getOrElse("AKKA_SYSTEM_NAME", throw new IllegalArgumentException("Actor system name must be defined by the actorSystemName property"))
+  val httpHost = sys.env.getOrElse("SERVICE_HTTP_BIND_HOST", throw new IllegalArgumentException("HTTP bind host must be defined by the SERVICE_HTTP_BIND_HOST property"))
   val httpPort = sys.env.get("SERVICE_HTTP_BIND_PORT").map(_.toInt).getOrElse(throw new IllegalArgumentException("HTTP bind port must be defined by the SERVICE_HTTP_BIND_PORT property"))
 
   val file = new File(System.getProperty("config.app"))

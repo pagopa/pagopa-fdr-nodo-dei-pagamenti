@@ -5,15 +5,12 @@ import com.azure.core.util.BinaryData
 import com.azure.storage.blob.{BlobAsyncClient, BlobClientBuilder}
 import eu.sia.pagopa.Main.materializer.system
 import eu.sia.pagopa.common.actor.BaseActor
-import eu.sia.pagopa.common.json.model.FdREventToHistory
 import eu.sia.pagopa.common.message.{BlobBodyRef, CategoriaEvento, CategoriaEventoEvh, ReEventHub, ReRequest, SottoTipoEvento}
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.repo.re.model.Fdr1Metadata
 import eu.sia.pagopa.common.util.{Constant, Util}
-import eu.sia.pagopa.{ActorProps, BootstrapUtil}
+import eu.sia.pagopa.ActorProps
 
 import java.util.UUID
-import scala.util.{Failure, Success}
 
 final case class ReActor(repositories: Repositories, actorProps: ActorProps) extends BaseActor {
 
@@ -59,7 +56,7 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
     val connectionString = system.settings.config.getString("azure-storage-blob.connection-string")
     val containerName = system.settings.config.getString("azure-storage-blob.re-payload-container-name")
 
-    val fileName = s"${r.sessionId}_${r.re.tipoEvento.get}_${r.re.sottoTipoEvento}.xml.zip"
+    val fileName = s"${r.sessionId}_${r.re.tipoEvento.get}_${r.re.sottoTipoEvento}_${UUID.randomUUID().toString}.xml.zip"
 
     var blobAsyncClient: Option[BlobAsyncClient] = None
     var compressedBytes: Array[Byte] = Array.empty[Byte]

@@ -1,6 +1,7 @@
 package eu.sia.pagopa.common.repo.re.model
 
-import org.mongodb.scala.bson.Document
+import eu.sia.pagopa.common.message.BlobBodyRef
+import org.mongodb.scala.bson.{BsonInt32, BsonString, Document}
 
 import java.time.format.DateTimeFormatter
 import java.time.{ZoneOffset, ZonedDateTime}
@@ -13,18 +14,12 @@ case class Fdr1Metadata(
                          creditorInstitution:String,
                          flowId: String,
                          flowDate: javax.xml.datatype.XMLGregorianCalendar,
-                         payloadFilename:String,
+                         blobBodyRef: Option[BlobBodyRef] = None,
                          pspCreditorInstitution:String  // used for sharding
                        ) {
 
   def getPsp(): String = psp
-  def getBrokerPsp(): String = brokerPsp
-  def getChannel(): String = channel
-  def getCreditorInstitution(): String = creditorInstitution
   def getFlowId(): String = flowId
-  def getFlowDate(): javax.xml.datatype.XMLGregorianCalendar = flowDate
-  def getPayloadFilename(): String = payloadFilename
-  def getPspCreditorInstitution(): String = payloadFilename
 
   def toDocument: Document = {
     val formatter = DateTimeFormatter.ISO_INSTANT
@@ -39,7 +34,12 @@ case class Fdr1Metadata(
       "creditorInstitution" -> creditorInstitution,
       "flowId" -> flowId,
       "flowDate" -> flowDateString,
-      "payloadFilename" -> payloadFilename,
+      "blobBodyRef" -> blobBodyRef.map(blob => Document(
+        "storageAccount" -> blob.storageAccount.map(BsonString(_)),
+        "containerName" -> blob.containerName.map(BsonString(_)),
+        "fileName" -> blob.fileName.map(BsonString(_)),
+        "fileLength" -> BsonInt32(blob.fileLength)
+      )),
       "pspCreditorInstitution" -> pspCreditorInstitution
     )
   }
