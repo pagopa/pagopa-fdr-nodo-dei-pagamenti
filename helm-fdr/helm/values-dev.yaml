@@ -1,11 +1,16 @@
-fdrnodo:
+microservice-chart:
   namespace: "fdr"
   nameOverride: ""
-  fullnameOverride: ""
+  fullnameOverride: "fdr-1"
   terminationGracePeriodSeconds: 140
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 1.0.0-SNAPSHOT
+    tag: "2.1.9-30-deploy-gh-action"
+    pullPolicy: Always
+  deployment:
+    create: true
+  canaryDelivery:
+    create: false
   livenessProbe:
     httpGet:
       path: /alive
@@ -29,13 +34,16 @@ fdrnodo:
     create: true
   resources:
     requests:
-      memory: "640m"
+      memory: "640M"
       cpu: "512m"
     limits:
       memory: "8Gi"
       cpu: "2560m"
   autoscaling:
     enable: true
+    minReplica: 1
+    maxReplica: 1
+    pollingInterval: 10 # seconds
     triggers:
       - type: cpu
         metricType: Utilization
@@ -46,6 +54,7 @@ fdrnodo:
         metadata:
           value: "80"
     advanced:
+      restoreToOriginalReplicaCount: false
       horizontalPodAutoscalerConfig:
         behavior:
           scaleDown:
@@ -84,24 +93,25 @@ fdrnodo:
     BLOB_RE_CONTAINER_NAME: "payload"
     AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
     ADDITIONAL_FDR_VALIDATIONS: "true"
+    AZURE_QUEUE_NAME: "queueconversion"
     EVENT_HUB_FLOWTX_NAME: "fdr-qi-flows"
     EVENT_HUB_REPORTEDIUV_NAME: "fdr-qi-reported-iuv"
-  secretProvider:
-    create: true
-    envSecrets:
-      APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-connection-string"
-      EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
-      AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
-      BLOB_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
-      API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
-      FDR_SUBSCRIPTION_KEY: "fdr-internal-product-subscription-key"
-      FDR_LEGACY_SUBSCRIPTION_KEY: "fdr-legacy-subscription-key"
-      DB_FDR_PASSWORD: "db-fdr-password"
-      EVENT_HUB_REPORTEDIUV_CONNECTION_STRING: "fdr-qi-reported-iuv-tx-connection-string"
-      EVENT_HUB_FLOWTX_CONNECTION_STRING: "fdr-qi-flows-tx-connection-string"
-    keyvault:
-      name: "pagopa-d-fdr-kv"
-      tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
+    APIM_URL: "https://api.dev.platform.pagopa.it"
+  envSecret:
+    APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-connection-string"
+    EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
+    AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
+    AZURE_QUEUE_CONNECTION_STRING: "fdr-sa-connection-string"
+    BLOB_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
+    API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
+    FDR_SUBSCRIPTION_KEY: "fdr-internal-product-subscription-key"
+    FDR_LEGACY_SUBSCRIPTION_KEY: "fdr-legacy-subscription-key"
+    DB_FDR_PASSWORD: "db-fdr-password"
+    EVENT_HUB_REPORTEDIUV_CONNECTION_STRING: "fdr-qi-reported-iuv-tx-connection-string"
+    EVENT_HUB_FLOWTX_CONNECTION_STRING: "fdr-qi-flows-tx-connection-string"
+  keyvault:
+    name: "pagopa-d-fdr-kv"
+    tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   envFieldRef:
     MANAGEMENT_HTTP_HOST: "status.podIP"
     SERVICE_HTTP_HOST: "status.podIP"
@@ -135,6 +145,7 @@ fdrnodo:
     - 9092 #micrometer
     - 3000 #jmx debug port
   service:
+    create: true
     type: ClusterIP
     ports:
       - 8080 #http
