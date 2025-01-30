@@ -10,7 +10,15 @@
       "target": 15
     },
     {
+      "duration": "0s",
+      "target": 15
+    },
+    {
       "duration": "4m",
+      "target": 15
+    },
+    {
+      "duration": "0s",
       "target": 15
     },
     {
