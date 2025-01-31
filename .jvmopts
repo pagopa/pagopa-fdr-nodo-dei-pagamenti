@@ -3,3 +3,4 @@
 -Xss4M
 -XX:MaxMetaspaceSize=1024M
 -Dfile.encoding=UTF-8
+-XX:+UseG1GC

@@ -37,7 +37,6 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
 
   var req: SoapRequest = _
   var replyTo: ActorRef = _
-
   var reFlow: Option[Re] = None
 
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")

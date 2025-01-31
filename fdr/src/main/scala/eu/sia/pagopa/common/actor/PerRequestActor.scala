@@ -8,7 +8,6 @@ import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.repo.Repositories
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.{FiniteDuration, _}

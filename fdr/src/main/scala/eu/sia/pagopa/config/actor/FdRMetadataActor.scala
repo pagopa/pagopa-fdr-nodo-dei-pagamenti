@@ -6,7 +6,7 @@ import com.azure.storage.blob.BlobClientBuilder
 import eu.sia.pagopa.Main.materializer.system
 import eu.sia.pagopa.common.actor.BaseActor
 import eu.sia.pagopa.common.json.model.FdREventToHistory
-import eu.sia.pagopa.common.message.BlobBodyRef
+import eu.sia.pagopa.common.message.{BlobBodyRef, ReRequest}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.re.model.Fdr1Metadata
 import eu.sia.pagopa.common.util.Util
@@ -77,16 +77,21 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
         "insertedTimestamp" -> event.insertedTimestamp.toString,
       )
 
-      val compressedBytes: Array[Byte] = Util.gzipContent(event.soapRequest.getBytes("UTF-8"))
+      var compressedBytes: Array[Byte] = Util.gzipContent(event.soapRequest.getBytes("UTF-8"))
 
       val binaryData: BinaryData = BinaryData.fromBytes(compressedBytes)
       blobAsyncClient.get.upload(binaryData, true)
         .flatMap(_ => blobAsyncClient.get.setMetadata(metadata.asJava))
         .subscribe()
 
-      blobAsyncClient.map(bc => {
+      val blobBodyRef = blobAsyncClient.map(bc => {
         BlobBodyRef(Some(bc.getAccountName), Some(bc.getContainerName), Some(filename), compressedBytes.length)
       })
+
+      // clear memory
+      compressedBytes = Array.empty[Byte]
+
+      blobBodyRef
     }
     else {
       log.debug("Reschedule save fdr1-flow blob - problem to initialize blob async client")
@@ -98,10 +103,16 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
     case event: FdREventToHistory =>
       log.info(s"FdREventToHistory ${event.retry}")
       saveForHistory(event)
+      context.become(idle) // clear reference after processing
     case _ =>
       log.error(s"""########################
                    |FDR METADATA ACT unmanaged message type
                    |########################""".stripMargin)
+  }
+
+  def idle: Receive = {
+    case event: FdREventToHistory =>
+      saveForHistory(event)
   }
 
 }

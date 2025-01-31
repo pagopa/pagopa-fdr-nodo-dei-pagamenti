@@ -2,8 +2,7 @@ package eu.sia.pagopa
 
 import eu.sia.pagopa.common.json.model.{FlussiRendicontazioneEvent, IUVRendicontatiEvent}
 import eu.sia.pagopa.common.message.{BlobBodyRef, ReEventHub}
-import eu.sia.pagopa.common.util.azurehubevent.AppObjectMapper
-import eu.sia.pagopa.common.util.{RandomStringUtils, Util}
+import eu.sia.pagopa.common.util.{AppObjectMapper, RandomStringUtils, Util}
 import eu.sia.pagopa.testutil.TestItems
 import net.openhft.hashing.LongHashFunction
 import org.scalatest.flatspec.AnyFlatSpec

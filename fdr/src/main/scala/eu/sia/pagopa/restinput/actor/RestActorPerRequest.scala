@@ -14,7 +14,7 @@ import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.StringUtils._
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ReEventFunc, sessionId}
+import Appfunction.sessionId
 import eu.sia.pagopa.config.actor.ReActor
 import eu.sia.pagopa.restinput.message.RestRouterRequest
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}

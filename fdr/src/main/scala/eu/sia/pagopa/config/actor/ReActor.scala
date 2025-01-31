@@ -93,41 +93,35 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
           .subscribe()
       }
 
-      blobAsyncClient.map(bc => {
+      val blobBodyRef = blobAsyncClient.map(bc => {
         BlobBodyRef(Some(bc.getAccountName), Some(bc.getContainerName), Some(filename), compressedBytes.length)
       })
+
+      // clear memory
+      compressedBytes = Array.empty[Byte]
+
+      blobBodyRef
     }
     else {
       log.debug("Reschedule save fdr1-flow blob - problem to initialize blob async client")
       Option.empty
     }
 
-
-
-
-//    var blobAsyncClient: Option[BlobAsyncClient] = None
-//    var compressedBytes: Array[Byte] = Array.empty[Byte]
-//    if (r.re.payload.isDefined) {
-//      compressedBytes = Util.gzipContent(r.re.payload.get)
-//
-//      blobAsyncClient = Some(new BlobClientBuilder()
-//        .connectionString(connectionString)
-//        .blobName(fileName).containerName(containerName)
-//        .buildAsyncClient())
-//      blobAsyncClient.get.upload(BinaryData.fromBytes(compressedBytes)).subscribe()
-//    }
-//    blobAsyncClient.map(bc => {
-//      BlobBodyRef(Some(bc.getAccountName), Some(bc.getContainerName), Some(fileName), compressedBytes.length)
-//    })
   }
 
   override def receive: Receive = {
     case reRequest: ReRequest =>
       saveRe(reRequest)
+      context.become(idle) // clear reference after processing
     case _ =>
       log.error(s"""########################
                    |RE ACT unmanaged message type
                    |########################""".stripMargin)
+  }
+
+  def idle: Receive = {
+    case reRequest: ReRequest =>
+      saveRe(reRequest)
   }
 
 }

@@ -91,7 +91,7 @@ class SoapActorPerRequest(
 
     case sres: SoapResponse =>
       log.debug(s"RECEIVE SoapResponse from sender: ${sender().path.name}")
-      // TODO [FC]
+      // TODO [FC] terminateActor forces the actor to stop, otherwise it remains in pending until to bundleTimeoutSeconds
       terminateActor(sender())
       sres.payload match {
         case Some(_) =>
@@ -123,7 +123,7 @@ class SoapActorPerRequest(
       }
   }
 
-  // TODO [FC] generalize the following method
+  // TODO [FC] generalize the methods generateAsyncReRequest and generateAsyncReRequestError
   private def generateAsyncReRequest(sres: SoapResponse): Unit = {
     Future {
       val now = Util.now()

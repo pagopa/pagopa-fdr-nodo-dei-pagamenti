@@ -349,6 +349,9 @@ object Main extends App {
       Future.failed(e)
     })
 
+  def getBootstrapFuture = bootstrapFuture
+
+  def getSystem: ActorSystem = system
 }
 
 object BootstrapUtil {

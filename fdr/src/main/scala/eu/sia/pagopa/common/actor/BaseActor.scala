@@ -5,7 +5,6 @@ import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 import eu.sia.pagopa.ftpsender.actor.FtpSenderActorPerRequest
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import org.slf4j.MDC
@@ -25,7 +24,6 @@ final case class PrimitiveActor(repositories: Repositories, actorProps: ActorPro
     val perrequest = context.actorOf(props, pr)
     log.debug(s"TELL ActorPerRequest [$pr] [${perrequest.path.name}]")
     perrequest.forward(request)
-//    perrequest.tell(request, self)
     perrequest
   }
 
@@ -67,8 +65,8 @@ final case class PrimitiveActor(repositories: Repositories, actorProps: ActorPro
           |unmanaged message type ${x.getClass}
           |########################""".stripMargin)
   }
-
 }
+
 trait BaseActor extends Actor with NodoLogging {
 
   implicit val executionContext: ExecutionContextExecutor = context.dispatcher

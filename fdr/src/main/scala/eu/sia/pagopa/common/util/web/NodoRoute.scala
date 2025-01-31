@@ -16,7 +16,6 @@ import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.fdr.FdrRepository
 import eu.sia.pagopa.common.repo.fdr.enums.SchedulerFireCheckStatus
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 import eu.sia.pagopa.nodopoller.actor.PollerActor
 import eu.sia.pagopa.restinput.actor.RestActorPerRequest
 import eu.sia.pagopa.restinput.message.RestRouterRequest
