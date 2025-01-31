@@ -14,7 +14,8 @@ import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.StringUtils._
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.{ReEventFunc, sessionId}
+import Appfunction.sessionId
+import eu.sia.pagopa.config.actor.ReActor
 import eu.sia.pagopa.restinput.message.RestRouterRequest
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import spray.json._
@@ -26,7 +27,6 @@ class RestActorPerRequest(
     override val requestContext: RequestContext,
     override val donePromise: Promise[RouteResult],
     allRouters: Map[String, ActorRef],
-    reEventFunc: ReEventFunc,
     actorProps: ActorProps
 ) extends FuturePerRequestActor {
 
@@ -35,6 +35,8 @@ class RestActorPerRequest(
 
   var params: Map[String, String] = _
   var httpMethod: Option[String] = _
+
+  val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
 
   override def actorError(dpe: DigitPaException): Unit = {
     val dpe = exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR)
@@ -60,7 +62,7 @@ class RestActorPerRequest(
   def reExtra(rrr: RestRouterRequest): ReExtra =
     ReExtra(uri = rrr.uri.map(_.toString), headers = rrr.headers, httpMethod = rrr.httpMethod, callRemoteAddress = rrr.callRemoteAddress)
 
-  def traceRequest(rrr: RestRouterRequest, reEventFunc: ReEventFunc, ddataMap: ConfigData): Unit = {
+  def traceRequest(rrr: RestRouterRequest, ddataMap: ConfigData): Unit = {
     Util.logPayload(log, message.payload)
     val reRequestReq = ReRequest(
       sessionId = rrr.sessionId,
@@ -77,7 +79,7 @@ class RestActorPerRequest(
       ),
       reExtra = Some(reExtra(rrr))
     )
-    reEventFunc(reRequestReq, log, ddataMap)
+    reActor.tell(reRequestReq, null)
   }
 
   override def receive: Receive = {
@@ -90,7 +92,7 @@ class RestActorPerRequest(
     case sres: RestResponse =>
       sres.payload match {
         case Some(_) =>
-          //risposta dal bundle positiva o negativa
+          // risposta dal bundle positiva o negativa
           bundleResponse = sres
 
           log.debug("RECEIVE RestResponse")
@@ -143,7 +145,7 @@ class RestActorPerRequest(
             case Some(e: Throwable) =>
               traceErrorResponse(e, StatusCodes.InternalServerError.intValue)
             case None =>
-              //qualche bundle ha risposto in modo sbagliato
+              // qualche bundle ha risposto in modo sbagliato
               sres.statusCode match {
                 case StatusCodes.OK.intValue =>
                   traceResponse(None, sres.payload.map(v => v).getOrElse(""), sres.statusCode, EsitoRE.INVIATA)
@@ -191,13 +193,13 @@ class RestActorPerRequest(
       ),
       reExtra = Some(ReExtra(statusCode = Some(statusCode), elapsed = Some(message.timestamp.until(now, ChronoUnit.MILLIS))))
     )
-    reEventFunc(reRequestOpt.getOrElse(reRequest), log, actorProps.ddataMap)
+    reActor.tell(reRequest, null)
     complete(createHttpResponse(statusCode, payload, sessionId), Constant.KeyName.REST_INPUT)
   }
 
   private def traceErrorResponse(e: Throwable, statusCode: Int): Unit = {
     log.error(e, s"Error response: [${e.getMessage}]")
-    traceRequest(message, reEventFunc, actorProps.ddataMap)
+    traceRequest(message, actorProps.ddataMap)
     log.info("Generating negative response")
     traceResponse(None, Error(e.getMessage).toJson.toString(), statusCode, EsitoRE.INVIATA_KO)
   }

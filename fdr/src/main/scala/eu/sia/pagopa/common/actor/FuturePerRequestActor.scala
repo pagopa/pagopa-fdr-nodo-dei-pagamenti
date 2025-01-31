@@ -19,8 +19,7 @@ trait FuturePerRequestActor extends Actor with NodoLogging {
   val requestContext: RequestContext
   val donePromise: Promise[akka.http.scaladsl.server.RouteResult]
 
-  val BUNDLE_IDLE_TIMEOUT =
-    FiniteDuration(context.system.settings.config.getInt("bundleTimeoutSeconds"), TimeUnit.SECONDS)
+  val BUNDLE_IDLE_TIMEOUT: FiniteDuration = FiniteDuration(context.system.settings.config.getInt("bundleTimeoutSeconds"), TimeUnit.SECONDS)
   context.setReceiveTimeout(BUNDLE_IDLE_TIMEOUT)
 
   val actorName: String = self.path.name
@@ -54,7 +53,7 @@ trait FuturePerRequestActor extends Actor with NodoLogging {
     val f: Future[akka.http.scaladsl.server.RouteResult] = requestContext.complete(m)
     f.onComplete(a => donePromise.complete(a))
     log.debug(s"FuturePerRequest - DESTROY FutureActorPerRequest [$actorPathName]")
-    log.info(FdrLogConstant.logEnd(s"$actorClassId"))
+    log.info(FdrLogConstant.logEnd(s"[${actorName}] $actorClassId"))
     context.stop(context.self)
   }
 }

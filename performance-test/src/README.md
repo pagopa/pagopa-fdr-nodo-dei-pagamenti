@@ -18,3 +18,12 @@ where
 - _API_SUBSCRIPTION_KEY_ is your sub-key
 
 `<script-name>.js` is the scenario to run with k6
+
+
+ENV_JSON=./environments/local.environment.json
+TEST_TYPE=./test-types/constant.json
+SUB_KEY=8047d472dfc54afb9f3204423d850477
+SCRIPT=only_nodoInviaFlussoRendicontazione_scenario
+FLOW_SIZE=1
+k6 run --env VARS=${ENV_JSON} --env TEST_TYPE=${TEST_TYPE} --env API_SUBSCRIPTION_KEY=${SUB_KEY} --env FLOW_SIZE=${FLOW_SIZE} ${SCRIPT}.js
+k6 run --env VARS=./environments/local.environment.json --env TEST_TYPE=./test-types/constant.json --env API_SUBSCRIPTION_KEY=8047d472dfc54afb9f3204423d850477 --env FLOW_SIZE=1 only_nodoInviaFlussoRendicontazione_scenario.js

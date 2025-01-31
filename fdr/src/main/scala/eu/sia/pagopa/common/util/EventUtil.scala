@@ -7,6 +7,7 @@ import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
 
 import java.time.LocalDateTime
 
+// TODO [FC] REMOVE
 object EventUtil {
 
   def createIUVRendicontatiEvent(

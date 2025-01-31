@@ -10,8 +10,11 @@ import eu.sia.pagopa.{ActorProps, BootstrapUtil, TestDData}
 import java.util.UUID
 import scala.concurrent.Future
 import scala.concurrent.duration._
+
 case class GetCache(override val sessionId: String, cacheId: String) extends BaseMessage
+
 case class CheckCache(override val sessionId: String) extends BaseMessage
+
 final case class ApiConfigActor(repositories: Repositories, actorProps: ActorProps) extends BaseActor {
 
   final val THREAD_SLEEP = 2000

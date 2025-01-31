@@ -1,4 +1,4 @@
-package eu.sia.pagopa.common.util.azurehubevent
+package eu.sia.pagopa.common.util
 
 import com.fasterxml.jackson.databind.{ObjectMapper, SerializationFeature}
 

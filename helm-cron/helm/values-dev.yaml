@@ -44,26 +44,23 @@ cronnodo:
     DB_FDR_URL: jdbc:postgresql://pagopa-d-weu-fdr-flexible-postgresql.postgres.database.azure.com:6432/fdr?sslmode=require&prepareThreshold=0
     DB_FDR_USER: fdr
     INSTANCE: DEV
-    EVENT_HUB_NAME: "fdr-re"
-    BLOB_RE_CONTAINER_NAME: "payload"
-    AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
+    AZURE_STORAGE_FDR1_FLOWS_BLOB_NAME: "fdr1-flows"
+    AZURE_STORAGE_RE_PAYLOAD_BLOB_NAME: "re-payload"
+    MONGO_DATABASE_NAME: "fdr-re"
+    MONGO_METADATA_DOCUMENT_NAME: "fdr1-metadata"
+    MONGO_EVENTS_DOCUMENT_NAME: "events"
     ADDITIONAL_FDR_VALIDATIONS: "true"
-    AZURE_QUEUE_NAME: "queueconversion"
-    EVENT_HUB_FLOWTX_NAME: "fdr-qi-flows"
-    EVENT_HUB_REPORTEDIUV_NAME: "fdr-qi-reported-iuv"
   secretProvider:
     create: true
     envSecrets:
       APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-connection-string"
       EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
       AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
-      BLOB_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
-      FDR_SUBSCRIPTION_KEY: "fdr-subscription-key-string"
+      FDR_SUBSCRIPTION_KEY: "fdr-internal-product-subscription-key"
       FDR_LEGACY_SUBSCRIPTION_KEY: "fdr-legacy-subscription-key"
       DB_FDR_PASSWORD: "db-fdr-password"
-      EVENT_HUB_REPORTEDIUV_CONNECTION_STRING: "fdr-qi-reported-iuv-tx-connection-string"
-      EVENT_HUB_FLOWTX_CONNECTION_STRING: "fdr-qi-flows-tx-connection-string"
+      MONGO_CONNECTION_STRING: "mongodb-re-connection-string"
     keyvault:
       name: "pagopa-d-fdr-kv"
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"

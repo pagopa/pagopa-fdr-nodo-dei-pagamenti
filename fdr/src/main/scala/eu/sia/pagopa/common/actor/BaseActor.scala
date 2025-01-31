@@ -5,7 +5,6 @@ import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction.ReEventFunc
 import eu.sia.pagopa.ftpsender.actor.FtpSenderActorPerRequest
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import org.slf4j.MDC
@@ -23,7 +22,7 @@ final case class PrimitiveActor(repositories: Repositories, actorProps: ActorPro
     val pr = s"pr-$actorClassId-${UUID.randomUUID().toString}-${request.sessionId}"
     log.debug(s"CREATE ActorPerRequest [$pr]")
     val perrequest = context.actorOf(props, pr)
-    log.debug(s"TELL ActorPerRequest [$pr]")
+    log.debug(s"TELL ActorPerRequest [$pr] [${perrequest.path.name}]")
     perrequest.forward(request)
     perrequest
   }
@@ -32,7 +31,7 @@ final case class PrimitiveActor(repositories: Repositories, actorProps: ActorPro
 
     MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, actorClassId)
 
-    log.debug(s"Creating actor per request ${actorClassId}${extraData.map(d => s"[$d]").getOrElse("")} of class ${clazz.getSimpleName}")
+    log.debug(s"Creating actor per request ${sender.path.name} ${actorClassId}${extraData.map(d => s"[$d]").getOrElse("")} of class ${clazz.getSimpleName}")
     Try({
       val a = createActorPerRequestAndTell(request, BootstrapUtil.actorClassId(clazz), Props(clazz, repositories, actorProps.copy(actorClassId = actorClassId)))(log, context)
       context.watch(a)
@@ -66,8 +65,8 @@ final case class PrimitiveActor(repositories: Repositories, actorProps: ActorPro
           |unmanaged message type ${x.getClass}
           |########################""".stripMargin)
   }
-
 }
+
 trait BaseActor extends Actor with NodoLogging {
 
   implicit val executionContext: ExecutionContextExecutor = context.dispatcher
@@ -76,6 +75,5 @@ trait BaseActor extends Actor with NodoLogging {
   val actorProps: ActorProps
   val repositories: Repositories
   val ddataMap: ConfigData = actorProps.ddataMap
-  val reEventFunc: ReEventFunc = actorProps.reEventFunc
 
 }

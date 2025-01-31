@@ -1,6 +1,6 @@
 package eu.sia.pagopa.common.repo.re.model
 
-import eu.sia.pagopa.common.util.azurehubevent.Appfunction
+import eu.sia.pagopa.common.util.Appfunction
 import net.openhft.hashing.LongHashFunction
 
 import java.time.LocalDateTime

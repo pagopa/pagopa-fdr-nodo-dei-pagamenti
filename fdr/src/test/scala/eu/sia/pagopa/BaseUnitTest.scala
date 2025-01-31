@@ -3,6 +3,7 @@ package eu.sia.pagopa
 import akka.actor.{ActorRef, ActorSystem, Props}
 import akka.event.Logging
 import akka.testkit.{ImplicitSender, TestKit}
+import com.azure.core.util.BinaryData
 import com.typesafe.config.{Config, ConfigFactory}
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.message._
@@ -165,7 +166,7 @@ abstract class BaseUnitTest()
   val reFunction = (a: ReRequest, b: NodoLogger, c: ConfigData) => {
     Future.successful(())
   }
-  val containerBlobFunction = (a: String, b: String, c: NodoLogger) => {
+  val containerBlobFunction = (a: String, m: Map[String, String], b: BinaryData, c: NodoLogger) => {
     Future.successful(())
   }
 
@@ -177,7 +178,8 @@ abstract class BaseUnitTest()
 
   val repositories = new RepositoriesTest(system.settings.config, log)
 
-  val props = ActorProps(null, null, null, actorUtility, Map(), reFunction, containerBlobFunction, "", certPath, TestItems.ddataMap)
+//  val props = ActorProps(null, null, null, actorUtility, Map(), containerBlobFunction, containerBlobFunction, "", certPath, TestItems.ddataMap)
+  val props = ActorProps(null, null, null, actorUtility, Map(), "", certPath, TestItems.ddataMap)
 
   val mockActor = system.actorOf(Props.create(classOf[MockActor]), s"mock")
 
