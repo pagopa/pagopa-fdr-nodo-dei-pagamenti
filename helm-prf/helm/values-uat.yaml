@@ -90,6 +90,7 @@ microservice-chart: &microservice-chart
     MONGO_METADATA_DOCUMENT_NAME: "fdr1-metadata"
     MONGO_EVENTS_DOCUMENT_NAME: "events"
     ADDITIONAL_FDR_VALIDATIONS: "true"
+    SERVICE_IDENTIFIER: "FDR001PRF"
   secretProvider:
     create: true
     envSecrets:
