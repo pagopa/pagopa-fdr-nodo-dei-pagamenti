@@ -46,7 +46,7 @@ jobs:
         env:
           LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
         run: |
-          sbt "project fdrnodo" \
+          sbt "project fdr" \
           -Dsonar.organization="pagopa" \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.host.url="https://sonarcloud.io" \
