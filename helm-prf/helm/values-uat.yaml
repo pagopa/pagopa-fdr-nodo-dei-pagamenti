@@ -117,11 +117,16 @@ microservice-chart: &microservice-chart
     nodeAffinity:
       requiredDuringSchedulingIgnoredDuringExecution:
         nodeSelectorTerms:
-          - matchExpressions:
-              - key: node_type
-                operator: In
-                values:
-                  - user
+#          - matchExpressions:
+#              - key: node_type
+#                operator: In
+#                values:
+#                  - user
+        - matchExpressions:
+            - key: nodo
+              operator: In
+              values:
+                - "true"
   serviceMonitor:
     create: true
     endpoints:
