@@ -2,7 +2,7 @@ import http from 'k6/http';
 import { check } from 'k6';
 import { SharedArray } from 'k6/data';
 import { parseHTML } from 'k6/html';
-import { generateNodoInviaFlussoRendicontazione, getRandom } from './helpers/fdr_helpers.js';
+import { generateNodoInviaFlussoRendicontazione, generateNodoInviaFlussoRendicontazioneFixedPayments, generateMultiplePaymentsObject, getRandom } from './helpers/fdr_helpers.js';
 
 export let options = JSON.parse(open(__ENV.TEST_TYPE));
 
@@ -37,6 +37,7 @@ export function setup() {
   // setup code (once)
   // The setup code runs, setting up the test environment (optional) and generating data
   // used to reuse code for the same VU
+  return generateMultiplePaymentsObject(parameters, flow_size);
 }
 
 function precondition() {
@@ -47,7 +48,7 @@ function postcondition() {
   // no post conditions
 }
 
-export default function () {
+export default function (multiplePaymentsObject) {
 
   // Initialize response variable
   let response = '';
@@ -66,7 +67,7 @@ export default function () {
   precondition();
 
   // Testing: nodoInviaFlussoRendicontazione
-  var request_nifr = generateNodoInviaFlussoRendicontazione(parameters, flow_id, flow_size);
+  var request_nifr = generateNodoInviaFlussoRendicontazione(parameters, flow_id, flow_size, generateMultiplePaymentsObject);
   response = http.post(parameters.url_nodo_psp, request_nifr, params)
   check(response, {
     'check status is 200': (resp) => resp.status === 200,
