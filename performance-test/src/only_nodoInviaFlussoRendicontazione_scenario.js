@@ -67,7 +67,7 @@ export default function (multiplePaymentsObject) {
   precondition();
 
   // Testing: nodoInviaFlussoRendicontazione
-  var request_nifr = generateNodoInviaFlussoRendicontazione(parameters, flow_id, flow_size, generateMultiplePaymentsObject);
+  var request_nifr = generateNodoInviaFlussoRendicontazioneFixedPayments(parameters, flow_id, flow_size, generateMultiplePaymentsObject);
   response = http.post(parameters.url_nodo_psp, request_nifr, params)
   check(response, {
     'check status is 200': (resp) => resp.status === 200,
