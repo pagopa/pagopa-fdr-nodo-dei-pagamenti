@@ -101,9 +101,12 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
 
   override def receive: Receive = {
     case event: FdREventToHistory =>
-      log.info(s"FdREventToHistory ${event.retry}")
-      saveForHistory(event)
-      context.become(idle) // clear reference after processing
+      val fdrMetadataEnabled = system.settings.config.getBoolean("fdrMetadataEnabled")
+      if (fdrMetadataEnabled) {
+        log.info(s"FdREventToHistory ${event.retry}")
+        saveForHistory(event)
+        context.become(idle) // clear reference after processing
+      }
     case _ =>
       log.error(s"""########################
                    |FDR METADATA ACT unmanaged message type

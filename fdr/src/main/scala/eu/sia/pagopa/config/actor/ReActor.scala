@@ -111,8 +111,11 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
 
   override def receive: Receive = {
     case reRequest: ReRequest =>
-      saveRe(reRequest)
-      context.become(idle) // clear reference after processing
+      val reEnabled = system.settings.config.getBoolean("reEnabled")
+      if (reEnabled) {
+        saveRe(reRequest)
+        context.become(idle) // clear reference after processing
+      }
     case _ =>
       log.error(s"""########################
                    |RE ACT unmanaged message type
