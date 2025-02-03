@@ -61,6 +61,7 @@ export default function (multiplePaymentsObject) {
       'SOAPAction': 'nodoInviaFlussoRendicontazione',
       "Ocp-Apim-Subscription-Key": subkey,
     },
+    tags: { primitiva: "nodoInviaFlussoRendicontazione"}
   };
 
   // starting the execution
