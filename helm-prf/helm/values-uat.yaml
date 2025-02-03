@@ -32,12 +32,12 @@ microservice-chart: &microservice-chart
       memory: "640M"
       cpu: "512m"
     limits:
-      memory: "8Gi"
-      cpu: "2560m"
+      memory: "4Gi"
+      cpu: "1000m"
   autoscaling:
     enable: true
     minReplica: 1
-    maxReplica: 16
+    maxReplica: 24
     pollingInterval: 10 # seconds
     triggers:
       - type: cpu
