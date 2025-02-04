@@ -50,6 +50,8 @@ jobs:
           LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
         run: |
           ls -la $HOME
+          echo "pippo"
+          ls -la ~
           
           sbt "project fdr" \
           -Dsonar.organization="pagopa" \
