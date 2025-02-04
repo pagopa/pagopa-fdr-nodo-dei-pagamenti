@@ -57,7 +57,7 @@ jobs:
           -Dsonar.projectName=${{ env.PROJECT_NAME }} \
           -Dsonar.sources=fdr/src/main/scala \
           -Dsonar.tests=fdr/src/test/scala \
-          -Dsonar.java.source=11 \
+          -Dsonar.java.source=17 \
           -Dsonar.junit.reportPaths=fdr/target/test-reports \
           -Dsonar.scala.coverage.reportPaths="target/scala-2.13/scoverage-report/scoverage.xml" \
           -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
