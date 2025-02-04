@@ -56,14 +56,13 @@ jobs:
           -Dsonar.host.url="https://sonarcloud.io" \
           -Dsonar.projectKey=${{ env.PROJECT_KEY }} \
           -Dsonar.projectName=${{ env.PROJECT_NAME }} \
-          -Dsonar.sources=fdr/src/main/scala \
-          -Dsonar.tests=fdr/src/test/scala \
-          -Dsonar.junit.reportPaths=fdr/target/test-reports \
+          -Dsonar.sources=src/main/scala \
+          -Dsonar.tests=src/test/scala \
+          -Dsonar.junit.reportPaths=target/test-reports \
           -Dsonar.scala.coverage.reportPaths="target/scala-2.13/scoverage-report/scoverage.xml" \
           -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
           -Dsonar.pullrequest.branch=${{ github.head_ref }} \
           -Dsonar.pullrequest.base=${{ github.base_ref }} \
-          -Dsonar.scm.forceReloadAll=true \
           reload clean coverage test coverageReport sonarScan
 
 
