@@ -45,6 +45,15 @@ jobs:
           java-version: 11
           cache: sbt
 
+      - name: Cache SBT
+        uses: actions/cache@v4.2.0
+        with:
+          path: |
+            ~/.ivy2/cache
+            ~/.sbt
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+          restore-keys: ${{ runner.os }}-sbt
+
       - name: Build and Test
         env:
           LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
@@ -57,6 +66,13 @@ jobs:
           distribution: temurin
           java-version: 17
           cache: sbt
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@v4.2.0
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
 
       - name: Sonar
         env:
