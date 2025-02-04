@@ -49,10 +49,6 @@ jobs:
         env:
           LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
         run: |
-          whoami
-          ls -la $HOME
-          echo "pippo"
-          ls -la /home/runner/.sonar/cache
           
           sbt "project fdr" \
           -Dsonar.organization="pagopa" \
@@ -67,6 +63,7 @@ jobs:
           -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
           -Dsonar.pullrequest.branch=${{ github.head_ref }} \
           -Dsonar.pullrequest.base=${{ github.base_ref }} \
+          -Dsonar.userHome="~/.sonar-local" \
           reload clean coverage test coverageReport sonarScan
 
 
