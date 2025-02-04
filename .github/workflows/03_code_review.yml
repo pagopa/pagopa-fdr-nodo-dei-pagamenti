@@ -19,6 +19,7 @@ on:
 
 env:
   PROJECT_KEY: "pagopa_pagopa-fdr-nodo-dei-pagamenti"
+  PROJECT_NAME: "pagopa-fdr-nodo-dei-pagamenti"
 
 permissions:
   id-token: write
@@ -51,6 +52,7 @@ jobs:
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.host.url="https://sonarcloud.io" \
           -Dsonar.projectKey=${{ env.PROJECT_KEY }} \
+          -Dsonar.projectName=${{ env.PROJECT_NAME }} \
           -Dsonar.sources=fdr/src/main/scala \
           -Dsonar.tests=fdr/src/test/scala \
           -Dsonar.junit.reportPaths=fdr/target/test-reports \
