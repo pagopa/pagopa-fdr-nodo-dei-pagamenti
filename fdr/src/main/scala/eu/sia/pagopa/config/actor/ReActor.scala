@@ -2,7 +2,7 @@ package eu.sia.pagopa.config.actor
 
 import akka.actor.ActorSystem
 import com.azure.core.util.BinaryData
-import com.azure.storage.blob.{BlobAsyncClient, BlobClientBuilder}
+import com.azure.storage.blob.BlobClientBuilder
 import eu.sia.pagopa.Main.materializer.system
 import eu.sia.pagopa.common.actor.BaseActor
 import eu.sia.pagopa.common.message.{BlobBodyRef, CategoriaEvento, CategoriaEventoEvh, ReEventHub, ReRequest, SottoTipoEvento}
@@ -85,6 +85,7 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
         val metadata: Map[String, String] = Map(
           "sessionId" -> r.sessionId,
           "insertedTimestamp" -> r.re.insertedTimestamp.toString,
+          "serviceIdentifier" -> Constant.FDR_VERSION
         )
         compressedBytes = Util.gzipContent(r.re.payload.get)
         val binaryData: BinaryData = BinaryData.fromBytes(compressedBytes)

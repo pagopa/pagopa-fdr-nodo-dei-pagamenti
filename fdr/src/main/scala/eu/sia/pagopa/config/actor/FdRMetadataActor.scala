@@ -9,7 +9,7 @@ import eu.sia.pagopa.common.json.model.FdREventToHistory
 import eu.sia.pagopa.common.message.{BlobBodyRef, ReRequest}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.re.model.Fdr1Metadata
-import eu.sia.pagopa.common.util.Util
+import eu.sia.pagopa.common.util.{Constant, Util}
 import eu.sia.pagopa.ActorProps
 
 import scala.jdk.CollectionConverters._
@@ -75,6 +75,7 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
         "elaborate" -> event.elaborate.toString,
         "sessionId" -> event.sessionId,
         "insertedTimestamp" -> event.insertedTimestamp.toString,
+        "serviceIdentifier" -> Constant.FDR_VERSION
       )
 
       var compressedBytes: Array[Byte] = Util.gzipContent(event.soapRequest.getBytes("UTF-8"))
