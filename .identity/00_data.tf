@@ -47,13 +47,13 @@ data "azurerm_key_vault_secret" "key_vault_bot_cd_token" {
 }
 
 data "azurerm_key_vault_secret" "key_vault_slack_webhook_url" {
-  name         = "pagopa-pagamenti-deploy-webhook"
+  name         = "pagopa-pagamenti-deploy-slack-webhook"
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
 
 data "azurerm_key_vault_secret" "key_vault_integration_test_slack_webhook_url" {
-  name         = "integrationtest-slack-webhook-url"
-  key_vault_id = data.azurerm_key_vault.nodo_key_vault.id
+  name         = "pagopa-pagamenti-integration-test-slack-webhook"
+  key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
 
 data "azurerm_user_assigned_identity" "identity_cd" {
