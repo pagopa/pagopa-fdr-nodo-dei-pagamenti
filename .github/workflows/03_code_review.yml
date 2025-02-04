@@ -49,9 +49,10 @@ jobs:
         env:
           LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
         run: |
+          whoami
           ls -la $HOME
           echo "pippo"
-          ls -la ~
+          ls -la /home/runner/.sonar/cache
           
           sbt "project fdr" \
           -Dsonar.organization="pagopa" \
