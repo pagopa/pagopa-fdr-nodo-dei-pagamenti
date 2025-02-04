@@ -43,13 +43,13 @@ jobs:
         with:
           distribution: temurin
           java-version: 11
-#          cache: sbt
+          cache: sbt
 
       - name: Build and Test
         env:
           LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
         run: |
-          sbt "project fdr" \
+          ./sbt "project fdr" \
           -Dsonar.organization="pagopa" \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
           -Dsonar.host.url="https://sonarcloud.io" \
