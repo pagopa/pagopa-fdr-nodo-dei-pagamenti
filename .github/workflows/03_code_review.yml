@@ -49,6 +49,8 @@ jobs:
         env:
           LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
         run: |
+          ls -la
+          
           sbt "project fdr" \
           -Dsonar.organization="pagopa" \
           -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
