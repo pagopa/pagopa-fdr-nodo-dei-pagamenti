@@ -84,7 +84,6 @@ export default function (multiplePaymentsObject) {
   if (exec.scenario.name === 'step_0') {
       multiplePaymentsObjectToUse = multiplePaymentsObject[0];
       flow_size = 150000;
-  }
   } else if (exec.scenario.name === 'step_1') {
       // use 120000 payments
       multiplePaymentsObjectToUse = multiplePaymentsObject[1];
