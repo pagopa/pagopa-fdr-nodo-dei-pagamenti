@@ -64,7 +64,7 @@ function postcondition() {
 export default function (multiplePaymentsObject) {
 
   var multiplePaymentsObjectToUse = ``;
-  var flow_size = 0;
+  var flow_size = 10;
   if (exec.scenario.name === 'step_0' || exec.scenario.name === 'step_7' || exec.scenario.name === 'step_9') {
     // use 3000 payments
     multiplePaymentsObjectToUse = multiplePaymentsObject[0];
