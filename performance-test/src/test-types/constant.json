@@ -4,74 +4,11 @@
   "scenarios": {
     "step_0": {
       "executor": "constant-arrival-rate",
-      "duration": "120s",
+      "duration": "5ms",
       "rate": 1,
-      "timeUnit": "1s",
+      "timeUnit": "20s",
       "preAllocatedVUs": 10,
       "maxVUs": 1000
-    },
-    "step_1": {
-      "executor": "constant-arrival-rate",
-      "duration": "30s",
-      "rate": 1,
-      "timeUnit": "1s",
-      "preAllocatedVUs": 10,
-      "maxVUs": 1000,
-      "startTime": "120s"
-    },
-    "step_2": {
-      "executor": "constant-arrival-rate",
-      "duration": "120s",
-      "rate": 1,
-      "timeUnit": "1s",
-      "preAllocatedVUs": 10,
-      "maxVUs": 1000,
-      "startTime": "150s"
-    },
-    "step_3": {
-      "executor": "constant-arrival-rate",
-      "duration": "20s",
-      "rate": 1,
-      "timeUnit": "1s",
-      "preAllocatedVUs": 10,
-      "maxVUs": 1000,
-      "startTime": "270s"
-    },
-    "step_4": {
-      "executor": "constant-arrival-rate",
-      "duration": "120s",
-      "rate": 1,
-      "timeUnit": "1s",
-      "preAllocatedVUs": 10,
-      "maxVUs": 1000,
-      "startTime": "290s"
-    },
-    "step_5": {
-      "executor": "constant-arrival-rate",
-      "duration": "10s",
-      "rate": 1,
-      "timeUnit": "1s",
-      "preAllocatedVUs": 10,
-      "maxVUs": 1000,
-      "startTime": "410s"
-    },
-    "step_6": {
-      "executor": "constant-arrival-rate",
-      "duration": "120s",
-      "rate": 1,
-      "timeUnit": "1s",
-      "preAllocatedVUs": 10,
-      "maxVUs": 1000,
-      "startTime": "420s"
-    },
-    "step_7": {
-      "executor": "constant-arrival-rate",
-      "duration": "20s",
-      "rate": 1,
-      "timeUnit": "5s",
-      "preAllocatedVUs": 10,
-      "maxVUs": 1000,
-      "startTime": "550s"
     }
   }
 }
