@@ -9,6 +9,14 @@
       "timeUnit": "20s",
       "preAllocatedVUs": 10,
       "maxVUs": 1000
+    },
+    "step_1": {
+      "executor": "constant-arrival-rate",
+      "duration": "5m",
+      "rate": 1,
+      "timeUnit": "1s",
+      "preAllocatedVUs": 10,
+      "maxVUs": 1000
     }
   }
 }
