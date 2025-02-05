@@ -103,6 +103,7 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
   override def receive: Receive = {
     case event: FdREventToHistory =>
       val fdrMetadataEnabled = system.settings.config.getBoolean("fdrMetadataEnabled")
+      log.debug(s"fdrMetadataEnabled ${fdrMetadataEnabled}")
       if (fdrMetadataEnabled) {
         log.info(s"FdREventToHistory ${event.retry}")
         saveForHistory(event)

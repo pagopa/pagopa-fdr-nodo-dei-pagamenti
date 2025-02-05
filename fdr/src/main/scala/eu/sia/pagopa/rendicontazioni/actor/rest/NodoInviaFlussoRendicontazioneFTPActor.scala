@@ -174,7 +174,7 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
           case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
             callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
             log.info(FdrLogConstant.logEnd(actorClassId))
-            replyTo ! sr
+
             Future {
               if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
                 // send data to history
@@ -191,6 +191,7 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
                     replyTo)
               }
             }
+            replyTo ! sr
 
             complete()
           case _ =>

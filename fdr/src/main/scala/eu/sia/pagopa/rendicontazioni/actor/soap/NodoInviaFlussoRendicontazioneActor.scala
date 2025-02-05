@@ -183,8 +183,8 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, rendicontazioneSaved: Rendicontazione) =>
           log.info(FdrLogConstant.logEnd(s"SR, NIFR, RENDICONTAZIONE ${actorClassId}"))
           callTrace(traceInterfaceRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
-          replyTo ! sr
           Future {
+            log.info(FdrLogConstant.logEnd(s"Stato rendicontazione ${rendicontazioneSaved.stato}"))
             if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
               // send data to history
               fdrMetadataActor ! FdREventToHistory(
@@ -196,6 +196,8 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
                 retry = 0
               )
             }
+            replyTo ! sr
+            complete()
           }.recover {
             case e: Throwable => log.error(e, "Problem to send message to fdrMetadataActor")
           }
