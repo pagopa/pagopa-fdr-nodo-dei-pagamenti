@@ -13,7 +13,7 @@ on:
         type: string
 
 env:
-  APP_NAME: fdr-nodo
+  APP_NAME: pagopa-fdr-nodo
 
 
 permissions:
