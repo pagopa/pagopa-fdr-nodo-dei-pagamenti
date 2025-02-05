@@ -22,7 +22,7 @@
     "step_2": {
       "executor": "constant-arrival-rate",
       "duration": "120s",
-      "rate": 3,
+      "rate": 1,
       "timeUnit": "1s",
       "preAllocatedVUs": 10,
       "maxVUs": 1000,
@@ -63,6 +63,15 @@
       "preAllocatedVUs": 10,
       "maxVUs": 1000,
       "startTime": "420s"
+    },
+    "step_7": {
+      "executor": "constant-arrival-rate",
+      "duration": "20s",
+      "rate": 1,
+      "timeUnit": "5s",
+      "preAllocatedVUs": 10,
+      "maxVUs": 1000,
+      "startTime": "550s"
     }
   }
 }

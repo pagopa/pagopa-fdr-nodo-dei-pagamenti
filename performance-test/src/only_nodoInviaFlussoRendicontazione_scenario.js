@@ -59,7 +59,7 @@ export default function (multiplePaymentsObject) {
 
   var multiplePaymentsObjectToUse = ``;
   var flow_size = 10;
-  if (exec.scenario.name === 'step_0' || exec.scenario.name === 'step_2' || exec.scenario.name === 'step_4' || exec.scenario.name === 'step_6') {
+  if (exec.scenario.name === 'step_0' || exec.scenario.name === 'step_2' || exec.scenario.name === 'step_4' || exec.scenario.name === 'step_5' || exec.scenario.name === 'step_6') {
     // use 6000 payments
     multiplePaymentsObjectToUse = multiplePaymentsObject[0];
     flow_size = 6000;
@@ -75,7 +75,7 @@ export default function (multiplePaymentsObject) {
     // use 60000 payments
     multiplePaymentsObjectToUse = multiplePaymentsObject[1];
     flow_size = 60000;
-  } else if (exec.scenario.name === 'step_5') {
+  } else if (exec.scenario.name === 'step_7') {
     // use 120000 payments
     multiplePaymentsObjectToUse = multiplePaymentsObject[5];
     flow_size = 120000;
