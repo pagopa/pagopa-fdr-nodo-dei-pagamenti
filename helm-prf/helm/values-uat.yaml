@@ -36,7 +36,7 @@ microservice-chart: &microservice-chart
       cpu: "1000m"
   autoscaling:
     enable: true
-    minReplica: 1
+    minReplica: 2
     maxReplica: 8
     pollingInterval: 10 # seconds
     triggers:
