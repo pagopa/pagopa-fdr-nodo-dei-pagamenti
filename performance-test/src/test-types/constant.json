@@ -7,7 +7,7 @@
       "duration": "5m",
       "rate": 1,
       "timeUnit": "20s",
-      "preAllocatedVUs": 10,
+      "preAllocatedVUs": 1,
       "maxVUs": 1000
     },
     "step_1": {
@@ -15,7 +15,7 @@
       "duration": "5m",
       "rate": 1,
       "timeUnit": "1s",
-      "preAllocatedVUs": 10,
+      "preAllocatedVUs": 1,
       "maxVUs": 1000
     }
   }
