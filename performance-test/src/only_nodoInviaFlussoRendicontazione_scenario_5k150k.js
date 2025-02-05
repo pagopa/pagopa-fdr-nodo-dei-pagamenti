@@ -42,9 +42,9 @@ export function setup() {
   //var paymentsObject_15000 = generateMultiplePaymentsObject(parameters, 15000);
   //var paymentsObject_30000 = generateMultiplePaymentsObject(parameters, 30000);
   //var paymentsObject_60000 = generateMultiplePaymentsObject(parameters, 60000);
-  var paymentsObject_50000 = generateMultiplePaymentsObject(parameters, 50000);
+  var paymentsObject_150000 = generateMultiplePaymentsObject(parameters, 150000);
   //const multiplePaymentsObject = [paymentsObject_6000, paymentsObject_15000, paymentsObject_30000, paymentsObject_60000, paymentsObject_150000];
-  const multiplePaymentsObject = [paymentsObject_50000, paymentsObject_5000];
+  const multiplePaymentsObject = [paymentsObject_150000, paymentsObject_5000];
   return multiplePaymentsObject;
 }
 
@@ -83,7 +83,7 @@ export default function (multiplePaymentsObject) {
 //  }
   if (exec.scenario.name === 'step_0') {
       multiplePaymentsObjectToUse = multiplePaymentsObject[0];
-      flow_size = 50000;
+      flow_size = 150000;
   } else if (exec.scenario.name === 'step_1') {
       // use 120000 payments
       multiplePaymentsObjectToUse = multiplePaymentsObject[1];
