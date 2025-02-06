@@ -32,12 +32,12 @@ microservice-chart: &microservice-chart
       memory: "640M"
       cpu: "512m"
     limits:
-      memory: "2Gi"
+      memory: "6Gi"
       cpu: "1000m"
   autoscaling:
     enable: true
     minReplica: 2
-    maxReplica: 12
+    maxReplica: 6
     pollingInterval: 10 # seconds
     triggers:
       - type: cpu
@@ -80,7 +80,7 @@ microservice-chart: &microservice-chart
     TZ: "Europe/Rome"
     AKKA_SYSTEM_NAME: "pagopafdrnodo"
     JAVA_OPTS: >-
-      -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -Xmx1536m -Xms64m -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts -Duser.language=it -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
+      -XX:+UseG1GC -XX:MaxGCPauseMillis=100 -Xmx4915m -Xms64m -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts -Duser.language=it -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
     DB_FDR_URL: jdbc:postgresql://fdr-db.u.internal.postgresql.pagopa.it:6432/fdr?sslmode=require&prepareThreshold=0
     DB_FDR_USER: fdr
     INSTANCE: UAT
