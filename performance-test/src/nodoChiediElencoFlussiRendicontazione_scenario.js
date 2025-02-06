@@ -51,8 +51,8 @@ export default function () {
     'check status is 200': (resp) => resp.status === 200,
     'totRestituiti field is not zero': (r) => parseHTML(response.body).find('totRestituiti').text() !== '0',
   });
-  // console.log(`nodoChiediElencoFlussiRendicontazione request: ${request_ncefr} to [${parameters.url_nodo_ci}]\n`)
-  // console.log(`nodoChiediElencoFlussiRendicontazione response: ${response.body} to [${parameters.url_nodo_ci}]\n`)
+  console.log(`nodoChiediElencoFlussiRendicontazione request: ${request_ncefr} to [${parameters.url_nodo_ci}]\n`)
+  console.log(`nodoChiediElencoFlussiRendicontazione response: ${response.body} to [${parameters.url_nodo_ci}]\n`)
 }
 
 export function teardown(data) {
