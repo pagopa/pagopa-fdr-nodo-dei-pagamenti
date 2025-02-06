@@ -294,7 +294,7 @@ class RendicontazioniTests() extends BaseUnitTest {
         assert(res.fault.isEmpty)
         assert(res.xmlRendicontazione.isDefined)
       }
-      rendicontazioneDecoded <- Future.fromTry(StringUtils.getStringDecoded(res.xmlRendicontazione.get, true))
+      rendicontazioneDecoded <- Future.fromTry(StringUtils.getStringDecodedByString(res.xmlRendicontazione.get.toString, true))
       flussoRiversamento = XmlEnum.str2FlussoRiversamento_flussoriversamento(rendicontazioneDecoded).getOrElse(throw exception.DigitPaException(DigitPaErrorCodes.PPT_SINTASSI_XSD))
       _ = {
         assert(flussoRiversamento.identificativoFlusso == idFlussoNexiToCheck)

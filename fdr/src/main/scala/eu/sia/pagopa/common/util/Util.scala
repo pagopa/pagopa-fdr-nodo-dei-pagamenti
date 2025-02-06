@@ -4,6 +4,7 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.{ContentType => _}
 import akka.routing.RoundRobinGroup
 import com.typesafe.config.Config
+import eu.sia.pagopa.Main.materializer.system
 
 import scala.reflect.runtime.universe._
 import scala.reflect.runtime.{currentMirror => cm}
@@ -33,7 +34,7 @@ object Util {
   }
 
   def logPayload(log: NodoLogger, payload: Option[String]): Unit = {
-    if (log.isDebugEnabled) {
+    if (log.isDebugEnabled && system.settings.config.getBoolean("logPayload")) {
       log.debug(payload.map(Util.obfuscate).getOrElse("[NO PAYLOAD]"))
     }
   }

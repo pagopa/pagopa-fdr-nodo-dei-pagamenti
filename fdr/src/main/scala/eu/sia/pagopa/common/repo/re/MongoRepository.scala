@@ -8,7 +8,6 @@ import org.mongodb.scala.result.InsertOneResult
 import org.mongodb.scala.{Document, MongoClient, MongoCollection, MongoDatabase}
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 case class MongoRepository(config:Config, log: NodoLogger)(implicit ec: ExecutionContext) {
 

@@ -2,7 +2,6 @@ package eu.sia.pagopa.rendicontazioni.actor.soap
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE

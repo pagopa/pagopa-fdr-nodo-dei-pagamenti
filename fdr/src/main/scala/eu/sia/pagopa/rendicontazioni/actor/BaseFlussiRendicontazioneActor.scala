@@ -30,7 +30,8 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
     log.debug("Check 'Flusso riversamento' element validity")
 
     for {
-      content <- Future.fromTry(StringUtils.getStringDecoded(nifr.xmlRendicontazione, checkUTF8))
+//      content <- Future.fromTry(StringUtils.getStringDecoded(nifr.xmlRendicontazione, checkUTF8))
+      content <- Future.fromTry(StringUtils.getStringDecodedByString(nifr.xmlRendicontazione.toString, checkUTF8))
       r <- XsdValid.checkOnly(content, XmlEnum.FLUSSO_RIVERSAMENTO_FLUSSORIVERSAMENTO, inputXsdValid) match {
         case Success(_) =>
           log.debug("Saving valid report")
@@ -113,7 +114,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
           None,
           Util.now()
         )
-        val content = StringUtils.getStringDecoded(xmlRendicontazione, checkUTF8) match {
+        val content = StringUtils.getStringDecodedByString(xmlRendicontazione.toString, checkUTF8) match {
           case Success(c) => c
           case Failure(e) => throw new DigitPaException("Errore decodifica rendicontazione", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
         }
