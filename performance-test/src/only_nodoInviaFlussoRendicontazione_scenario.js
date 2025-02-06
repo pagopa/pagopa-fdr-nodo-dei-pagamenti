@@ -17,6 +17,7 @@ const varsArray = new SharedArray('vars', function () {
 const vars = varsArray[0];
 const app_host = `${vars.app_host}`;
 const subkey = `${__ENV.API_SUBSCRIPTION_KEY}`;
+var flow_size = `${__ENV.FLOW_SIZE}`;
 
 
 const parameters = {
@@ -59,7 +60,6 @@ function postcondition() {
 export default function (multiplePaymentsObject) {
 
   var multiplePaymentsObjectToUse = ``;
-  var flow_size = 10;
 //  if (exec.scenario.name === 'step_0' || exec.scenario.name === 'step_2' || exec.scenario.name === 'step_4' || exec.scenario.name === 'step_5' || exec.scenario.name === 'step_6') {
 //    // use 6000 payments
 //    multiplePaymentsObjectToUse = multiplePaymentsObject[0];
