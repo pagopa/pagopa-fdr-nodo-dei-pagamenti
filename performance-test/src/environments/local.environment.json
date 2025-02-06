@@ -10,7 +10,8 @@
       "password": "PLACEHOLDER",
       "creditor_institution_code": "15376371009",
       "broker_ci": "15376371009",
-      "station_id": "15376371009_03"
+      "station_id": "15376371009_03",
+      "flow_id": ""
     }
   ]
 }
