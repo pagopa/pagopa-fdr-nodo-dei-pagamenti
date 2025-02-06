@@ -1,11 +1,15 @@
-fdrnodo:
+microservice-chart: &microservice-chart
   namespace: "fdr"
+  image:
+    repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
+    tag: 2.1.9-40-test-deploy
+  canaryDelivery:
+    create: false
+fdrnodo:
+  !!merge <<: *microservice-chart
   nameOverride: ""
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
-  image:
-    repository: pagopaucommonacr.azurecr.io/pagopafdrnododeipagamenti
-    tag: 1.0.0-SNAPSHOT
   livenessProbe:
     httpGet:
       path: /alive
@@ -29,16 +33,13 @@ fdrnodo:
     create: true
   resources:
     requests:
-      memory: "640m"
+      memory: "640M"
       cpu: "512m"
     limits:
       memory: "8Gi"
       cpu: "2560m"
   autoscaling:
     enable: true
-    minReplica: 1
-    maxReplica: 2
-    pollingInterval: 10 # seconds
     triggers:
       - type: cpu
         metricType: Utilization
@@ -49,7 +50,6 @@ fdrnodo:
         metadata:
           value: "80"
     advanced:
-      restoreToOriginalReplicaCount: false
       horizontalPodAutoscalerConfig:
         behavior:
           scaleDown:
@@ -80,10 +80,10 @@ fdrnodo:
     TZ: "Europe/Rome"
     AKKA_SYSTEM_NAME: "pagopafdrnodo"
     JAVA_OPTS: >-
-      -Dlogback.configurationFile=/mnt/file-config/logback.xml  -Dconfig.app=/mnt/file-config/config-app.conf  -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts  -Duser.language=it  -Duser.country=IT  -Duser.timezone=Europe/Rome  -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
-    DB_FDR_URL: jdbc:postgresql://fdr-db.u.internal.postgresql.pagopa.it:6432/fdr?sslmode=require&prepareThreshold=0
+      -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts -Duser.language=it -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true -Dcom.sun.management.jmxremote.port=3000 -Dcom.sun.management.jmxremote.rmi.port=3000 -Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+    DB_FDR_URL: jdbc:postgresql://fdr-db.d.internal.postgresql.pagopa.it:6432/fdr?sslmode=require&prepareThreshold=0
     DB_FDR_USER: fdr
-    INSTANCE: UAT
+    INSTANCE: DEV
     EVENT_HUB_NAME: "fdr-re"
     BLOB_RE_CONTAINER_NAME: "payload"
     AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
@@ -104,7 +104,7 @@ fdrnodo:
       EVENT_HUB_REPORTEDIUV_CONNECTION_STRING: "fdr-qi-reported-iuv-tx-connection-string"
       EVENT_HUB_FLOWTX_CONNECTION_STRING: "fdr-qi-flows-tx-connection-string"
     keyvault:
-      name: "pagopa-u-fdr-kv"
+      name: "pagopa-d-fdr-kv"
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
   envFieldRef:
     MANAGEMENT_HTTP_HOST: "status.podIP"
@@ -146,7 +146,7 @@ fdrnodo:
       - 9092 #micrometer
   ingress:
     create: true
-    host: "weuuat.fdr.internal.uat.platform.pagopa.it"
+    host: "weudev.fdr.internal.dev.platform.pagopa.it"
     path: /pagopa-fdr-nodo-service(/|$)(.*)
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"

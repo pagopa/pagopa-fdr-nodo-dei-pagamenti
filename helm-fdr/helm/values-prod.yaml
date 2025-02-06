@@ -1,11 +1,15 @@
-fdrnodo:
+microservice-chart: &microservice-chart
   namespace: "fdr"
+  image:
+    repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
+    tag: 2.1.9-25-deploy-gh-action
+  canaryDelivery:
+    create: false
+fdrnodo:
+  !!merge <<: *microservice-chart
   nameOverride: ""
   fullnameOverride: ""
   terminationGracePeriodSeconds: 140
-  image:
-    repository: pagopapcommonacr.azurecr.io/pagopafdrnododeipagamenti
-    tag: 1.0.0-SNAPSHOT
   livenessProbe:
     httpGet:
       path: /alive
@@ -81,7 +85,7 @@ fdrnodo:
     AKKA_SYSTEM_NAME: "pagopafdrnodo"
     JAVA_OPTS: >-
       -Dlogback.configurationFile=/mnt/file-config/logback.xml  -Dconfig.app=/mnt/file-config/config-app.conf  -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts  -Duser.language=it  -Duser.country=IT  -Duser.timezone=Europe/Rome  -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
-    DB_FDR_URL: jdbc:postgresql://fdr-db.p.internal.postgresql.pagopa.it:6432/nodo?sslmode=require&prepareThreshold=0&currentSchema=offline
+    DB_FDR_URL: jdbc:postgresql://fdr-db.p.internal.postgresql.pagopa.it:6432/fdr?sslmode=require&prepareThreshold=0
     DB_FDR_USER: fdr
     INSTANCE: PROD
     EVENT_HUB_NAME: "fdr-re"

@@ -52,7 +52,7 @@ lazy val pgversion = "42.5.0"
 lazy val azureStorageBlob = "12.22.2"
 lazy val azureIdentity = "1.9.0"
 
-val lightbendKey = sys.env.getOrElse("LIGHTBEND_KEY","5IDMAq0poMpRYz1HD58Y7c8jQ9kjlFs_yKCMkg3tdeBTeqiL")
+val lightbendKey = sys.env("LIGHTBEND_KEY")
 
 ThisBuild / organization := "eu.sia.pagopa"
 ThisBuild / scalaVersion := "2.13.6"

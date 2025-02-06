@@ -66,3 +66,8 @@ data "azurerm_key_vault_secret" "integration_test_subscription_key" {
   name         = "integration-test-fdr1-subscription-key"
   key_vault_id = data.azurerm_key_vault.domain_key_vault.id
 }
+
+data "azurerm_key_vault_secret" "key_vault_lightbend_key" {
+  name         = "lightbend-key"
+  key_vault_id = data.azurerm_key_vault.domain_key_vault.id
+}

@@ -3,9 +3,9 @@ name: fdr-cron-chart
 description: Flussi di rendicontazione cron job
 type: application
 version: 2.1.9
-appVersion: 2.1.9
+appVersion: 2.1.9-40-deploy-gh-action
 dependencies:
   - name: cron-chart
     version: 2.3.0
     repository: "https://pagopa.github.io/aks-cron-chart-blueprint"
-    alias: cj-ftp-upload
+    alias: cronnodo
