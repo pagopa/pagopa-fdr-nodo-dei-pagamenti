@@ -19,12 +19,12 @@ const vars = varsArray[0];
 const subkey = `${__ENV.API_SUBSCRIPTION_KEY}`;
 
 const parameters = {
-    pspId: `${vars.psp}`,
-    password: `${vars.password}`,
-    creditorInstitutionId: `${vars.creditor_institution}`,
-    brokerCiId: `${vars.broker_ci}`,
-    stationId: `${vars.station}`,
-    url_nodo_ci: `${vars.app_host_nodo_ci}`,
+  pspId: `${vars.psp}`,
+  password: `${vars.password}`,
+  creditorInstitutionId: `${vars.creditor_institution}`,
+  brokerCiId: `${vars.broker_ci}`,
+  stationId: `${vars.station}`,
+  url_nodo_ci: `${vars.app_host_nodo_ci}`,
 }
 
 export function setup() {
@@ -42,6 +42,9 @@ export default function () {
       'SOAPAction': 'nodoChiediElencoFlussiRendicontazione',
       "Ocp-Apim-Subscription-Key": subkey,
     },
+    tags: {
+      primitiva: "nodoChiediElencoFlussiRendicontazione",
+    }
   };
 
   // Testing: nodoChiediElencoFlussiRendicontazione
