@@ -5,15 +5,7 @@
     "step_0": {
       "executor": "constant-arrival-rate",
       "duration": "30m",
-      "rate": 1,
-      "timeUnit": "10s",
-      "preAllocatedVUs": 1,
-      "maxVUs": 1000
-    },
-    "step_1": {
-      "executor": "constant-arrival-rate",
-      "duration": "30m",
-      "rate": 1,
+      "rate": 15,
       "timeUnit": "1s",
       "preAllocatedVUs": 1,
       "maxVUs": 1000
