@@ -30,7 +30,6 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
     log.debug("Check 'Flusso riversamento' element validity")
 
     for {
-//      content <- Future.fromTry(StringUtils.getStringDecoded(nifr.xmlRendicontazione, checkUTF8))
       content <- Future.fromTry(StringUtils.getStringDecodedByString(nifr.xmlRendicontazione.toString, checkUTF8))
       r <- XsdValid.checkOnly(content, XmlEnum.FLUSSO_RIVERSAMENTO_FLUSSORIVERSAMENTO, inputXsdValid) match {
         case Success(_) =>
