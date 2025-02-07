@@ -19,6 +19,10 @@ parameters:
       - "constant"
       - "smoke"
       - "ramping"
+      - "constant_nodoChiediElencoFlussi"
+      - "constant_nodoChiediFlusso"
+      - "spike_nodoChiediElencoFlussi"
+      - "spike_nodoChiediFlusso"
   - name: "SCRIPT"
     displayName: "Script name"
     type: string
@@ -26,6 +30,8 @@ parameters:
       - happy_case_scenario
       - only_nodoInviaFlussoRendicontazione_scenario
       - only_nodoInviaFlussoRendicontazione_payments_ramp_scenario
+      - nodoChiediElencoFlussiRendicontazione_scenario
+      - nodoChiediFlussoRendicontazione_scenario
   - name: "FLOW_SIZE"
     displayName: "Flow size"
     type: number

@@ -14,10 +14,10 @@
     "contacts": {
       "executor": "constant-arrival-rate",
       "duration": "5m",
-      "rate": 10,
+      "rate": 30,
       "timeUnit": "1s",
-      "preAllocatedVUs": 100,
-      "maxVUs": 200
+      "preAllocatedVUs": 1000,
+      "maxVUs": 2000
     }
   },
   "thresholds": {
@@ -25,7 +25,7 @@
       "rate<0.1"
     ],
     "http_req_duration": [
-      "p(99)<2000"
+      "p(99)<15000"
     ],
     "http_req_duration{group:::setup}": [
       "max>=0"

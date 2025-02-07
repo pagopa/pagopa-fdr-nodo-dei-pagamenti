@@ -49,10 +49,10 @@ export default function () {
   const response = http.post(parameters.url_nodo_ci, request_ncefr, params)
   check(response, {
     'check status is 200': (resp) => resp.status === 200,
-    'totRestituiti field is not zero': (r) => parseHTML(response.body).find('totRestituiti').text() !== '0',
+    'totRestituiti field is not zero': (r) => parseHTML(r.body).find('totRestituiti').text() !== '0',
   });
-  console.log(`nodoChiediElencoFlussiRendicontazione request: ${request_ncefr} to [${parameters.url_nodo_ci}]\n`)
-  console.log(`nodoChiediElencoFlussiRendicontazione response: ${response.body} to [${parameters.url_nodo_ci}]\n`)
+  // console.log(`nodoChiediElencoFlussiRendicontazione request: ${request_ncefr} to [${parameters.url_nodo_ci}]\n`)
+  // console.log(`nodoChiediElencoFlussiRendicontazione response: ${response} to [${parameters.url_nodo_ci}]\n`)
 }
 
 export function teardown(data) {
