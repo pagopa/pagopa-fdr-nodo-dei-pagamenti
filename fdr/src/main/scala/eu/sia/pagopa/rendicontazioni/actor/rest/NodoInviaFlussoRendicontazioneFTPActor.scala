@@ -27,10 +27,10 @@ import spray.json._
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
-import java.util.UUID
 import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
+
 
 case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Repositories, actorProps: ActorProps)
   extends PerRequestActor with BaseFlussiRendicontazioneActor with ReUtil {
@@ -188,7 +188,7 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
                       elaborate = true,
                       retry = 0
                     ),
-                    replyTo)
+                    null)
               }
             }
             replyTo ! sr

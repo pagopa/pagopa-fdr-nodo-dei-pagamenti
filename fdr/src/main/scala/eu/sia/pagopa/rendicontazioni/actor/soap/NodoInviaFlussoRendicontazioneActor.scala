@@ -47,10 +47,6 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
   val reActor: ActorRef = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
   private val fdrMetadataActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
 
-  override def postStop(): Unit = {
-    log.info("POST STOP")
-  }
-
   override def receive: Receive = { case soapRequest: SoapRequest =>
 
     req = soapRequest

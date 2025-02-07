@@ -91,7 +91,7 @@ class SoapActorPerRequest(
 
     case sres: SoapResponse =>
       log.debug(s"RECEIVE SoapResponse from sender: ${sender().path.name}")
-      // TODO [FC] terminateActor forces the actor to stop, otherwise it remains in pending until to bundleTimeoutSeconds
+      // [FC] terminateActor forces the actor to stop, otherwise it remains in pending until to bundleTimeoutSeconds
       terminateActor(sender())
       sres.payload match {
         case Some(_) =>
@@ -190,7 +190,7 @@ class SoapActorPerRequest(
   }
 
   private def terminateActor(actorRef: ActorRef): Unit = {
-    log.info(s"Terminating ${actorRef.path.name}")
+    log.debug(s"Terminating ${actorRef.path.name}")
     context.stop(actorRef)
   }
 
@@ -257,7 +257,6 @@ class SoapActorPerRequest(
     } recover {
       case sre: SoapRouterException =>
         log.error(sre, "SoapRouterException")
-        // TODO [FC]
         traceRequest(message)
 
         val payload = Util.faultXmlResponse(sre.faultcode, sre.faultstring, sre.detail)
