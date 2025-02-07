@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "fdr"
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.1.9-96-PAGOPA-2600-housekeeping-evh-qi
+    tag: 2.1.9-104-PAGOPA-2600-housekeeping-evh-qi
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
@@ -29,25 +29,25 @@ microservice-chart: &microservice-chart
     create: true
   resources:
     requests:
-      memory: "640M"
+      memory: "3Gi"
       cpu: "512m"
     limits:
-      memory: "8Gi"
-      cpu: "2560m"
+      memory: "6Gi"
+      cpu: "1000m"
   autoscaling:
     enable: true
-    minReplica: 1
-    maxReplica: 2
+    minReplica: 2
+    maxReplica: 8
     pollingInterval: 10 # seconds
     triggers:
       - type: cpu
         metricType: Utilization
         metadata:
-          value: "70"
+          value: "80"
       - type: memory
         metricType: Utilization
         metadata:
-          value: "80"
+          value: "100"
     advanced:
       restoreToOriginalReplicaCount: false
       horizontalPodAutoscalerConfig:
@@ -80,7 +80,7 @@ microservice-chart: &microservice-chart
     TZ: "Europe/Rome"
     AKKA_SYSTEM_NAME: "pagopafdrnodo"
     JAVA_OPTS: >-
-      -Xmx3560m -Xms64m -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts -Duser.language=it -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
+      -XX:+UseG1GC -XX:MaxGCPauseMillis=50 -XX:InitiatingHeapOccupancyPercent=30 -XX:G1HeapRegionSize=8M -XX:ConcGCThreads=4 -XX:ParallelGCThreads=8 -Xmx4915m -Xms2304m -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts -Duser.language=it -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
     DB_FDR_URL: jdbc:postgresql://fdr-db.u.internal.postgresql.pagopa.it:6432/fdr?sslmode=require&prepareThreshold=0
     DB_FDR_USER: fdr
     INSTANCE: UAT
@@ -90,6 +90,7 @@ microservice-chart: &microservice-chart
     MONGO_METADATA_DOCUMENT_NAME: "fdr1-metadata"
     MONGO_EVENTS_DOCUMENT_NAME: "events"
     ADDITIONAL_FDR_VALIDATIONS: "true"
+    SERVICE_IDENTIFIER: "FDR001UAT"
   secretProvider:
     create: true
     envSecrets:

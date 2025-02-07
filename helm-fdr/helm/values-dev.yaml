@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "fdr"
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.1.9-96-PAGOPA-2600-housekeeping-evh-qi
+    tag: 2.1.9-104-PAGOPA-2600-housekeeping-evh-qi
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
@@ -43,11 +43,11 @@ microservice-chart: &microservice-chart
       - type: cpu
         metricType: Utilization
         metadata:
-          value: "70"
+          value: "80"
       - type: memory
         metricType: Utilization
         metadata:
-          value: "80"
+          value: "100"
     advanced:
       restoreToOriginalReplicaCount: false
       horizontalPodAutoscalerConfig:
@@ -90,6 +90,7 @@ microservice-chart: &microservice-chart
     MONGO_METADATA_DOCUMENT_NAME: "fdr1-metadata"
     MONGO_EVENTS_DOCUMENT_NAME: "events"
     ADDITIONAL_FDR_VALIDATIONS: "true"
+    SERVICE_IDENTIFIER: "FDR001DEV"
   secretProvider:
     create: true
     envSecrets:
