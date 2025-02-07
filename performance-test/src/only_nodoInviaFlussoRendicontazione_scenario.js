@@ -39,7 +39,7 @@ export function setup() {
   // The setup code runs, setting up the test environment (optional) and generating data
   // used to reuse code for the same VU
 
-  var paymentsObject_5000 = generateMultiplePaymentsObject(parameters, flow_size);
+  var paymentsObject = generateMultiplePaymentsObject(parameters, flow_size);
   const multiplePaymentsObject = [paymentsObject];
   return multiplePaymentsObject;
 }
