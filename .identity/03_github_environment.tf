@@ -36,6 +36,20 @@ locals {
     "INTEGRATION_TEST_STORAGE_ACCOUNT_NAME": local.integration_test.storage_account_name,
     "INTEGRATION_TEST_REPORTS_FOLDER": local.integration_test.reports_folder
   }
+  special_repo_secrets = {
+    "CLIENT_ID" : {
+      "key" : "${upper(var.env)}_CLIENT_ID",
+      "value" : data.azurerm_user_assigned_identity.identity_cd.client_id
+    },
+    "TENANT_ID" : {
+      "key" : "${upper(var.env)}_TENANT_ID",
+      "value" : data.azurerm_client_config.current.tenant_id
+    },
+    "SUBSCRIPTION_ID" : {
+      "key" : "${upper(var.env)}_SUBSCRIPTION_ID",
+      "value" : data.azurerm_subscription.current.subscription_id
+    }
+  }
 }
 
 ###############
@@ -81,7 +95,7 @@ resource "github_actions_secret" "secret_bot_token" {
 
   repository       = local.github.repository
   secret_name      = "BOT_TOKEN_GITHUB"
-  plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_cd_token.value
+  plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_token.value
 }
 
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
@@ -116,3 +130,9 @@ resource "github_issue_label" "ignore_for_release" {
   color      = "008000"
 }
 
+resource "github_actions_secret" "special_repo_secrets" {
+  for_each        = local.special_repo_secrets
+  repository      = local.github.repository
+  secret_name     = each.value.key
+  plaintext_value = each.value.value
+}
