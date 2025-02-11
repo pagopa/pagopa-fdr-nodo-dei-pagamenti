@@ -18,8 +18,10 @@ jobs:
   scheduler:
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false
       matrix:
-        short_env: [ d, u, p ]
+#        short_env: [ d, u, p ]
+        short_env: [ d ]
     steps:
       - name: setup environment
         id: setup
