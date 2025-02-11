@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "fdr"
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.1.10
+    tag: 2.1.9-63-PAGOPA-2394
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
@@ -37,7 +37,7 @@ microservice-chart: &microservice-chart
   autoscaling:
     enable: true
     minReplica: 1
-    maxReplica: 2
+    maxReplica: 1
     pollingInterval: 10 # seconds
     triggers:
       - type: cpu
@@ -146,14 +146,14 @@ microservice-chart: &microservice-chart
       - 8080 #http
       - 9091 #cinnamon
       - 9092 #micrometer
-fdrnodo:
+prfnodo:
   !!merge <<: *microservice-chart
   nameOverride: ""
   fullnameOverride: ""
   ingress:
     create: true
     host: "weuuat.fdr.internal.uat.platform.pagopa.it"
-    path: /pagopa-fdr-nodo-service(/|$)(.*)
+    path: /pagopa-fdr-nodo-service-prf(/|$)(.*)
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m

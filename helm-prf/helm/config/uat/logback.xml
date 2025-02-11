@@ -11,38 +11,38 @@
 
 
     <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
-        <!--
-            <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
-                <providers>
-                    <message/>
-                    <nestedField>
-                        <fieldName>app</fieldName>
-                        <providers>
-                            <timestamp>
-                                <fieldName>apptimestamp</fieldName>
-                            </timestamp>
-                            <loggerName/>
-                            <threadName/>
-                            <logLevel/>
-                            <logLevelValue/>
-                            <stackTrace/>
-                            <mdc>
-                                <excludeMdcKeyName>elapsed</excludeMdcKeyName>
-                            </mdc>
-                            <tags/>
+    <!--
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <message/>
+                <nestedField>
+                    <fieldName>app</fieldName>
+                    <providers>
+                        <timestamp>
+                            <fieldName>apptimestamp</fieldName>
+                        </timestamp>
+                        <loggerName/>
+                        <threadName/>
+                        <logLevel/>
+                        <logLevelValue/>
+                        <stackTrace/>
+                        <mdc>
+                            <excludeMdcKeyName>elapsed</excludeMdcKeyName>
+                        </mdc>
+                        <tags/>
+                        <pattern>
+                            <omitEmptyFields>true</omitEmptyFields>
                             <pattern>
-                                <omitEmptyFields>true</omitEmptyFields>
-                                <pattern>
-                                    {
-                                    "elapsed": "#asLong{%mdc{elapsed}}"
-                                    }
-                                </pattern>
+                                {
+                                "elapsed": "#asLong{%mdc{elapsed}}"
+                                }
                             </pattern>
-                        </providers>
-                    </nestedField>
-                </providers>
-            </encoder>
-        -->
+                        </pattern>
+                    </providers>
+                </nestedField>
+            </providers>
+        </encoder>
+    -->
 
         <encoder>
             <pattern>${CONSOLE_PATTERN}</pattern>

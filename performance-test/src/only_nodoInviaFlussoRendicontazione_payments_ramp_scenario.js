@@ -3,7 +3,7 @@ import { check } from 'k6';
 import { SharedArray } from 'k6/data';
 import { parseHTML } from 'k6/html';
 import exec from 'k6/execution';
-import { generateNodoInviaFlussoRendicontazione, generateNodoInviaFlussoRendicontazioneFixedPayments, generateMultiplePaymentsObject, getRandom } from './helpers/fdr_helpers.js';
+import { generateNodoInviaFlussoRendicontazione, getRandom } from './helpers/fdr_helpers.js';
 
 export let options = JSON.parse(open(__ENV.TEST_TYPE));
 
@@ -17,8 +17,7 @@ const varsArray = new SharedArray('vars', function () {
 const vars = varsArray[0];
 const app_host = `${vars.app_host}`;
 const subkey = `${__ENV.API_SUBSCRIPTION_KEY}`;
-var flow_size = `${__ENV.FLOW_SIZE}`;
-
+let flow_size = Number(`${__ENV.FLOW_SIZE}`);
 
 const parameters = {
     pspId: `${vars.psp}`,
@@ -38,10 +37,6 @@ export function setup() {
   // setup code (once)
   // The setup code runs, setting up the test environment (optional) and generating data
   // used to reuse code for the same VU
-
-  var paymentsObject = generateMultiplePaymentsObject(parameters, flow_size);
-  const multiplePaymentsObject = [paymentsObject];
-  return multiplePaymentsObject;
 }
 
 function precondition() {
@@ -52,9 +47,17 @@ function postcondition() {
   // no post conditions
 }
 
-export default function (multiplePaymentsObject) {
+export default function () {
 
-  var multiplePaymentsObjectToUse = multiplePaymentsObject[0];
+  // Manage flow size with respect to the various stages
+  if (exec.scenario.progress >= 0.33 && exec.scenario.progress < 0.66) {
+    flow_size = 5000
+  }
+
+  if (exec.scenario.progress >= 0.66) {
+    flow_size = 10000
+  }
+
   // Initialize response variable
   let response = '';
   var flow_id = `${parameters.today}${parameters.pspId}-${getRandom(1000000, 9999999) + __VU}`;
@@ -66,17 +69,14 @@ export default function (multiplePaymentsObject) {
       'SOAPAction': 'nodoInviaFlussoRendicontazione',
       "Ocp-Apim-Subscription-Key": subkey,
     },
-    tags: {
-    primitiva: "nodoInviaFlussoRendicontazione",
-    pagamenti: flow_size.toString()
-    }
+    tags: { primitiva: "nodoInviaFlussoRendicontazione"}
   };
 
   // starting the execution
   precondition();
 
   // Testing: nodoInviaFlussoRendicontazione
-  var request_nifr = generateNodoInviaFlussoRendicontazioneFixedPayments(parameters, flow_id, flow_size, multiplePaymentsObjectToUse);
+  var request_nifr = generateNodoInviaFlussoRendicontazione(parameters, flow_id, flow_size);
   response = http.post(parameters.url_nodo_psp, request_nifr, params)
   check(response, {
     'check status is 200': (resp) => resp.status === 200,

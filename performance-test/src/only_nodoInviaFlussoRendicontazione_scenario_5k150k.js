@@ -17,7 +17,6 @@ const varsArray = new SharedArray('vars', function () {
 const vars = varsArray[0];
 const app_host = `${vars.app_host}`;
 const subkey = `${__ENV.API_SUBSCRIPTION_KEY}`;
-var flow_size = `${__ENV.FLOW_SIZE}`;
 
 
 const parameters = {
@@ -39,8 +38,13 @@ export function setup() {
   // The setup code runs, setting up the test environment (optional) and generating data
   // used to reuse code for the same VU
 
-  var paymentsObject = generateMultiplePaymentsObject(parameters, flow_size);
-  const multiplePaymentsObject = [paymentsObject];
+  var paymentsObject_5000 = generateMultiplePaymentsObject(parameters, 5000);
+  //var paymentsObject_15000 = generateMultiplePaymentsObject(parameters, 15000);
+  //var paymentsObject_30000 = generateMultiplePaymentsObject(parameters, 30000);
+  //var paymentsObject_60000 = generateMultiplePaymentsObject(parameters, 60000);
+  var paymentsObject_150000 = generateMultiplePaymentsObject(parameters, 150000);
+  //const multiplePaymentsObject = [paymentsObject_6000, paymentsObject_15000, paymentsObject_30000, paymentsObject_60000, paymentsObject_150000];
+  const multiplePaymentsObject = [paymentsObject_150000, paymentsObject_5000];
   return multiplePaymentsObject;
 }
 
@@ -54,7 +58,37 @@ function postcondition() {
 
 export default function (multiplePaymentsObject) {
 
-  var multiplePaymentsObjectToUse = multiplePaymentsObject[0];
+  var multiplePaymentsObjectToUse = ``;
+  var flow_size = 10;
+//  if (exec.scenario.name === 'step_0' || exec.scenario.name === 'step_2' || exec.scenario.name === 'step_4' || exec.scenario.name === 'step_5' || exec.scenario.name === 'step_6') {
+//    // use 6000 payments
+//    multiplePaymentsObjectToUse = multiplePaymentsObject[0];
+//    flow_size = 6000;
+//  } else if (exec.scenario.name === 'step_1') {
+//    // use 15000 payments
+//    multiplePaymentsObjectToUse = multiplePaymentsObject[2];
+//    flow_size = 15000;
+//  } else if (exec.scenario.name === 'step_3') {
+//    // use 30000 payments
+//    multiplePaymentsObjectToUse = multiplePaymentsObject[3];
+//    flow_size = 30000;
+//  } else if (exec.scenario.name === 'step_4' ) {
+//    // use 60000 payments
+//    multiplePaymentsObjectToUse = multiplePaymentsObject[1];
+//    flow_size = 60000;
+//  } else if (exec.scenario.name === 'step_7') {
+//    // use 120000 payments
+//    multiplePaymentsObjectToUse = multiplePaymentsObject[5];
+//    flow_size = 120000;
+//  }
+  if (exec.scenario.name === 'step_0') {
+      multiplePaymentsObjectToUse = multiplePaymentsObject[0];
+      flow_size = 150000;
+  } else if (exec.scenario.name === 'step_1') {
+      // use 120000 payments
+      multiplePaymentsObjectToUse = multiplePaymentsObject[1];
+      flow_size = 5000;
+    }
   // Initialize response variable
   let response = '';
   var flow_id = `${parameters.today}${parameters.pspId}-${getRandom(1000000, 9999999) + __VU}`;
