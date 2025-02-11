@@ -14,6 +14,9 @@ addSbtPlugin("com.github.sbt"         % "sbt-release"           % "1.1.0")
 addSbtPlugin("net.virtual-void"       % "sbt-dependency-graph"  % "0.10.0-RC1")
 addSbtPlugin("org.scalaxb"            % "sbt-scalaxb"           % "1.8.2")
 addSbtPlugin("com.github.sbt"         % "sbt-jacoco"            % "3.3.0")
+addSbtPlugin("org.scoverage" % "sbt-scoverage" % "1.8.2")
 
 addSbtPlugin("com.typesafe.sbt" % "sbt-native-packager" % "1.8.1")
 addSbtPlugin("com.github.eikek" % "sbt-openapi-schema" % "0.9.0")
+
+addSbtPlugin("com.sonar-scala" % "sbt-sonar" % "2.3.0")
