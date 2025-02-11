@@ -17,7 +17,10 @@ env:
 jobs:
   scheduler:
     runs-on: ubuntu-22.04
+    environment:
+      name: oidc
     strategy:
+      fail-fast: false
       matrix:
         short_env: [ d, u, p ]
     steps:
@@ -25,21 +28,20 @@ jobs:
         id: setup
         run: |
           if [[ "${{ matrix.short_env }}" == "d" ]]; then
-            echo "CLIENT_ID=${{ secrets.DEV_CLIENT_ID_BRANCH }}" >> $GITHUB_ENV
-            echo "TENANT_ID=${{ secrets.DEV_TENANT_ID_BRANCH }}" >> $GITHUB_ENV
+            echo "CLIENT_ID=${{ secrets.DEV_CLIENT_ID }}" >> $GITHUB_ENV
+            echo "TENANT_ID=${{ secrets.DEV_TENANT_ID }}" >> $GITHUB_ENV
             echo "SUBSCRIPTION_ID=${{ secrets.DEV_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
           fi  
           if [[ "${{ matrix.short_env }}" == "u" ]]; then
-            echo "CLIENT_ID=${{ secrets.UAT_CLIENT_ID_BRANCH }}" >> $GITHUB_ENV
-            echo "TENANT_ID=${{ secrets.UAT_TENANT_ID_BRANCH }}" >> $GITHUB_ENV
+            echo "CLIENT_ID=${{ secrets.UAT_CLIENT_ID}}" >> $GITHUB_ENV
+            echo "TENANT_ID=${{ secrets.UAT_TENANT_ID}}" >> $GITHUB_ENV
             echo "SUBSCRIPTION_ID=${{ secrets.UAT_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
           fi 
           if [[ "${{ matrix.short_env }}" == "p" ]]; then
-            echo "CLIENT_ID=${{ secrets.PROD_CLIENT_ID_BRANCH }}" >> $GITHUB_ENV
-            echo "TENANT_ID=${{ secrets.PROD_TENANT_ID_BRANCH }}" >> $GITHUB_ENV
+            echo "CLIENT_ID=${{ secrets.PROD_CLIENT_ID}}" >> $GITHUB_ENV
+            echo "TENANT_ID=${{ secrets.PROD_TENANT_ID}}" >> $GITHUB_ENV
             echo "SUBSCRIPTION_ID=${{ secrets.PROD_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
           fi
-      
 
       - name: Azure Login
         id: login
@@ -59,10 +61,10 @@ jobs:
             --max-executions ${{ env.maximum_replica }}
 
       - name: Decrease minimum replicas
-        if: github.event.schedule == '0 18 * * MON-FRI'
+        if: github.event.schedule == '0 19 * * MON-FRI'
         run: |
           az containerapp job update \
-            --resource-group 'pagopa-${{ matrix.env_name }}-identity-rg' \
-            --name 'pagopa-${{ matrix.env_name }}-${{ env.repo_short_name }}-ca-job' \
+            --resource-group 'pagopa-${{ matrix.short_env }}-identity-rg' \
+            --name 'pagopa-${{ matrix.short_env }}-${{ env.repo_short_name }}-ca-job' \
             --min-executions 0 \
             --max-executions ${{ env.maximum_replica }}
