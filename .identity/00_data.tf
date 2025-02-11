@@ -61,6 +61,11 @@ data "azurerm_user_assigned_identity" "identity_ci" {
   resource_group_name = "${local.product}-identity-rg"
 }
 
+data "azurerm_user_assigned_identity" "identity_oidc" {
+  name = "${local.product}-${local.domain}-01-oidc-github-cd-identity"
+  resource_group_name = "${local.product}-identity-rg"
+}
+
 data "azurerm_key_vault_secret" "integration_test_subscription_key" {
   count        = var.env_short == "p" ? 0 : 1
   name         = "integration-test-fdr1-subscription-key"

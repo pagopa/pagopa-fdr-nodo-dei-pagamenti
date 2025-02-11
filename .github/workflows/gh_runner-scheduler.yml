@@ -22,7 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        short_env: [ d, u, p ]
+        short_env: [ d ]
     steps:
       - name: setup environment
         id: setup
@@ -52,7 +52,7 @@ jobs:
           subscription-id: ${{ env.SUBSCRIPTION_ID }}
 
       - name: Increase minimum replicas
-        if: github.event.schedule == '0 07 * * MON-FRI'
+        # if: github.event.schedule == '0 07 * * MON-FRI'
         run: |
           az containerapp job update \
             --resource-group 'pagopa-${{ matrix.env_name }}-identity-rg' \
