@@ -55,8 +55,8 @@ jobs:
         # if: github.event.schedule == '0 07 * * MON-FRI'
         run: |
           az containerapp job update \
-            --resource-group 'pagopa-${{ matrix.env_name }}-identity-rg' \
-            --name 'pagopa-${{ matrix.env_name }}-${{ env.repo_short_name }}-ca-job' \
+            --resource-group 'pagopa-${{ matrix.short_env }}-identity-rg' \
+            --name 'pagopa-${{ matrix.short_env }}-${{ env.repo_short_name }}-ca-job' \
             --min-executions 1 \
             --max-executions ${{ env.maximum_replica }}
 
@@ -64,7 +64,7 @@ jobs:
         if: github.event.schedule == '0 19 * * MON-FRI'
         run: |
           az containerapp job update \
-            --resource-group 'pagopa-${{ matrix.env_name }}-identity-rg' \
-            --name 'pagopa-${{ matrix.env_name }}-${{ env.repo_short_name }}-ca-job' \
+            --resource-group 'pagopa-${{ matrix.short_env }}-identity-rg' \
+            --name 'pagopa-${{ matrix.short_env }}-${{ env.repo_short_name }}-ca-job' \
             --min-executions 0 \
             --max-executions ${{ env.maximum_replica }}
