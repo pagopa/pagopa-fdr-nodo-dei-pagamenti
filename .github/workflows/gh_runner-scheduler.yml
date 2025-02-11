@@ -22,8 +22,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-#        short_env: [ d, u, p ]
-        short_env: [ d ]
+        short_env: [ d, u, p ]
     steps:
       - name: setup environment
         id: setup
@@ -43,7 +42,6 @@ jobs:
             echo "TENANT_ID=${{ secrets.PROD_TENANT_ID}}" >> $GITHUB_ENV
             echo "SUBSCRIPTION_ID=${{ secrets.PROD_SUBSCRIPTION_ID }}" >> $GITHUB_ENV
           fi
-      
 
       - name: Azure Login
         id: login
@@ -63,7 +61,7 @@ jobs:
             --max-executions ${{ env.maximum_replica }}
 
       - name: Decrease minimum replicas
-        if: github.event.schedule == '0 18 * * MON-FRI'
+        if: github.event.schedule == '0 19 * * MON-FRI'
         run: |
           az containerapp job update \
             --resource-group 'pagopa-${{ matrix.env_name }}-identity-rg' \
