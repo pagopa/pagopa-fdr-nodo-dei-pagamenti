@@ -18,7 +18,7 @@ jobs:
   scheduler:
     runs-on: ubuntu-22.04
     environment:
-      name:
+      name: oidc
     strategy:
       fail-fast: false
       matrix:
