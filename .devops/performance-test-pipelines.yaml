@@ -18,12 +18,23 @@ parameters:
       - "stress"
       - "constant"
       - "smoke"
+      - "ramping"
+      - "constant_nodoChiediElencoFlussi"
+      - "constant_nodoChiediFlusso"
+      - "spike_nodoChiediElencoFlussi"
+      - "spike_nodoChiediFlusso"
   - name: "SCRIPT"
     displayName: "Script name"
     type: string
     values:
+      - happy_case_scenario
       - only_nodoInviaFlussoRendicontazione_scenario
-
+      - only_nodoInviaFlussoRendicontazione_payments_ramp_scenario
+      - nodoChiediElencoFlussiRendicontazione_scenario
+      - nodoChiediFlussoRendicontazione_scenario
+  - name: "FLOW_SIZE"
+    displayName: "Flow size"
+    type: number
 variables:
   ${{ if eq(parameters['ENVIRONMENT'], 'dev') }}:
     poolImage: 'pagopa-dev-loadtest-linux'
@@ -41,8 +52,7 @@ steps:
       cd ./performance-test/src
       docker pull grafana/k6
     displayName: Pull k6 image
-
   - script: |
       cd ./performance-test
-      sh ./run_performance_test.sh ${{ parameters.ENVIRONMENT }} ${{ parameters.TEST_TYPE }} ${{ parameters.SCRIPT }} fdrnodok6 $(API_SUBSCRIPTION_KEY)
+      sh ./run_performance_test.sh ${{ parameters.ENVIRONMENT }} ${{ parameters.TEST_TYPE }} ${{ parameters.SCRIPT }} fdr1_k6 $(API_SUBSCRIPTION_KEY) ${{ parameters.FLOW_SIZE }}
     displayName: Run k6 ${{ parameters.SCRIPT }} on ${{ parameters.ENVIRONMENT }}
