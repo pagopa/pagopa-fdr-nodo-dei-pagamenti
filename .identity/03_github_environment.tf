@@ -22,7 +22,6 @@ resource "github_repository_environment" "github_repository_environment" {
 locals {
   env_secrets = {
     "CD_CLIENT_ID" : data.azurerm_user_assigned_identity.identity_cd.client_id,
-    "CI_CLIENT_ID" : data.azurerm_user_assigned_identity.identity_ci.client_id,
     "TENANT_ID" : data.azurerm_client_config.current.tenant_id,
     "SUBSCRIPTION_ID" : data.azurerm_subscription.current.subscription_id,
     "INTEGRATION_TEST_SUBSCRIPTION_KEY": var.env_short != "p" ? data.azurerm_key_vault_secret.integration_test_subscription_key[0].value : ""
@@ -35,6 +34,20 @@ locals {
     "NAMESPACE" : local.domain,
     "INTEGRATION_TEST_STORAGE_ACCOUNT_NAME": local.integration_test.storage_account_name,
     "INTEGRATION_TEST_REPORTS_FOLDER": local.integration_test.reports_folder
+  }
+  special_repo_secrets = {
+    "CLIENT_ID" : {
+      "key" : "${upper(var.env)}_CLIENT_ID",
+      "value" : data.azurerm_user_assigned_identity.identity_oidc.client_id
+    },
+    "TENANT_ID" : {
+      "key" : "${upper(var.env)}_TENANT_ID",
+      "value" : data.azurerm_client_config.current.tenant_id
+    },
+    "SUBSCRIPTION_ID" : {
+      "key" : "${upper(var.env)}_SUBSCRIPTION_ID",
+      "value" : data.azurerm_subscription.current.subscription_id
+    }
   }
 }
 
@@ -50,16 +63,12 @@ resource "github_actions_environment_secret" "github_environment_runner_secrets"
   plaintext_value = each.value
 }
 
-#################
-# ENV Variables #
-#################
-
-resource "github_actions_environment_variable" "github_environment_runner_variables" {
-  for_each      = local.env_variables
-  repository    = local.github.repository
-  environment   = var.env
-  variable_name = each.key
-  value         = each.value
+resource "github_actions_environment_secret" "ci_client_id_secret" {
+  count           = var.env_short == "p" ? 0 : 1
+  repository      = local.github.repository
+  environment     = var.env
+  secret_name     = "CI_CLIENT_ID"
+  plaintext_value = data.azurerm_user_assigned_identity.identity_ci[0].client_id
 }
 
 resource "github_actions_secret" "lightbend_key" {
@@ -81,7 +90,7 @@ resource "github_actions_secret" "secret_bot_token" {
 
   repository       = local.github.repository
   secret_name      = "BOT_TOKEN_GITHUB"
-  plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_cd_token.value
+  plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_token.value
 }
 
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
@@ -89,15 +98,27 @@ resource "github_actions_secret" "secret_slack_webhook" {
 
   repository       = local.github.repository
   secret_name      = "SLACK_WEBHOOK_URL"
-  plaintext_value  = data.azurerm_key_vault_secret.key_vault_slack_webhook_url.value
+  plaintext_value  = data.azurerm_key_vault_secret.key_vault_pagopa-pagamenti-deploy-slack-webhook.value
 }
 
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
 resource "github_actions_secret" "secret_integrationtest_slack_webhook" {
-
   repository       = local.github.repository
   secret_name      = "INTEGRATION_TEST_SLACK_WEBHOOK_URL"
   plaintext_value  = data.azurerm_key_vault_secret.key_vault_integration_test_slack_webhook_url.value
+}
+
+
+#################
+# ENV Variables #
+#################
+
+resource "github_actions_environment_variable" "github_environment_runner_variables" {
+  for_each      = local.env_variables
+  repository    = local.github.repository
+  environment   = var.env
+  variable_name = each.key
+  value         = each.value
 }
 
 ############
@@ -116,3 +137,9 @@ resource "github_issue_label" "ignore_for_release" {
   color      = "008000"
 }
 
+resource "github_actions_secret" "special_repo_secrets" {
+  for_each        = local.special_repo_secrets
+  repository      = local.github.repository
+  secret_name     = each.value.key
+  plaintext_value = each.value.value
+}

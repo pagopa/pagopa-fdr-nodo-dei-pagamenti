@@ -13,12 +13,12 @@ on:
     branches:
       - main
 
-
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 env:
   PROJECT_KEY: "pagopa_pagopa-fdr-nodo-dei-pagamenti"
+  PROJECT_NAME: "pagopa-fdr-nodo-dei-pagamenti"
 
 permissions:
   id-token: write
@@ -30,4 +30,63 @@ jobs:
   code-review:
     name: Code Review
     # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: Setup JDK 11
+        uses: actions/setup-java@0ab4596768b603586c0de567f2430c30f5b0d2b0 # v3
+        with:
+          distribution: temurin
+          java-version: 11
+          cache: sbt
+
+      - name: Cache SBT
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: |
+            ~/.ivy2/cache
+            ~/.sbt
+          key: ${{ runner.os }}-sbt-${{ hashFiles('**/build.sbt') }}
+
+      - name: Build and Test
+        env:
+          LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
+        run: |
+          sbt "project fdr" reload clean coverage test coverageReport
+
+      - name: Setup JDK 17
+        uses: actions/setup-java@0ab4596768b603586c0de567f2430c30f5b0d2b0 # v3
+        with:
+          distribution: temurin
+          java-version: 17
+          cache: sbt
+
+      - name: Cache SonarQube packages
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4.2.0
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Sonar
+        env:
+          LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
+        run: |
+          sbt "project fdr" \
+          -Dsonar.organization="pagopa" \
+          -Dsonar.login=${{ secrets.SONAR_TOKEN }} \
+          -Dsonar.host.url="https://sonarcloud.io" \
+          -Dsonar.projectKey=${{ env.PROJECT_KEY }} \
+          -Dsonar.projectName=${{ env.PROJECT_NAME }} \
+          -Dsonar.sources=src/main/scala \
+          -Dsonar.tests=src/test/scala \
+          -Dsonar.junit.reportPaths=target/test-reports \
+          -Dsonar.scala.coverage.reportPaths="target/scala-2.13/scoverage-report/scoverage.xml" \
+          -Dsonar.pullrequest.key=${{ github.event.pull_request.number }} \
+          -Dsonar.pullrequest.branch=${{ github.head_ref }} \
+          -Dsonar.pullrequest.base=${{ github.base_ref }} \
+          sonarScan
