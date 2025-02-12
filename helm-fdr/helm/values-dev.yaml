@@ -49,7 +49,6 @@ microservice-chart: &microservice-chart
         metadata:
           value: "100"
     advanced:
-      restoreToOriginalReplicaCount: false
       horizontalPodAutoscalerConfig:
         behavior:
           scaleDown:

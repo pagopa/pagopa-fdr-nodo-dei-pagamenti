@@ -49,12 +49,10 @@ microservice-chart: &microservice-chart
         metadata:
           value: "100"
     advanced:
-#      restoreToOriginalReplicaCount: false
       horizontalPodAutoscalerConfig:
         behavior:
           scaleDown:
-#            stabilizationWindowSeconds: 300
-            stabilizationWindowSeconds: 60
+            stabilizationWindowSeconds: 300
             policies:
               - type: Pods
                 value: 1
