@@ -52,6 +52,8 @@ lazy val pgversion = "42.5.0"
 lazy val azureStorageBlob = "12.22.2"
 lazy val azureIdentity = "1.9.0"
 
+lazy val applicationinsightsagentName = "applicationinsights-agent"
+lazy val applicationinsightsagentVersion = "3.4.10"
 val lightbendKey = sys.env("LIGHTBEND_KEY")
 
 ThisBuild / organization := "eu.sia.pagopa"
@@ -211,6 +213,13 @@ lazy val `fdr` = (project in file("fdr"))
   .dependsOn(`common-xml`)
   .enablePlugins(Cinnamon, JavaAppPackaging, DockerPlugin, JavaAgent, OpenApiSchema)
   .settings(
+    javaAgents += "com.microsoft.azure" % applicationinsightsagentName % applicationinsightsagentVersion,
+    bashScriptExtraDefines := bashScriptExtraDefines.value.filterNot(_.contains("applicationinsights-agent")) :+
+      s"""
+         |if [[ "$$AZURE_INSIGHTS_ENABLED" = "true" ]]; then
+         |  addJava "-javaagent:$${app_home}/../$applicationinsightsagentName/$applicationinsightsagentName-$applicationinsightsagentVersion.jar"
+         |fi
+         |""".stripMargin,
     openapiTargetLanguage := Language.Scala,
     openapiPackage := Pkg("it.pagopa.config"),
     openapiScalaConfig := ScalaConfig()
