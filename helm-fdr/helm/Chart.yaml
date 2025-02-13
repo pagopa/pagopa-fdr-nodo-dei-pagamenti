@@ -2,8 +2,8 @@ apiVersion: v2
 name: fdr-chart
 description: Flussi di rendicontazione
 type: application
-version: 0.11.0
-appVersion: 2.1.12-125-fix-helm-dev
+version: 0.12.0
+appVersion: 2.1.13
 dependencies:
   - name: microservice-chart
     version: 3.0.0
