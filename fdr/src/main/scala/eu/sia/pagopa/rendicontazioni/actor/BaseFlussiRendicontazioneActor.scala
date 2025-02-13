@@ -5,23 +5,17 @@ import eu.sia.pagopa.common.actor.NodoLogging
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
 import eu.sia.pagopa.common.repo.fdr.FdrRepository
-import eu.sia.pagopa.common.repo.fdr.enums.{FtpFileStatus, RendicontazioneStatus}
-import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, FtpFile, Rendicontazione}
+import eu.sia.pagopa.common.repo.fdr.enums.RendicontazioneStatus
+import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, Rendicontazione}
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
-import it.pagopa.config.CreditorInstitution
 import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
 
-import java.io.{File, FileOutputStream}
-import java.nio.file.{Files, Paths}
-import java.security.MessageDigest
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
-import java.util.zip.{ZipEntry, ZipOutputStream}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.util.{Failure, Success}
 
@@ -36,7 +30,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
     log.debug("Check 'Flusso riversamento' element validity")
 
     for {
-      content <- Future.fromTry(StringUtils.getStringDecoded(nifr.xmlRendicontazione, checkUTF8))
+      content <- Future.fromTry(StringUtils.getStringDecodedByString(nifr.xmlRendicontazione.toString, checkUTF8))
       r <- XsdValid.checkOnly(content, XmlEnum.FLUSSO_RIVERSAMENTO_FLUSSORIVERSAMENTO, inputXsdValid) match {
         case Success(_) =>
           log.debug("Saving valid report")
@@ -119,11 +113,11 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
           None,
           Util.now()
         )
-        val content = StringUtils.getStringDecoded(xmlRendicontazione, checkUTF8) match {
+        val content = StringUtils.getStringDecodedByString(xmlRendicontazione.toString, checkUTF8) match {
           case Success(c) => c
           case Failure(e) => throw new DigitPaException("Errore decodifica rendicontazione", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
         }
-        val bf = BinaryFile(0, xmlRendicontazione.length, Some(Util.zipContent(content.getBytes)), None)
+        val bf = BinaryFile(0, xmlRendicontazione.length, Some(Util.gzipContent(content.getBytes)), None)
         fdrRepository
           .saveRendicontazioneAndBinaryFile(rendi, bf)
           .recoverWith({ case e =>
@@ -137,7 +131,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
   }
 
   def checks(ddataMap: ConfigData, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, checkPassword: Boolean, actorClassId: String)(implicit log: NodoLogger) = {
-    log.info(FdrLogConstant.logSemantico(actorClassId))
+    log.info(FdrLogConstant.logSemantico(actorClassId) + " psp, broker, channel, password, ci")
     val paaa = for {
       (psp, canale) <- DDataChecks
         .checkPspIntermediarioPspCanale(
@@ -162,7 +156,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
   }
 
   def checkFormatoIdFlussoRendicontazione(identificativoFlusso: String, idPsp: String, actorClassId: String)(implicit log: NodoLogger) = {
-    log.info(FdrLogConstant.logSemantico(actorClassId))
+    log.info(FdrLogConstant.logSemantico(actorClassId) + " checkFormatoIdFlussoRendicontazione")
     (for {
       _ <- CheckRendicontazioni.checkFormatoIdFlussoRendicontazione(identificativoFlusso, idPsp)
     } yield ()).recoverWith({

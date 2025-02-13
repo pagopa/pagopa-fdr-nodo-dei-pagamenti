@@ -2,31 +2,35 @@ package eu.sia.pagopa.rendicontazioni.actor.rest
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
-import eu.sia.pagopa.common.json.model.Error
+import eu.sia.pagopa.common.json.model.{Error, FdREventToHistory}
 import eu.sia.pagopa.common.json.model.rendicontazione._
 import eu.sia.pagopa.common.json.{JsonEnum, JsonValid}
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
+import eu.sia.pagopa.common.repo.fdr.enums.RendicontazioneStatus
+import eu.sia.pagopa.common.repo.fdr.model.Rendicontazione
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.commonxml.XmlEnum
+import eu.sia.pagopa.config.actor.{FdRMetadataActor, ReActor}
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import org.slf4j.MDC
+import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
 import spray.json._
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
-import java.util.UUID
 import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
+
 
 case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Repositories, actorProps: ActorProps)
   extends PerRequestActor with BaseFlussiRendicontazioneActor with ReUtil {
@@ -35,6 +39,8 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
   var replyTo: ActorRef = _
 
   var reFlow: Option[Re] = None
+
+  val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
 
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
 
@@ -134,7 +140,7 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
         }
 
         (flussoRiversamento, flussoRiversamentoContent) <- validateRendicontazione(nifrSoap, checkUTF8, false, repositories.fdrRepository)
-        (_, _, _, _) <- saveRendicontazione(
+        (_, rendicontazioneSaved, _, _) <- saveRendicontazione(
           nifrSoap.identificativoFlusso,
           nifrSoap.identificativoPSP,
           nifrSoap.identificativoIntermediarioPSP,
@@ -147,11 +153,10 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
           repositories.fdrRepository
         )
 
-        _ <- actorProps.containerBlobFunction(s"${nifrSoap.identificativoFlusso}_${UUID.randomUUID().toString}", xmlPayload, log)
-
         _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
-        _ = traceInternalRequest(restRequest, reFlow.get, restRequest.reExtra, reEventFunc, ddataMap)
-      } yield RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
+        _ = callTrace(traceInternalRequest, reActor, restRequest, reFlow.get, restRequest.reExtra)
+        sr = RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
+      } yield (sr, nifrSoap, flussoRiversamento, rendicontazioneSaved))
         .recoverWith({
           case rex: RestException =>
             Future.successful(generateErrorResponse(Some(rex)))
@@ -161,12 +166,48 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
           case cause: Throwable =>
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateErrorResponse(Some(pmae)))
-      }).map( res => {
-        traceInterfaceRequest(req, reFlow.get, req.reExtra, reEventFunc, ddataMap)
-        log.info(FdrLogConstant.logEnd(actorClassId))
-        replyTo ! res
-        complete()
-      })
+      }).map {
+          case sr: SoapResponse =>
+            callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
+            log.info(FdrLogConstant.logEnd(actorClassId))
+            replyTo ! sr
+          case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
+            callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
+            log.info(FdrLogConstant.logEnd(actorClassId))
+
+            Future {
+              if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
+                // send data to history
+                actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
+                  .tell(
+                    FdREventToHistory(
+                      sessionId = req.sessionId,
+                      nifr = nifr,
+                      soapRequest = req.payload.get,
+                      insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
+                      elaborate = true,
+                      retry = 0
+                    ),
+                    null)
+              }
+            }
+            replyTo ! sr
+
+            complete()
+          case _ =>
+            log.info("TODO [FC] MANAGE HERE")
+        }
+      }
+
+  private def callTrace(callback: (ActorRef, RestRequest, Re, ReExtra) => Unit,
+                        reActor: ActorRef, restRequest: RestRequest, re: Re,
+                        reExtra: ReExtra): Unit = {
+    Future {
+      callback(reActor, restRequest, re, reExtra)
+    }.recover {
+      case e: Throwable =>
+        log.error(e, s"Execution error in ${callback.getClass.getSimpleName}")
+    }
   }
 
   private def parseInput(restRequest: RestRequest) = {

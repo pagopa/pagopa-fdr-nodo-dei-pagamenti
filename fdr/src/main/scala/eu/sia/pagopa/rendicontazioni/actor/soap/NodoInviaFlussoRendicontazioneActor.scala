@@ -2,19 +2,21 @@ package eu.sia.pagopa.rendicontazioni.actor.soap
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
-import eu.sia.pagopa.common.json.model.{FlussiRendicontazioneEvent, IUVRendicontatiEvent}
+import eu.sia.pagopa.common.json.model.FdREventToHistory
 import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
+import eu.sia.pagopa.common.repo.fdr.enums.RendicontazioneStatus
+import eu.sia.pagopa.common.repo.fdr.model.Rendicontazione
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.azurehubevent.sdkazureclient.{AzureFlussiRendicontazioneProducer, AzureIuvRendicontatiProducer}
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
+import eu.sia.pagopa.config.actor.{FdRMetadataActor, ReActor}
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoInviaFlussoRendicontazioneResponse
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
@@ -23,7 +25,6 @@ import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoR
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
-import java.util.UUID
 import scala.concurrent.Future
 import scala.util.{Failure, Try}
 
@@ -35,7 +36,6 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
 
   var req: SoapRequest = _
   var replyTo: ActorRef = _
-
   var reFlow: Option[Re] = None
 
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
@@ -44,10 +44,11 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
 
   val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"
 
-  var iuvRendicontatiEvent: Seq[IUVRendicontatiEvent] = Nil
-  var flussiRendicontazioneEvent: Option[FlussiRendicontazioneEvent] = None
+  val reActor: ActorRef = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
+  private val fdrMetadataActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
 
   override def receive: Receive = { case soapRequest: SoapRequest =>
+
     req = soapRequest
     replyTo = sender()
 
@@ -71,6 +72,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
     val pipeline = for {
       _ <- Future.successful(())
 
+      // syntax check
       nifr <- Future.fromTry(parseInput(soapRequest.payload, inputXsdValid))
 
       _ = MDC.put(Constant.MDCKey.FDR, nifr.identificativoFlusso)
@@ -95,7 +97,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       )
       _ = reFlow = Some(re_)
 
-      _ = log.info(FdrLogConstant.logSemantico(actorClassId))
+      // semantic check
       (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifr, checkPassword = true, actorClassId))
       _ <- Future.fromTry(checkFormatoIdFlussoRendicontazione(nifr.identificativoFlusso, nifr.identificativoPSP, actorClassId))
 
@@ -154,29 +156,14 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         repositories.fdrRepository
       )
 
-      _ <- actorProps.containerBlobFunction(s"${nifr.identificativoFlusso}_${UUID.randomUUID().toString}", soapRequest.payload, log)
-
-      _ = iuvRendicontatiEvent = EventUtil.createIUVRendicontatiEvent(
-        req.sessionId,
-        nifr,
-        flussoRiversamento,
-        rendicontazioneSaved.insertedTimestamp
-      )
-      _ = flussiRendicontazioneEvent = Some(EventUtil.createFlussiRendicontazioneEvent(
-        req.sessionId,
-        nifr,
-        flussoRiversamento,
-        rendicontazioneSaved.insertedTimestamp
-      ))
-
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
       _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
       _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
-      _ = traceInternalRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+      _ = callTrace(traceInternalRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
-    } yield sr
+    } yield (sr, nifr, rendicontazioneSaved)
 
     pipeline
       .recover({
@@ -186,33 +173,58 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         case e: Throwable =>
           log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
           errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
-      }).map(sr => {
-        log.info(FdrLogConstant.logEnd(actorClassId))
-        traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
-        replyTo ! sr
       })
-      .map(_ => {
-        // TODO [FC] to uncomment
-//        Future.sequence(
-//          iuvRendicontatiEvent.map(event=>{
-//            AzureIuvRendicontatiProducer.send(log,event)
-//          }) ++
-//            flussiRendicontazioneEvent.map(event=>{
-//              AzureFlussiRendicontazioneProducer.send(log,event)
-//            })
-//        )
-        complete()
-      })
+      .map {
+        case sr: SoapResponse =>
+          log.info(FdrLogConstant.logEnd(s"Only SR ${actorClassId}"))
+          callTrace(traceInterfaceRequest,reActor, soapRequest, reFlow.get, soapRequest.reExtra)
+          replyTo ! sr
+        case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, rendicontazioneSaved: Rendicontazione) =>
+          log.info(FdrLogConstant.logEnd(s"SR, NIFR, RENDICONTAZIONE ${actorClassId}"))
+          callTrace(traceInterfaceRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
+          Future {
+            log.info(FdrLogConstant.logEnd(s"Stato rendicontazione ${rendicontazioneSaved.stato}"))
+            if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
+              // send data to history
+              fdrMetadataActor ! FdREventToHistory(
+                sessionId = req.sessionId,
+                nifr = nifr,
+                soapRequest = soapRequest.payload,
+                insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
+                elaborate = true,
+                retry = 0
+              )
+            }
+            replyTo ! sr
+            complete()
+          }.recover {
+            case e: Throwable => log.error(e, "Problem to send message to fdrMetadataActor")
+          }
+
+        case _ =>
+          log.info("TODO [FC] MANAGE HERE")
+      }
   }
 
   override def actorError(e: DigitPaException): Unit = {
     actorError(req, replyTo, ddataMap, e, reFlow)
   }
 
+  private def callTrace(callback: (ActorRef, SoapRequest, Re, ReExtra) => Unit,
+                        reActor: ActorRef, soapRequest: SoapRequest, re: Re,
+                        reExtra: ReExtra): Unit = {
+    Future {
+      callback(reActor, soapRequest, re, reExtra)
+    }.recover {
+      case e: Throwable =>
+        log.error(e, s"Execution error in ${callback.getClass.getSimpleName}")
+    }
+  }
+
   private def checksDB(nifr: NodoInviaFlussoRendicontazione) = {
     val datazoned =
       LocalDateTime.parse(nifr.dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault()))
-    CheckRendicontazioni.checkFlussoRendicontazioneNotPresentOnSamePsp(repositories.fdrRepository, nifr.identificativoFlusso, nifr.identificativoPSP, datazoned).flatMap {
+      CheckRendicontazioni.checkFlussoRendicontazioneNotPresentOnSamePsp(repositories.fdrRepository, nifr.identificativoFlusso, nifr.identificativoPSP, datazoned).flatMap {
       case Some(r) =>
         Future.failed(
           exception.DigitPaException(

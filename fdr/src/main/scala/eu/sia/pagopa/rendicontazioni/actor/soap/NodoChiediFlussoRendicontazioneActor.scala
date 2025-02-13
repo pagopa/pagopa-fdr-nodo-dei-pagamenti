@@ -2,7 +2,7 @@ package eu.sia.pagopa.rendicontazioni.actor.soap
 
 import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.{HttpSoapServiceManagement, PerRequestActor}
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception
@@ -15,6 +15,7 @@ import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XmlUtil.StringBase64Binary
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
+import eu.sia.pagopa.config.actor.ReActor
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.actor.soap.response.NodoChiediFlussoRendicontazioneResponse
 import it.pagopa.config.{CreditorInstitution, PaymentServiceProvider, Station}
@@ -43,6 +44,8 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
   private val callNexiToo: Boolean = Try(context.system.settings.config.getBoolean(s"callNexiToo")).getOrElse(false)
 
   val RESPONSE_NAME = "nodoChiediFlussoRendicontazioneRisposta"
+
+  val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
 
   var reFlow: Option[Re] = None
 
@@ -73,7 +76,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         } else {
           log.info("NOT FTP reporting")
           if (binaryFileOption.isDefined) {
-            val unzippedFilecontent = Util.unzipContent(binaryFileOption.get.fileContent.get) match {
+            val unzippedFilecontent = Util.ungzipContent(binaryFileOption.get.fileContent.get) match {
               case Success(content) => content
               case Failure(e) => throw new exception.DigitPaException("Error during unzip xml content from db", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
             }
@@ -87,7 +90,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
       case None =>
         log.info("Identificativo dominio NON presente")
         if (binaryFileOption.isDefined) {
-          val unzippedFilecontent = Util.unzipContent(binaryFileOption.get.fileContent.get) match {
+          val unzippedFilecontent = Util.ungzipContent(binaryFileOption.get.fileContent.get) match {
             case Success(content) => content
             case Failure(e) => throw new exception.DigitPaException("Error during unzip xml content from db", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e)
           }
@@ -298,11 +301,22 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         log.warn(e, FdrLogConstant.logGeneraPayload(s"negative $RESPONSE_NAME, [${e.getMessage}]"))
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
     }) map (sr => {
-      traceInterfaceRequest(soapRequest, reFlow.get, soapRequest.reExtra, reEventFunc, ddataMap)
+      callTrace(traceInterfaceRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
       log.info(FdrLogConstant.logEnd(actorClassId))
       replyTo ! sr
       complete()
     })
+  }
+
+  private def callTrace(callback: (ActorRef, SoapRequest, Re, ReExtra) => Unit,
+                        reActor: ActorRef, soapRequest: SoapRequest, re: Re,
+                        reExtra: ReExtra): Unit = {
+    Future {
+      callback(reActor, soapRequest, re, reExtra)
+    }.recover {
+      case e: Throwable =>
+        log.error(e, s"Execution error in ${callback.getClass.getSimpleName}")
+    }
   }
 
   private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediFlussoRendicontazioneRisposta]] = {

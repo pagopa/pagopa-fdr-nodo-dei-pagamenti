@@ -4,11 +4,17 @@ import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.{ContentType => _}
 import akka.routing.RoundRobinGroup
 import com.typesafe.config.Config
+import eu.sia.pagopa.Main.materializer.system
 
+import scala.reflect.runtime.universe._
+import scala.reflect.runtime.{currentMirror => cm}
 import java.io.{ByteArrayInputStream, ByteArrayOutputStream}
-import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.{LocalDate, LocalDateTime}
 import java.time.temporal.ChronoUnit
 import java.util.zip.{GZIPInputStream, GZIPOutputStream}
+import javax.xml.datatype.XMLGregorianCalendar
+import scala.collection.immutable.HashMap
 import scala.util.Try
 import scala.util.matching.Regex
 
@@ -28,7 +34,7 @@ object Util {
   }
 
   def logPayload(log: NodoLogger, payload: Option[String]): Unit = {
-    if (log.isDebugEnabled) {
+    if (log.isDebugEnabled && system.settings.config.getBoolean("logPayload")) {
       log.debug(payload.map(Util.obfuscate).getOrElse("[NO PAYLOAD]"))
     }
   }
@@ -54,31 +60,31 @@ object Util {
   }
 
   def mapToJson(map: Map[String, Any]): String = {
-    map
-      .map { i =>
-        def quote(x: Any): String = "\"" + x + "\""
-        val key: String = quote(i._1)
-        val value: String = i._2 match {
-          case elem: Seq[_] =>
-            elem
-              .map {
-                case ee: Map[_, _] => mapToJson(ee.asInstanceOf[Map[String, Any]])
-                case _             => quote(_)
-              }
-              .mkString("[", ",", "]")
-          case elem: Option[_] =>
-            elem.map(quote).getOrElse("null")
-          case elem: Map[_, _] =>
-            mapToJson(elem.asInstanceOf[Map[String, Any]])
-          case elem =>
-            quote(elem)
-        }
-        s"$key : $value"
-      }
-      .mkString("{", ", ", "}")
+    def quote(value: Any): String = value match {
+      case str: String =>
+        if (str.startsWith("\"") && str.endsWith("\"")) str
+        else "\"" + str.replace("\"", "\\\"") + "\""
+      case date: LocalDate => "\"" + date.toString + "\""
+      case dateTime: LocalDateTime => "\"" + dateTime.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "\""
+      case xmlCal: XMLGregorianCalendar => "\"" + xmlCal.toXMLFormat + "\""
+      case other => other.toString
+    }
+
+    def toJson(value: Any): String = value match {
+      case null => "null"
+      case seq: Seq[_] => seq.map(toJson).mkString("[", ",", "]")
+      case subMap: Map[_, _] => mapToJson(subMap.asInstanceOf[Map[String, Any]])
+      case other => quote(other)
+    }
+
+    map.map { case (key, value) =>
+      val quotedKey = quote(key)
+      val quotedValue = toJson(value)
+      s"$quotedKey : $quotedValue"
+    }.mkString("{", ", ", "}")
   }
 
-  def zipContent(bytes: Array[Byte]) = {
+  def gzipContent(bytes: Array[Byte]) = {
     val bais = new ByteArrayOutputStream(bytes.length)
     val gzipOut = new GZIPOutputStream(bais)
     gzipOut.write(bytes)
@@ -88,10 +94,38 @@ object Util {
     compressed
   }
 
-  def unzipContent(compressed: Array[Byte]) = {
+  def ungzipContent(compressed: Array[Byte]) = {
     Try {
       val bais = new ByteArrayInputStream(compressed)
       new GZIPInputStream(bais).readAllBytes()
     }
+  }
+
+  def toMap(obj: Any): Map[String, Any] = {
+    val mirror = cm.reflect(obj)
+    val members = mirror.symbol.typeSignature.members.collect {
+      case m: MethodSymbol if m.isCaseAccessor => m
+    }
+
+    members.map { member =>
+      val fieldName = member.name.toString
+      val fieldValue = mirror.reflectMethod(member).apply()
+
+      fieldName -> convertValue(fieldValue)
+    }.toMap
+  }
+
+  private def convertValue(value: Any): Any = value match {
+    case Some(v)             => convertValue(v) // Unwrap Option
+    case None                => null            // Handle None
+    case l: List[_]          => l.map(convertValue) // Handle Lists
+    case m: Map[_, _]        => m.map { case (k, v) => k.toString -> convertValue(v) }
+    case p if isCaseClass(p) => toMap(p)        // Recursively handle case classes
+    case v                   => v              // Base case: return the value as is
+  }
+
+  private def isCaseClass(obj: Any): Boolean = {
+    val symbol = cm.reflect(obj).symbol
+    symbol.isClass && symbol.asClass.isCaseClass
   }
 }

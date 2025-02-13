@@ -2,13 +2,9 @@ microservice-chart: &microservice-chart
   namespace: "fdr"
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.1.10
+    tag: 2.1.10-117-PAGOPA-2600-housekeeping-evh-qi
   canaryDelivery:
     create: false
-fdrnodo:
-  !!merge <<: *microservice-chart
-  nameOverride: ""
-  fullnameOverride: ""
   terminationGracePeriodSeconds: 140
   livenessProbe:
     httpGet:
@@ -40,15 +36,18 @@ fdrnodo:
       cpu: "2560m"
   autoscaling:
     enable: true
+    minReplica: 1
+    maxReplica: 1
+    pollingInterval: 10 # seconds
     triggers:
       - type: cpu
         metricType: Utilization
         metadata:
-          value: "70"
+          value: "80"
       - type: memory
         metricType: Utilization
         metadata:
-          value: "80"
+          value: "100"
     advanced:
       horizontalPodAutoscalerConfig:
         behavior:
@@ -84,25 +83,24 @@ fdrnodo:
     DB_FDR_URL: jdbc:postgresql://fdr-db.d.internal.postgresql.pagopa.it:6432/fdr?sslmode=require&prepareThreshold=0
     DB_FDR_USER: fdr
     INSTANCE: DEV
-    EVENT_HUB_NAME: "fdr-re"
-    BLOB_RE_CONTAINER_NAME: "payload"
-    AZURE_STORAGE_BLOB_NAME: "xmlsharefile"
+    AZURE_STORAGE_FDR1_FLOWS_BLOB_NAME: "fdr1-flows"
+    AZURE_STORAGE_RE_PAYLOAD_BLOB_NAME: "re-payload"
+    MONGO_DATABASE_NAME: "fdr-re"
+    MONGO_METADATA_DOCUMENT_NAME: "fdr1-metadata"
+    MONGO_EVENTS_DOCUMENT_NAME: "events"
     ADDITIONAL_FDR_VALIDATIONS: "true"
-    EVENT_HUB_FLOWTX_NAME: "fdr-qi-flows"
-    EVENT_HUB_REPORTEDIUV_NAME: "fdr-qi-reported-iuv"
+    SERVICE_IDENTIFIER: "FDR001DEV"
   secretProvider:
     create: true
     envSecrets:
       APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-connection-string"
       EVENT_HUB_RE_CONNECTION_STRING: "azure-event-hub-re-connection-string"
       AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
-      BLOB_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
       API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
       FDR_SUBSCRIPTION_KEY: "fdr-internal-product-subscription-key"
       FDR_LEGACY_SUBSCRIPTION_KEY: "fdr-legacy-subscription-key"
       DB_FDR_PASSWORD: "db-fdr-password"
-      EVENT_HUB_REPORTEDIUV_CONNECTION_STRING: "fdr-qi-reported-iuv-tx-connection-string"
-      EVENT_HUB_FLOWTX_CONNECTION_STRING: "fdr-qi-flows-tx-connection-string"
+      MONGO_CONNECTION_STRING: "mongodb-re-connection-string"
     keyvault:
       name: "pagopa-d-fdr-kv"
       tenantId: "7788edaf-0346-4068-9d79-c868aed15b3d"
@@ -144,6 +142,10 @@ fdrnodo:
       - 8080 #http
       - 9091 #cinnamon
       - 9092 #micrometer
+fdrnodo:
+  !!merge <<: *microservice-chart
+  nameOverride: ""
+  fullnameOverride: ""
   ingress:
     create: true
     host: "weudev.fdr.internal.dev.platform.pagopa.it"
