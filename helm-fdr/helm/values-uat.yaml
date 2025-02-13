@@ -147,6 +147,7 @@ microservice-chart: &microservice-chart
       - 8080 #http
       - 9091 #cinnamon
       - 9092 #micrometer
+      - 3000
 fdrnodo:
   !!merge <<: *microservice-chart
   nameOverride: ""
