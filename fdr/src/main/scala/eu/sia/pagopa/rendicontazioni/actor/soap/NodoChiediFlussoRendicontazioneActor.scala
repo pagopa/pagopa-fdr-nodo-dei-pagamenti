@@ -224,8 +224,10 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         _ = log.debug("Make response with reporting")
         rendicontazioneDb <- elaboraRisposta(binaryFileOption, pa)
       } yield (rendicontazioneDb)
+      _ = log.debug(s"rendicontazioniLocal.isEmpty ? ${rendicontazioniLocal.isEmpty} ${rendicontazioniLocal.toString}")
 
-      rendicontazioneNexi <- if ( rendicontazioniLocal.isEmpty && callNexiToo) {
+//      rendicontazioneNexi <- if ( rendicontazioniLocal.isEmpty && callNexiToo) {
+      rendicontazioneNexi <- if ( callNexiToo ) {
         (for {
           response <- HttpSoapServiceManagement.createRequestSoapAction(
             req.sessionId,
