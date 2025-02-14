@@ -157,8 +157,13 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         }
 
       case None =>
-        log.error(s"Flow ${ncfr.identificativoFlusso} unknown")
-        Future.failed(exception.DigitPaException("Rendicontazione sconosciuta o presente in SFTP", DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO))
+        if (callNexiToo) {
+          log.warn(s"Flow ${ncfr.identificativoFlusso} unknown, but callNexiToo is true. Returning empty object.")
+          Future.successful((null.asInstanceOf[Rendicontazione], None, None, None, null.asInstanceOf[Station], None))
+        } else {
+          log.error(s"Flow ${ncfr.identificativoFlusso} unknown")
+          Future.failed(exception.DigitPaException("Rendicontazione sconosciuta o presente in SFTP", DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO))
+        }
     }
   }
 
@@ -220,7 +225,10 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         _ <- Future.successful(())
         _ = log.debug(s"Looking for reporting ${ncfr.identificativoFlusso} to db")
         (_, binaryFileOption, _, pa, staz, psp) <- checksSemanticiEDuplicati(ncfr)
-        _ = reFlow = reFlow.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(p => p.description)))
+        _ = reFlow = reFlow.map(r => r.copy(
+          fruitoreDescr = Option(staz).map(_.stationCode),
+          pspDescr = psp.flatMap(_.description)
+        ))
         _ = log.debug("Make response with reporting")
         rendicontazioneDb <- elaboraRisposta(binaryFileOption, pa)
       } yield (rendicontazioneDb)
@@ -283,7 +291,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
       } else if ( rendicontazioneNexi.isDefined) {
         Some(rendicontazioneNexi.get)
       } else {
-        None
+        throw new exception.DigitPaException("Rendicontazione sconosciuta o presente in SFTP", DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO)
       }
 
       _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
