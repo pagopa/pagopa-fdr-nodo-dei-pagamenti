@@ -1,0 +1,30 @@
+{
+  "discardResponseBodies": false,
+  "setupTimeout": "60m",
+  "scenarios": {
+    "step_0": {
+      "executor": "constant-arrival-rate",
+      "duration": "5h",
+      "rate": 1,
+      "timeUnit": "10s",
+      "preAllocatedVUs": 1,
+      "maxVUs": 1000
+    },
+    "step_1": {
+      "executor": "constant-arrival-rate",
+      "duration": "5h",
+      "rate": 1,
+      "timeUnit": "1s",
+      "preAllocatedVUs": 1,
+      "maxVUs": 1000
+    },
+    "step_2": {
+      "executor": "constant-arrival-rate",
+      "duration": "5h",
+      "rate": 1,
+      "timeUnit": "5s",
+      "preAllocatedVUs": 1,
+      "maxVUs": 1000
+    }
+  }
+}
