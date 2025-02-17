@@ -421,13 +421,6 @@ abstract class BaseUnitTest()
         Props.create(classOf[RegisterFdrForValidationTest], p, repositories, props.copy(actorClassId = "registerFdrForValidation", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
         s"registerFdrForValidation${Util.now()}"
       )
-    /*
-    val act =
-      system.actorOf(
-        Props.create(classOf[NodoInviaFlussoRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "inviaflussorendi", routers = Map("ftp-senderRouter" -> mockActor))),
-        s"inviaflussorendi${Util.now()}"
-      )
-     */
 
     val restResponse = askActor(
       registerFdrForValidation,
