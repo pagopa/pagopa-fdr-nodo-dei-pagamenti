@@ -97,7 +97,8 @@ class RestRendicontazioniTests() extends BaseUnitTest {
 
   "registerFdrForValidation" must {
     "ok" in {
-      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(Util.now())
+      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+      val dateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(Util.now())
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
 
@@ -106,7 +107,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
            |  "flowId": "$idFlusso",
            |  "pspId": "${TestItems.PSP}",
            |  "organizationId": "${TestItems.PA}",
-           |  "flowTimestamp": "$date"
+           |  "flowTimestamp": "$dateTime"
       }""".stripMargin
 
       await(
@@ -122,6 +123,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
     }
     "ko missing field" in {
       val date = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(Util.now())
+      val dateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(Util.now())
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
 
@@ -129,7 +131,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         s"""{
            |  "flowId": "$idFlusso",
            |  "pspId": "${TestItems.PSP}",
-           |  "flowTimestamp": "$date"
+           |  "flowTimestamp": "$dateTime"
       }""".stripMargin
 
       await(
@@ -138,13 +140,14 @@ class RestRendicontazioniTests() extends BaseUnitTest {
           testCase = Some("KO"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.BAD_REQUEST.intValue)
-            assert(resp.contains("{\"message\":\"KO: Invalid organizationId\"}"))
+            assert(resp.contains("{\"message\":\"Invalid organizationId\"}"))
           }
         )
       )
     }
     "ko invalid psp" in {
       val date = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(Util.now())
+      val dateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(Util.now())
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}fakepsp-$random"
 
@@ -153,7 +156,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
            |  "flowId": "$idFlusso",
            |  "pspId": "fakepsp",
            |  "organizationId": "${TestItems.PA}",
-           |  "flowTimestamp": "$date"
+           |  "flowTimestamp": "$dateTime"
       }""".stripMargin
 
       await(
