@@ -4,7 +4,7 @@
   "scenarios": {
     "step_0": {
       "executor": "constant-arrival-rate",
-      "duration": "5h",
+      "duration": "10m",
       "rate": 1,
       "timeUnit": "10s",
       "preAllocatedVUs": 1,
