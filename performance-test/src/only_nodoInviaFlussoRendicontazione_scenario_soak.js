@@ -39,13 +39,14 @@ export function setup() {
   // The setup code runs, setting up the test environment (optional) and generating data
   // used to reuse code for the same VU
 
+  var paymentsObject_100 = generateMultiplePaymentsObject(parameters, 100);
   var paymentsObject_5000 = generateMultiplePaymentsObject(parameters, 5000);
   //var paymentsObject_15000 = generateMultiplePaymentsObject(parameters, 15000);
   var paymentsObject_30000 = generateMultiplePaymentsObject(parameters, 30000);
   //var paymentsObject_60000 = generateMultiplePaymentsObject(parameters, 60000);
   var paymentsObject_50000 = generateMultiplePaymentsObject(parameters, 50000);
   //const multiplePaymentsObject = [paymentsObject_6000, paymentsObject_15000, paymentsObject_30000, paymentsObject_60000, paymentsObject_150000];
-  const multiplePaymentsObject = [paymentsObject_50000, paymentsObject_5000, paymentsObject_30000];
+  const multiplePaymentsObject = [paymentsObject_50000, paymentsObject_5000, paymentsObject_30000, paymentsObject_100];
   return multiplePaymentsObject;
 }
 
@@ -90,6 +91,9 @@ export default function (multiplePaymentsObject) {
   } else if (exec.scenario.name === 'step_2') {
       multiplePaymentsObjectToUse = multiplePaymentsObject[2];
       flow_size = 30000;
+  } else if (exec.scenario.name === 'step_2') {
+      multiplePaymentsObjectToUse = multiplePaymentsObject[3];
+      flow_size = 100;
   }
   // Initialize response variable
   let response = '';

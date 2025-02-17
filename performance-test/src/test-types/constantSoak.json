@@ -25,6 +25,14 @@
       "timeUnit": "5s",
       "preAllocatedVUs": 1,
       "maxVUs": 1000
+    },
+    "step_3": {
+      "executor": "constant-arrival-rate",
+      "duration": "5h",
+      "rate": 15,
+      "timeUnit": "1s",
+      "preAllocatedVUs": 1,
+      "maxVUs": 1000
     }
   }
 }
