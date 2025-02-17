@@ -17,11 +17,12 @@ query = ("INSERT INTO fdr.rendicontazione (optlock, psp, dominio, id_flusso, dat
 with open('rendicontazione.csv', mode='r', encoding='utf-8') as file:
     csv_reader = csv.reader(file)
     next(csv_reader) # skip header
+    i = 0
     for row in csv_reader:
-
         cursor.execute(query, row)
         conn.commit()
-        break
+        print(f"done item ${i}")
+        i += 1
 
 
 conn.close()
