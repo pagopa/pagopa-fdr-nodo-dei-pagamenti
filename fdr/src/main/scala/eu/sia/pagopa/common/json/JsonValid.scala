@@ -30,7 +30,8 @@ object JsonValid {
         val path = jsonEnum match {
           case JsonEnum.ERROR         => "/json-schemas/error.json"
           case JsonEnum.NOTIFY_FLOW   => "/json-schemas/notifyFlowRendicontazione.json"
-          case JsonEnum.INVIA_FLUSSO_FTP   => "/json-schemas/nodoInviaFlussoRendicontazioneFTP.json"
+          case JsonEnum.INVIA_FLUSSO_FTP        => "/json-schemas/nodoInviaFlussoRendicontazioneFTP.json"
+          case JsonEnum.REGISTER_FOR_VALIDATION => "/json-schemas/registerFdrForValidation.json"
         }
 
         val fileStream = getClass.getResourceAsStream(path)

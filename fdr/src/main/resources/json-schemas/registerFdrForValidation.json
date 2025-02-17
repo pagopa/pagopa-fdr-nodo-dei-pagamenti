@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "required": ["flowId", "pspId", "organizationId", "flowTimestamp"],
+  "properties": {
+    "flowId" : {
+      "type" : "string"
+    },
+    "pspId" : {
+      "type" : "string"
+    },
+    "organizationId" : {
+      "type" : "string"
+    },
+    "flowTimestamp" : {
+      "type" : "string"
+    }
+  },
+  "additionalProperties": false
+}
