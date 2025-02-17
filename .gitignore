@@ -31,3 +31,4 @@ lightbend.sbt
 /integration-test/reports/
 /integration-test/results/
 **/.venv/
+.run/**
