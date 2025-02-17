@@ -409,6 +409,38 @@ abstract class BaseUnitTest()
     p.future.map(_ => restResponse.payload.get)
   }
 
+  def registerFdrForValidation(
+                                   payload: Option[String],
+                                   testCase: Option[String] = Some("OK"),
+                                   responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
+                                   newdata: Option[ConfigData] = None
+                                 ): Future[String] = {
+    val p = Promise[Boolean]()
+    val registerFdrForValidation =
+      system.actorOf(
+        Props.create(classOf[RegisterFdrForValidationTest], p, repositories, props.copy(actorClassId = "registerFdrForValidation", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        s"registerFdrForValidation${Util.now()}"
+      )
+
+    val restResponse = askActor(
+      registerFdrForValidation,
+      RestRequest(
+        UUID.randomUUID().toString,
+        payload,
+        Nil,
+        Map(),
+        TestItems.testPDD,
+        "registerFdrForValidation",
+        Util.now(),
+        ReExtra(),
+        testCase
+      )
+    )
+    assert(restResponse.payload.isDefined)
+    responseAssert(restResponse.payload.get, restResponse.statusCode)
+    p.future.map(_ => restResponse.payload.get)
+  }
+
   def nodoInviaFlussoRendicontazioneFTP(
                                          payload: Option[String],
                                          testCase: Option[String] = None,
