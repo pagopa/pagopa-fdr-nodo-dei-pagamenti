@@ -91,7 +91,7 @@ export default function (multiplePaymentsObject) {
   } else if (exec.scenario.name === 'step_2') {
       multiplePaymentsObjectToUse = multiplePaymentsObject[2];
       flow_size = 30000;
-  } else if (exec.scenario.name === 'step_2') {
+  } else if (exec.scenario.name === 'step_3') {
       multiplePaymentsObjectToUse = multiplePaymentsObject[3];
       flow_size = 100;
   }
