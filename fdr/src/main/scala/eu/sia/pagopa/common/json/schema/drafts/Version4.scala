@@ -10,7 +10,7 @@ object Version4 extends Version4 { self =>
   val SchemaUrl = "http://json-schema.org/draft-04/schema#"
   val schemaLocation: String = SchemaUrl
   lazy val Schema: SchemaType =
-    JsonSource.schemaFromUrl(self.getClass.getResource("/json-schema-draft-04.json")).getOrElse(throw new RuntimeException("Could not read schema file json-schema-draft-04.json."))
+    JsonSource.schemaFromUrl(self.getClass.getResource("/draft-schemas/json-schema-draft-04.json")).getOrElse(throw new RuntimeException("Could not read schema file json-schema-draft-04.json."))
   val options: SchemaConfigOptions = new SchemaConfigOptions {
     override def supportsExternalReferences: Boolean = true
     override def formats: Map[String, SchemaFormat] = DefaultFormats.formats

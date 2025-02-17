@@ -203,7 +203,8 @@ case class RegisterFdrForValidationActorPerRequest(repositories: Repositories, a
     log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Risposta"))
     val httpStatusCode = exception.map(_.statusCode).getOrElse(StatusCodes.OK.intValue)
     log.debug(s"Generazione risposta $httpStatusCode")
-    val responsePayload = exception.map(v => GenericResponse(GenericResponseOutcome.KO.toString).toJson.toString())
+    val errorCause = exception.map(_.message).getOrElse("Generic error")
+    val responsePayload = exception.map(v => GenericResponse(errorCause).toJson.toString())
     RestResponse(req.sessionId, responsePayload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
 
