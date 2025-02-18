@@ -14,7 +14,7 @@ class PollerActorUnitTests() extends BaseUnitTest {
     BootstrapUtil.actorRouter(j._1) -> mockActor
   })
   val act =
-    system.actorOf(Props.create(classOf[PollerActor], repositories, props.copy(actorClassId = "pollerActor", routers = routers)), s"pollerActor${Util.now()}")
+    system.actorOf(Props.create(classOf[PollerActor], repositories, props.copy(actorClassId = "pollerActor", routers = mockRouters)), s"pollerActor${Util.now()}")
 
   "pollerActor" must {
     Primitive.jobs.foreach(j => {

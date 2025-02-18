@@ -130,6 +130,42 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
     } yield r
   }
 
+  def saveRendicontazione(
+                           identificativoFlusso: String,
+                           identificativoPSP: String,
+                           identificativoDominio: String,
+                           dataOraFlusso: javax.xml.datatype.XMLGregorianCalendar,
+                           fdrRepository: FdrRepository)(implicit log: NodoLogger, ec: ExecutionContext) = {
+
+    for {
+      r <- {
+        val rendi = Rendicontazione(
+          0,
+          RendicontazioneStatus.VALID,
+          0,
+          identificativoPSP,
+          None,
+          None,
+          identificativoDominio,
+          identificativoFlusso,
+          LocalDateTime.parse(dataOraFlusso.toString, DateTimeFormatter.ISO_DATE_TIME.withZone(ZoneId.systemDefault())),
+          None,
+          None,
+          Util.now()
+        )
+
+        fdrRepository
+          .saveRendicontazione(rendi)
+          .recoverWith({ case e =>
+            Future.failed(exception.DigitPaException("Errore salvataggio rendicontazione", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e))
+          })
+          .flatMap(data => {
+            Future.successful((Constant.OK))
+          })
+      }
+    } yield r
+  }
+
   def checks(ddataMap: ConfigData, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, checkPassword: Boolean, actorClassId: String)(implicit log: NodoLogger) = {
     log.info(FdrLogConstant.logSemantico(actorClassId) + " psp, broker, channel, password, ci")
     val paaa = for {

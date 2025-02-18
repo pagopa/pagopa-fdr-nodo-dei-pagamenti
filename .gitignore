@@ -31,3 +31,5 @@ lightbend.sbt
 /integration-test/reports/
 /integration-test/results/
 **/.venv/
+.run/MainTest dev.run.xml
+.run/MainTest local.run.xml

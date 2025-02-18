@@ -178,10 +178,10 @@ abstract class BaseUnitTest()
 
   val repositories = new RepositoriesTest(system.settings.config, log)
 
-//  val props = ActorProps(null, null, null, actorUtility, Map(), containerBlobFunction, containerBlobFunction, "", certPath, TestItems.ddataMap)
-  val props = ActorProps(null, null, null, actorUtility, Map(), "", certPath, TestItems.ddataMap)
-
   val mockActor = system.actorOf(Props.create(classOf[MockActor]), s"mock")
+  val mockRouters =  Map("reActorRouter" -> mockActor, "fdRMetadataActorRouter" -> mockActor)
+
+  val props = ActorProps(null, null, null, actorUtility, mockRouters, "", certPath, TestItems.ddataMap)
 
   val singletesttimeout: FiniteDuration = 1000.seconds
 
@@ -311,7 +311,7 @@ abstract class BaseUnitTest()
                                 ): NodoInviaFlussoRendicontazioneRisposta = {
     val act =
       system.actorOf(
-        Props.create(classOf[NodoInviaFlussoRendicontazioneActor], repositories, props.copy(actorClassId = "nodoInviaFlussoRendicontazione", routers = Map("ftp-senderRouter" -> mockActor))),
+        Props.create(classOf[NodoInviaFlussoRendicontazioneActor], repositories, props.copy(actorClassId = "nodoInviaFlussoRendicontazione", routers = mockRouters)),
         s"nodoInviaFlussoRendicontazione${Util.now()}"
       )
     val soapres = askActor(
@@ -349,7 +349,7 @@ abstract class BaseUnitTest()
                                    responseAssert: NodoChiediFlussoRendicontazioneRisposta => Assertion = (_) => assert(true)
                                  ): NodoChiediFlussoRendicontazioneRisposta = {
     val act =
-      system.actorOf(Props.create(classOf[NodoChiediFlussoRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoChiediFlussoRendicontazione")), s"nodoChiediFlussoRendicontazione${Util.now()}")
+      system.actorOf(Props.create(classOf[NodoChiediFlussoRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoChiediFlussoRendicontazione", routers = mockRouters)), s"nodoChiediFlussoRendicontazione${Util.now()}")
     val soapres =
       askActor(act, SoapRequest(UUID.randomUUID().toString, chiediFlussoRendicontazionePayload(idFlusso), TestItems.testPDD, "nodoChiediFlussoRendicontazione", "test", Util.now(), ReExtra(), testCase))
     assert(soapres.payload.isDefined)
@@ -365,7 +365,7 @@ abstract class BaseUnitTest()
                                        ): NodoChiediElencoFlussiRendicontazioneRisposta = {
     val act =
       system.actorOf(
-        Props.create(classOf[NodoChiediElencoFlussiRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoChiediElencoFlussiRendicontazione")),
+        Props.create(classOf[NodoChiediElencoFlussiRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoChiediElencoFlussiRendicontazione", routers = mockRouters)),
         s"nodoChiediElencoFlussiRendicontazione${Util.now()}"
       )
     val soapres =
@@ -386,7 +386,7 @@ abstract class BaseUnitTest()
     val p = Promise[Boolean]()
     val notifyFlussoRendicontazione =
       system.actorOf(
-        Props.create(classOf[NotifyFlussoRendicontazioneTest], p, repositories, props.copy(actorClassId = "notifyFlussoRendicontazione", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        Props.create(classOf[NotifyFlussoRendicontazioneTest], p, repositories, props.copy(actorClassId = "notifyFlussoRendicontazione", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
         s"notifyFlussoRendicontazione${Util.now()}"
       )
 
@@ -409,17 +409,48 @@ abstract class BaseUnitTest()
     p.future.map(_ => restResponse.payload.get)
   }
 
+  def registerFdrForValidation(
+                                   payload: Option[String],
+                                   testCase: Option[String] = Some("OK"),
+                                   responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
+                                   newdata: Option[ConfigData] = None
+                                 ): Future[String] = {
+    val p = Promise[Boolean]()
+    val registerFdrForValidation =
+      system.actorOf(
+        Props.create(classOf[RegisterFdrForValidationTest], p, repositories, props.copy(actorClassId = "registerFdrForValidation", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        s"registerFdrForValidation${Util.now()}"
+      )
+
+    val restResponse = askActor(
+      registerFdrForValidation,
+      RestRequest(
+        UUID.randomUUID().toString,
+        payload,
+        Nil,
+        Map(),
+        TestItems.testPDD,
+        "registerFdrForValidation",
+        Util.now(),
+        ReExtra(),
+        testCase
+      )
+    )
+    assert(restResponse.payload.isDefined)
+    responseAssert(restResponse.payload.get, restResponse.statusCode)
+    p.future.map(_ => restResponse.payload.get)
+  }
+
   def nodoInviaFlussoRendicontazioneFTP(
                                          payload: Option[String],
                                          testCase: Option[String] = None,
                                          responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
                                          newdata: Option[ConfigData] = None
                                 ): Future[String] = {
-
     val p = Promise[Boolean]()
     val nodoInviaFlussoRendicontazioneFTP =
       system.actorOf(
-        Props.create(classOf[NodoInviaFlussoRendicontazioneFTPTest], p, repositories, props.copy(actorClassId = "nodoInviaFlussoRendicontazioneFTP", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        Props.create(classOf[NodoInviaFlussoRendicontazioneFTPTest], p, repositories, props.copy(actorClassId = "nodoInviaFlussoRendicontazioneFTP", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
         s"nodoInviaFlussoRendicontazioneFTP${Util.now()}"
       )
 
@@ -452,7 +483,7 @@ abstract class BaseUnitTest()
     val p = Promise[Boolean]()
     val getAllRevisionFdr =
       system.actorOf(
-        Props.create(classOf[GetAllRevisionFdrTest], p, repositories, props.copy(actorClassId = "getAllRevisionFdr", ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        Props.create(classOf[GetAllRevisionFdrTest], p, repositories, props.copy(actorClassId = "getAllRevisionFdr", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
         s"getAllRevisionFdr${Util.now()}"
       )
 
