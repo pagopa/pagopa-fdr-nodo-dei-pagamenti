@@ -47,7 +47,7 @@ microservice-chart: &microservice-chart
       - type: memory
         metricType: Utilization
         metadata:
-          value: "100"
+          value: "85"
     advanced:
       horizontalPodAutoscalerConfig:
         behavior:
