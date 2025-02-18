@@ -2,6 +2,9 @@
 Manage FdR Nodo Dei Pagamenti
 
 
+## Api Documentation 📖
+- REST APIs - See the [OpenApi 3 here](https://editor.swagger.io/?url=https://raw.githubusercontent.com/pagopa/pagopa-fdr-nodo-dei-pagamenti/refs/heads/main/openapi/openapi.json)
+
 # 🧩 Integration Test
 - Report DEV is available [here](https://pagopadweusharedtstdtsa.blob.core.windows.net/pagopa-fdr-nodo-dei-pagamenti/reports/index.html)
 - Report UAT is available [here](https://pagopauweusharedtstdtsa.blob.core.windows.net/pagopa-fdr-nodo-dei-pagamenti/reports/index.html) 
