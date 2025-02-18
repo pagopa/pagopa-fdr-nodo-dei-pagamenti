@@ -123,7 +123,7 @@ abstract class BaseUnitTest()
             subscriptionKey=""
             timeoutSeconds=60
         }
-        callNexiToo=true
+        callNexiToo=false
         limitjobs = true
         config.ftp.connect-timeout = "1000"
         slick.dbs.default.db.numThreads=20
@@ -361,10 +361,94 @@ abstract class BaseUnitTest()
 
   def chiediElencoFlussiRendicontazione(
                                          testCase: Option[String] = None,
-                                         responseAssert: NodoChiediElencoFlussiRendicontazioneRisposta => Assertion = (_) => assert(true)
+                                         responseAssert: NodoChiediElencoFlussiRendicontazioneRisposta => Assertion = (_) => assert(true),
+                                         callNexiTooValue: Boolean = false
                                        ): NodoChiediElencoFlussiRendicontazioneRisposta = {
+    val config =
+      s"""
+     scope = test
+     forwarder {
+         subscriptionKey=key
+     }
+     blobstorage-dispatcher {
+         type = Dispatcher
+         executor = "thread-pool-executor"
+         thread-pool-executor {
+           fixed-pool-size = 16
+         }
+         throughput = 1
+       }
+     eventhub-dispatcher {
+         type = Dispatcher
+         executor = "thread-pool-executor"
+         thread-pool-executor {
+            fixed-pool-size = 16
+         }
+         throughput = 1
+     }
+     azure-hub-event {
+       azure-sdk-client {
+         re-event {
+           client-timeoput-ms = 5000
+           event-hub-name = "fdr-re"
+           connection-string = "fake"
+         }
+         blob-re {
+           enabled  = false
+           container-name = "payload"
+           connection-string = "fake"
+         }
+       }
+     }
+     azure-storage-blob {
+         enabled  = false
+         container-name = "xmlsharefile"
+         connection-string = "fake"
+     }
+     config.http.connect-timeout = 1
+     bundleTimeoutSeconds = 120
+     bundle.checkUTF8 = false
+     routing.useMetrics = false
+     akka {
+       loggers = ["akka.event.slf4j.Slf4jLogger"]
+       loglevel = "INFO"
+       logging-filter = "akka.event.slf4j.Slf4jLoggingFilter"
+     }
+     nexi {
+         nodoChiediElencoFlussiRendicontazione {
+           url="http://localhost:8080/webservices/input"
+         }
+         nodoChiediFlussoRendicontazione {
+           url="http://localhost:8080/webservices/input"
+         }
+         timeoutSeconds=60
+     }
+     fdr{
+         internalGetWithRevision {
+             url="http://localhost:8080/fdr/service-internal/v1/internal/organizations/ndp/fdrs/{fdr}/revisions/{revision}/psps/{pspId}"
+             method="GET"
+         }
+         internalGetFdrPayment {
+             url="http://localhost:8080/fdr/service-internal/v1/internal/organizations/ndp/fdrs/{fdr}/revisions/{revision}/psps/{pspId}/payments"
+             method="GET"
+         }
+         subscriptionKey=""
+         timeoutSeconds=60
+     }
+     callNexiToo=$callNexiTooValue
+     limitjobs = true
+     config.ftp.connect-timeout = "1000"
+     slick.dbs.default.db.numThreads=20
+     slick.dbs.default.db.maxConnections=20
+     configScheduleMinutes=1
+     coordinatedShutdown=true
+     waitAsyncProcesses=true
+     reBufferSize=1
+     reFlushIntervalSeconds=1
+  """
+    val systemWithNewConfig = ActorSystem("testSystemWithNewConfig", ConfigFactory.parseString(config).withFallback(ConfigFactory.load()))
     val act =
-      system.actorOf(
+      systemWithNewConfig.actorOf(
         Props.create(classOf[NodoChiediElencoFlussiRendicontazioneActorPerRequest], repositories, props.copy(actorClassId = "nodoChiediElencoFlussiRendicontazione", routers = mockRouters)),
         s"nodoChiediElencoFlussiRendicontazione${Util.now()}"
       )

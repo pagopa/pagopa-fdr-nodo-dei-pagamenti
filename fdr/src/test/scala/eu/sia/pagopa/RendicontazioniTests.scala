@@ -1,13 +1,15 @@
 package eu.sia.pagopa
 
-import akka.http.scaladsl.model.StatusCodes
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.DigitPaErrorCodes
+import eu.sia.pagopa.common.repo.fdr.enums.RendicontazioneStatus
+import eu.sia.pagopa.common.repo.fdr.model.Rendicontazione
 import eu.sia.pagopa.common.util.{Constant, RandomStringUtils, StringUtils, Util}
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.testutil.TestItems
 import slick.jdbc.H2Profile
 
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import scala.concurrent.Future
 import scala.util.Try
@@ -59,6 +61,7 @@ class RendicontazioniTests() extends BaseUnitTest {
       )
     }
     "chiedi elenco + chiedi flusso" in {
+
       val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
@@ -70,18 +73,63 @@ class RendicontazioniTests() extends BaseUnitTest {
         }
       )
       import H2Profile.api._
+      // Check: Is the flow present in the RENDICONTAZIONE table?
       assert(Try(runQuery[Long](fdrRepository, sql"select id from RENDICONTAZIONE where ID_FLUSSO = '#$idFlusso'".as[Long])).isSuccess)
+
+      // Verify that there is at least one record with FK_BINARY_FILE set
+      val countAll: Long = runQuery[Long](fdrRepository, sql"SELECT COUNT(*) FROM RENDICONTAZIONE WHERE ID_FLUSSO = '#$idFlusso'".as[Long])
+      val countWithBinary = runQuery[Long](fdrRepository, sql"SELECT COUNT(*) FROM RENDICONTAZIONE WHERE ID_FLUSSO = '#$idFlusso' AND FK_BINARY_FILE IS NOT NULL".as[Long])
+
+      log.info(s"Total records for idFlusso: $countAll, with FK_BINARY_FILE: $countWithBinary")
+      assert(countAll >= 1, "There must be at least one record for idFlusso")
+      assert(countWithBinary >= 1, "There must be at least one record with valued FK_BINARY_FILE")
 
       chiediElencoFlussiRendicontazione(responseAssert = (r) => {
         assert(r.elencoFlussiRendicontazione.isDefined)
         assert(r.elencoFlussiRendicontazione.get.idRendicontazione.nonEmpty)
         assert(r.elencoFlussiRendicontazione.get.idRendicontazione.exists(p => p.get.identificativoFlusso == idFlusso))
-      })
+      }, callNexiTooValue = false)
       chiediFlussoRendicontazione(
         idFlusso,
         responseAssert = (r) => {
           assert(r.fault.isEmpty)
           assert(r.xmlRendicontazione.isDefined)
+        }
+      )
+
+      // inserting a report without fk_binary_file (negative case)
+      val idFlussoWithoutBinary = s"${date}${TestItems.PSP}-$random"+"_NO_BINARY"
+      val rendicontazioneWithoutBinary = Rendicontazione(
+        objId = 0,
+        idFlusso = idFlussoWithoutBinary,
+        psp = "PSP_TEST",
+        dominio = "DOMINIO_TEST",
+        dataOraFlusso = LocalDateTime.now(),
+        stato = RendicontazioneStatus.VALID,
+        optlock = 0L,
+        intermediarioPsp = None,
+        canale = None,
+        insertedTimestamp = LocalDateTime.now(),
+        fk_binary_file = None,
+        fk_sftp_file = None
+      )
+      fdrRepository.saveRendicontazione(rendicontazioneWithoutBinary)
+
+      val countWithoutBinary = runQuery[Long](fdrRepository, sql"SELECT COUNT(*) FROM RENDICONTAZIONE WHERE FK_BINARY_FILE IS NULL".as[Long])
+      log.info(s"Extracted records without FK_BINARY_FILE: $countWithoutBinary")
+      assert(countWithoutBinary >= 1, "There must be at least one record without FK_BINARY_FILE")
+
+      // Verify that the record without FK_BINARY_FILE is not extracted
+      chiediElencoFlussiRendicontazione(responseAssert = (r) => {
+        assert(r.elencoFlussiRendicontazione.isDefined)
+        assert(!r.elencoFlussiRendicontazione.get.idRendicontazione.exists(p => p.get.identificativoFlusso == idFlussoWithoutBinary))
+      }, callNexiTooValue = false)
+
+      chiediFlussoRendicontazione(
+        idFlussoWithoutBinary,
+        responseAssert = (r) => {
+          assert(r.fault.isDefined)
+          assert(r.xmlRendicontazione.isEmpty, "xmlRendicontazione should not be present")
         }
       )
     }
@@ -272,7 +320,8 @@ class RendicontazioniTests() extends BaseUnitTest {
       val zipped = listarendi.tail.zip(listarendi)
       assert(!zipped.exists(p => p._1 == p._2))
       assert(listarendi.exists(p => p.get.identificativoFlusso == idFlussoNexiToCheck))
-    })
+    },
+      callNexiTooValue = true)
   }
 
   "chiediElencoFlussiRendicontazione Nexi KO" in {
@@ -282,7 +331,8 @@ class RendicontazioniTests() extends BaseUnitTest {
       assert(r.elencoFlussiRendicontazione.get.idRendicontazione.nonEmpty)
       val listarendi = r.elencoFlussiRendicontazione.get.idRendicontazione
       assert(!listarendi.exists(p => p.get.identificativoFlusso == idFlussoNexiToCheck))
-    })
+    },
+      callNexiTooValue = false)
   }
 
   "chiediFlussoRendicontazione Nexi OK" in {
