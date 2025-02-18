@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "fdr"
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.1.14-135-PAGOPA-2671
+    tag: 2.1.17
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
@@ -29,15 +29,15 @@ microservice-chart: &microservice-chart
     create: true
   resources:
     requests:
-      memory: "3Gi"
-      cpu: "512m"
+      memory: "2200Mi"
+      cpu: "1500m"
     limits:
-      memory: "6Gi"
+      memory: "3500Mi"
       cpu: "2"
   autoscaling:
     enable: true
     minReplica: 2
-    maxReplica: 8
+    maxReplica: 10
     pollingInterval: 10 # seconds
     triggers:
       - type: cpu
@@ -47,7 +47,7 @@ microservice-chart: &microservice-chart
       - type: memory
         metricType: Utilization
         metadata:
-          value: "100"
+          value: "85"
     advanced:
       horizontalPodAutoscalerConfig:
         behavior:
@@ -79,7 +79,7 @@ microservice-chart: &microservice-chart
     TZ: "Europe/Rome"
     AKKA_SYSTEM_NAME: "pagopafdrnodo"
     JAVA_OPTS: >-
-      -Dlogback.configurationFile=/mnt/file-config/logback.xml  -Dconfig.app=/mnt/file-config/config-app.conf  -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts  -Duser.language=it  -Duser.country=IT  -Duser.timezone=Europe/Rome  -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
+      -XX:+UnlockExperimentalVMOptions -XX:PermSize=256m -XX:MaxPermSize=1024m -XX:InitiatingHeapOccupancyPercent=20 -XX:+UseContainerSupport -XX:+UseG1GC -XX:+AlwaysPreTouch -XX:MaxMetaspaceSize=256M -XX:ParallelGCThreads=8 -XX:MaxGCPauseMillis=100 -XX:MinHeapFreeRatio=30 -XX:MaxHeapFreeRatio=30 -Xms512m -Xmx2048m -Dlogback.configurationFile=/mnt/file-config/logback.xml -Dconfig.app=/mnt/file-config/config-app.conf -Dapp.bundle.cacerts.path=/mnt/file-config-external/fdr-cacerts/cacerts -Duser.language=it -Duser.country=IT -Duser.timezone=Europe/Rome -Dfile.encoding=UTF-8 -Dcom.sun.management.jmxremote=true  -Dcom.sun.management.jmxremote.port=3000  -Dcom.sun.management.jmxremote.rmi.port=3000  -Djava.rmi.server.hostname=127.0.0.1  -Dcom.sun.management.jmxremote.authenticate=false  -Dcom.sun.management.jmxremote.ssl=false
     DB_FDR_URL: jdbc:postgresql://fdr-db.p.internal.postgresql.pagopa.it:6432/fdr?sslmode=require&prepareThreshold=0
     DB_FDR_USER: fdr
     INSTANCE: PROD
