@@ -95,6 +95,83 @@ class RestRendicontazioniTests() extends BaseUnitTest {
   }
 
 
+  "registerFdrForValidation" must {
+    "ok" in {
+      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+      val dateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(Util.now())
+      val random = RandomStringUtils.randomNumeric(9)
+      val idFlusso = s"${date}${TestItems.PSP}-$random"
+
+      val payload =
+        s"""{
+           |  "flowId": "$idFlusso",
+           |  "pspId": "${TestItems.PSP}",
+           |  "organizationId": "${TestItems.PA}",
+           |  "flowTimestamp": "$dateTime"
+      }""".stripMargin
+
+      await(
+        registerFdrForValidation(
+          Some(payload),
+          testCase = Some("OK"),
+          responseAssert = (resp, status) => {
+            assert(status == StatusCodes.OK.intValue)
+            assert(resp.contains("{\"message\":\"OK\"}"))
+          }
+        )
+      )
+    }
+    "ko missing field" in {
+      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(Util.now())
+      val dateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(Util.now())
+      val random = RandomStringUtils.randomNumeric(9)
+      val idFlusso = s"${date}${TestItems.PSP}-$random"
+
+      val payload =
+        s"""{
+           |  "flowId": "$idFlusso",
+           |  "pspId": "${TestItems.PSP}",
+           |  "flowTimestamp": "$dateTime"
+      }""".stripMargin
+
+      await(
+        registerFdrForValidation(
+          Some(payload),
+          testCase = Some("KO"),
+          responseAssert = (resp, status) => {
+            assert(status == StatusCodes.BAD_REQUEST.intValue)
+            assert(resp.contains("{\"message\":\"Invalid organizationId\"}"))
+          }
+        )
+      )
+    }
+    "ko invalid psp" in {
+      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(Util.now())
+      val dateTime = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss").format(Util.now())
+      val random = RandomStringUtils.randomNumeric(9)
+      val idFlusso = s"${date}fakepsp-$random"
+
+      val payload =
+        s"""{
+           |  "flowId": "$idFlusso",
+           |  "pspId": "fakepsp",
+           |  "organizationId": "${TestItems.PA}",
+           |  "flowTimestamp": "$dateTime"
+      }""".stripMargin
+
+      await(
+        registerFdrForValidation(
+          Some(payload),
+          testCase = Some("KO"),
+          responseAssert = (resp, status) => {
+            assert(status == StatusCodes.BAD_REQUEST.intValue)
+            assert(resp.contains("{\"message\":\"PSP sconosciuto.\"}"))
+          }
+        )
+      )
+    }
+  }
+
   "nodoInviaFlussoRendicontazioneFTP" must {
     "ok" in {
       val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())

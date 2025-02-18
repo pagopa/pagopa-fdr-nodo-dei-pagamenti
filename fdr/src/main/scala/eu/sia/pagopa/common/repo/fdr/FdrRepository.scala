@@ -122,6 +122,14 @@ case class FdrRepository(override val driver: JdbcProfile, override val db: Jdbc
   private val insertRendicontazioni =
     rendicontazioni returning rendicontazioni.map(_.objId) into ((item, id) => item.copy(objId = id))
 
+  def saveRendicontazione(rendicontazione: Rendicontazione)(implicit log: NodoLogger): Future[(Rendicontazione)] = {
+    val param = Seq("rendicontazione" -> rendicontazione)
+    val action = for {
+      r <- insertRendicontazioni += rendicontazione.copy(fk_binary_file = None)
+    } yield (r)
+    run("saveRendicontazione", param, action.transactionally)
+  }
+
   def saveRendicontazioneAndBinaryFile(rendicontazione: Rendicontazione, binaryFile: BinaryFile)(implicit log: NodoLogger): Future[(Rendicontazione, BinaryFile)] = {
     val param = Seq("rendicontazione" -> rendicontazione, "binaryFile" -> binaryFile)
     val action = for {

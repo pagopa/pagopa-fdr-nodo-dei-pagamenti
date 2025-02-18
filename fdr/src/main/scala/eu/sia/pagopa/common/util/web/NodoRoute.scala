@@ -109,7 +109,8 @@ case class NodoRoute(
 
   val methods: Map[String, String] = Map(
     "notifyFlussoRendicontazione" -> "POST",
-    "nodoInviaFlussoRendicontazioneFTP" -> "POST"
+    "nodoInviaFlussoRendicontazioneFTP" -> "POST",
+    "registerFdrForValidation" -> "POST"
   )
 
   val methodsInternal: Map[String, String] = Map(

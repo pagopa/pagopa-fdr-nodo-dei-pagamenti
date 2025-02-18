@@ -208,7 +208,7 @@ object Appfunction {
     if (httpType.isDefined && httpType.contains(Constant.RESPONSE)) {
       val jsValue = json.map(v => v.parseJson.asJsObject)
       businessProcess match {
-        case Some(value) if (value == "notifyFlussoRendicontazione" || value == "nodoInviaFlussoRendicontazioneFTP") =>
+        case Some(value) if (value == "notifyFlussoRendicontazione" || value == "nodoInviaFlussoRendicontazioneFTP" || value == "registerFdrForValidation") =>
           val error = jsValue.flatMap(_.getFields("error").headOption).map(_.convertTo[String]).map(v => s"error=[$v]")
           if (error.isDefined) {
             (
