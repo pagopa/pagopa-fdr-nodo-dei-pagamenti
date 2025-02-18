@@ -31,7 +31,7 @@ pool:
   name: $(poolImage)
 jobs:
   - job: prepare_run_test
-    displayName: "Prepare and run K6 tests env (${{ parameters.env }})"
+    displayName: "Prepare and run K6 tests env (${{ parameters.ENVIRONMENT }})"
     timeoutInMinutes: 0 # how long to run the job before automatically cancelling. When 0 is specified, the maximum limit is used
     steps:
       - script: |
