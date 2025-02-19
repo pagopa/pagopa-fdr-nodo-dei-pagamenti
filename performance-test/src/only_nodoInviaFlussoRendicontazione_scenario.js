@@ -25,7 +25,7 @@ const parameters = {
     brokerPspId:  `${vars.broker_psp}`,
     channelId: `${vars.channel}`,
     password: `${vars.password}`,
-    creditorInstitutionId: `${vars.creditor_institution}`,
+    creditorInstitutionId: `${vars.creditor_institution_nodo_invia}`,
     brokerCiId: `${vars.broker_ci}`,
     stationId: `${vars.station}`,
     today: new Date().toISOString().slice(0, 10),

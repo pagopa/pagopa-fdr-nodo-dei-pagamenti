@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "fdr"
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.1.14-135-PAGOPA-2671
+    tag: 2.1.17
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
@@ -47,7 +47,7 @@ microservice-chart: &microservice-chart
       - type: memory
         metricType: Utilization
         metadata:
-          value: "100"
+          value: "85"
     advanced:
       horizontalPodAutoscalerConfig:
         behavior:

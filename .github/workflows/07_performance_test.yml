@@ -15,24 +15,14 @@ on:
           - uat
       test-type:
         required: true
-        type: choice
+        type: string
         description: Select the Test Type
-        options:
-          - ramping
-          - constant
-          - load
-          - smoke
-          - soak
-          - spike
-          - stress
+
       script-name:
         required: true
-        type: choice
+        type: string
         description: Select the Script Name
-        options:
-          - happy_case_scenario
-          - only_nodoInviaFlussoRendicontazione_scenario
-          - only_nodoInviaFlussoRendicontazione_payments_ramp_scenario
+
       flow-size:
         required: true
         type: number
