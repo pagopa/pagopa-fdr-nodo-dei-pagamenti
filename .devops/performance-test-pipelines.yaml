@@ -29,13 +29,16 @@ variables:
 
 pool:
   name: $(poolImage)
-
-steps:
-  - script: |
-      cd ./performance-test/src
-      docker pull grafana/k6
-    displayName: Pull k6 image
-  - script: |
-      cd ./performance-test
-      sh ./run_performance_test.sh ${{ parameters.ENVIRONMENT }} ${{ parameters.TEST_TYPE }} ${{ parameters.SCRIPT }} fdr1_k6 $(API_SUBSCRIPTION_KEY) ${{ parameters.FLOW_SIZE }}
-    displayName: Run k6 ${{ parameters.SCRIPT }} on ${{ parameters.ENVIRONMENT }}
+jobs:
+  - job: prepare_run_test
+    displayName: "Prepare and run K6 tests env (${{ parameters.ENVIRONMENT }})"
+    timeoutInMinutes: 0 # how long to run the job before automatically cancelling. When 0 is specified, the maximum limit is used
+    steps:
+      - script: |
+          cd ./performance-test/src
+          docker pull grafana/k6
+        displayName: Pull k6 image
+      - script: |
+          cd ./performance-test
+          sh ./run_performance_test.sh ${{ parameters.ENVIRONMENT }} ${{ parameters.TEST_TYPE }} ${{ parameters.SCRIPT }} fdr1_k6 $(API_SUBSCRIPTION_KEY) ${{ parameters.FLOW_SIZE }}
+        displayName: Run k6 ${{ parameters.SCRIPT }} on ${{ parameters.ENVIRONMENT }}
