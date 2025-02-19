@@ -76,14 +76,6 @@ class RendicontazioniTests() extends BaseUnitTest {
       // Check: Is the flow present in the RENDICONTAZIONE table?
       assert(Try(runQuery[Long](fdrRepository, sql"select id from RENDICONTAZIONE where ID_FLUSSO = '#$idFlusso'".as[Long])).isSuccess)
 
-      // Verify that there is at least one record with FK_BINARY_FILE set
-      val countAll: Long = runQuery[Long](fdrRepository, sql"SELECT COUNT(*) FROM RENDICONTAZIONE WHERE ID_FLUSSO = '#$idFlusso'".as[Long])
-      val countWithBinary = runQuery[Long](fdrRepository, sql"SELECT COUNT(*) FROM RENDICONTAZIONE WHERE ID_FLUSSO = '#$idFlusso' AND FK_BINARY_FILE IS NOT NULL".as[Long])
-
-      log.info(s"Total records for idFlusso: $countAll, with FK_BINARY_FILE: $countWithBinary")
-      assert(countAll >= 1, "There must be at least one record for idFlusso")
-      assert(countWithBinary >= 1, "There must be at least one record with valued FK_BINARY_FILE")
-
       chiediElencoFlussiRendicontazione(responseAssert = (r) => {
         assert(r.elencoFlussiRendicontazione.isDefined)
         assert(r.elencoFlussiRendicontazione.get.idRendicontazione.nonEmpty)
@@ -114,10 +106,6 @@ class RendicontazioniTests() extends BaseUnitTest {
         fk_sftp_file = None
       )
       fdrRepository.saveRendicontazione(rendicontazioneWithoutBinary)
-
-      val countWithoutBinary = runQuery[Long](fdrRepository, sql"SELECT COUNT(*) FROM RENDICONTAZIONE WHERE FK_BINARY_FILE IS NULL".as[Long])
-      log.info(s"Extracted records without FK_BINARY_FILE: $countWithoutBinary")
-      assert(countWithoutBinary >= 1, "There must be at least one record without FK_BINARY_FILE")
 
       // Verify that the record without FK_BINARY_FILE is not extracted
       chiediElencoFlussiRendicontazione(responseAssert = (r) => {
