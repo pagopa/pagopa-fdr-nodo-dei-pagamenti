@@ -177,6 +177,7 @@ case class FdrRepository(override val driver: JdbcProfile, override val db: Jdbc
         .filter(_.stato === rendicontazioneStatus)
         .filter(_.dataOraFlusso >= LocalDate.now().minusDays(dayLimit).atStartOfDay())
         .filter(s => insetFix[String](idPaSeq, a => s.dominio inSet a))
+        .filter(_.fk_binary_file.isDefined)
         .filterOpt(idPsp)((r, get) => r.psp === get)
         .map(r => r.idFlusso -> r.dataOraFlusso)
         .result
@@ -222,6 +223,7 @@ case class FdrRepository(override val driver: JdbcProfile, override val db: Jdbc
       r <- rendicontazioni
         .filter(_.stato === rendicontazioneStatus)
         .filter(_.idFlusso === idFlusso)
+        .filter(_.fk_binary_file.isDefined)
         .filterOpt(idDominio)((r, get) => r.dominio === get)
         .filterOpt(idPsp)((r, get) => r.psp === get)
         .sortBy(_.dataOraFlusso.desc)
