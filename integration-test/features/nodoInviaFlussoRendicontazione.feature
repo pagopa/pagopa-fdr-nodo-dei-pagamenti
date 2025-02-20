@@ -508,7 +508,7 @@ Feature: Syntax and semantic checks for nodoInviaFlussoRendicontazione
                 <identificativoIntermediarioPSP>#broker_psp#</identificativoIntermediarioPSP>
                 <identificativoCanale>#channel#</identificativoCanale>
                 <password>#password#</password>
-                <identificativoDominio>99999999998</identificativoDominio>
+                <identificativoDominio>#creditor_institution_code_diffent#</identificativoDominio>
                 <identificativoFlusso>$identificativoFlusso</identificativoFlusso>
                 <dataOraFlusso>$timedate</dataOraFlusso>
                 <xmlRendicontazione>$rendAttachment</xmlRendicontazione>
