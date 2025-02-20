@@ -1,1 +1,1 @@
-ThisBuild / version := "2.1.18-145-feat-healthcheck-api"
+ThisBuild / version := "2.1.18-146-feat-healthcheck-api"
