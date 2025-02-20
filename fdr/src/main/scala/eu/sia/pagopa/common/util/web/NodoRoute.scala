@@ -488,6 +488,23 @@ case class NodoRoute(
     HttpResponse(status = StatusCodes.BadRequest, entity = HttpEntity(MediaTypes.`application/xml` withCharset HttpCharsets.`UTF-8`, payload))
   }
 
+  def infoRoute(actorProps: ActorProps): Route = {
+    path("info") {
+      get {
+        complete {
+          HttpEntity(
+            ContentTypes.`application/json`,
+            s"""{
+               |"version" : "${Constant.APP_VERSION}",
+               |"name" : "${Constant.APP_NAME}",
+               |"instance" : "${Constant.INSTANCE}",
+               |}""".stripMargin
+          )
+        }
+      }
+    }
+  }
+
   def soapFunction(actorProps: ActorProps): Route = {
     ignoreTrailingSlash {
       path("webservices" / "input") {
