@@ -495,9 +495,9 @@ case class NodoRoute(
           HttpEntity(
             ContentTypes.`application/json`,
             s"""{
-               |"version" : "${Constant.APP_VERSION}",
-               |"name" : "${Constant.APP_NAME}",
-               |"instance" : "${Constant.INSTANCE}",
+               |\t"name" : "${Constant.APP_NAME}",
+               |\t"version" : "${Constant.APP_VERSION}",
+               |\t"environment" : "${Constant.INSTANCE.toLowerCase()}",
                |}""".stripMargin
           )
         }
