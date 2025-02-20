@@ -33,3 +33,4 @@ lightbend.sbt
 **/.venv/
 .run/MainTest dev.run.xml
 .run/MainTest local.run.xml
+*.tmp
