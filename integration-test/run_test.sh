@@ -3,13 +3,10 @@
 if [ -z $ENV ]
 then
   echo "DEV environment..."
+  cp config/dev.json config/env.json
 else
   echo "Setting $ENV environment..."
-    cp config/${ENV}.json config/${ENV}.json.orig
-    dest="api.${ENV}."
-    sed "s/api.dev./$dest/g" config/${ENV}.json > config/${ENV}.json.bkp
-    sleep 1
-    mv config/${ENV}.json.bkp config/${ENV}.json
+    cp config/${ENV}.json config/env.json
     sleep 1
 fi
 

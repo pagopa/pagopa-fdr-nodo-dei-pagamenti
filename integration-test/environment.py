@@ -16,7 +16,7 @@ def before_all(context):
 
     logging.debug('Global settings: loading configuration')
 
-    config_file = "/config/dev.json"
+    config_file = "/config/env.json"
     if 'CONFIG_FILE' in os.environ:
         config_file = os.getenv('CONFIG_FILE')
 
