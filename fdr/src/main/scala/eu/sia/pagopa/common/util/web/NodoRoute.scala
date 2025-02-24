@@ -497,7 +497,7 @@ case class NodoRoute(
             s"""{
                |\t"name" : "${Constant.APP_NAME}",
                |\t"version" : "${Constant.APP_VERSION}",
-               |\t"environment" : "${Constant.INSTANCE.toLowerCase()}",
+               |\t"environment" : "${Constant.INSTANCE.toLowerCase()}"
                |}""".stripMargin
           )
         }
