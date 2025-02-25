@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "fdr"
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.1.18-147-feat-healthcheck-api
+    tag: 2.1.19
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
@@ -44,10 +44,10 @@ microservice-chart: &microservice-chart
         metricType: Utilization
         metadata:
           value: "70"
-      # - type: memory
-      #   metricType: Utilization
-      #   metadata:
-      #     value: "85"
+          # - type: memory
+          #   metricType: Utilization
+          #   metadata:
+          #     value: "85"
     advanced:
       horizontalPodAutoscalerConfig:
         behavior:
