@@ -294,7 +294,7 @@ object Main extends App {
           import akka.http.scaladsl.server.Directives._
           http
             .newServerAt(httpHost, httpPort)
-            .bind(routes.route ~ routes.routeSeed ~ routes.soapFunction(actorProps) ~ routes.restFunction(actorProps) ~ routes.restFunctionInternal(actorProps))
+            .bind(routes.route ~ routes.routeSeed ~ routes.infoRoute(actorProps) ~ routes.soapFunction(actorProps) ~ routes.restFunction(actorProps) ~ routes.restFunctionInternal(actorProps))
             .map(f => {
               if (job.isEmpty) {
                 log.info(s"Starting AkkaManagement...")
