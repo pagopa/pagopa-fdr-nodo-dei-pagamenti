@@ -117,10 +117,7 @@ case class RegisterFdrForValidationActorPerRequest(repositories: Repositories, a
             Future.successful(generateResponse(Some(pmae)))
         }).map(res => {
           callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
-          res.throwable match {
-            case Some(ex) => log.error(FdrLogConstant.logEndKO(actorClassId, Some(ex)))
-            case None => log.info(FdrLogConstant.logEndOK(actorClassId))
-          }
+          logEndProcess(res)
           replyTo ! res
           complete()
         })
@@ -210,5 +207,4 @@ case class RegisterFdrForValidationActorPerRequest(repositories: Repositories, a
     val responsePayload = exception.map(v => GenericResponse(errorCause).toJson.toString())
     RestResponse(req.sessionId, responsePayload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
-
 }

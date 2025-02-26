@@ -7,7 +7,9 @@ import eu.sia.pagopa.ActorProps
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
+import eu.sia.pagopa.common.message.{RestResponse, SoapResponse}
 import eu.sia.pagopa.common.repo.Repositories
+import eu.sia.pagopa.common.util.FdrLogConstant
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.{FiniteDuration, _}
@@ -71,4 +73,18 @@ trait PerRequestActor extends Actor with NodoLogging {
     actor.ask(req)(BUNDLE_IDLE_TIMEOUT).mapTo[S]
   }
 
+  def logEndProcess(soapResponse: SoapResponse): Unit = {
+    logEndProcess(soapResponse.throwable)
+  }
+
+  def logEndProcess(restResponse: RestResponse): Unit = {
+    logEndProcess(restResponse.throwable)
+  }
+
+  private def logEndProcess(throwable: Option[Throwable]): Unit = {
+    throwable match {
+      case Some(ex) => log.error(FdrLogConstant.logEndKO(actorClassId, Some(ex)))
+      case None => log.info(FdrLogConstant.logEndOK(actorClassId))
+    }
+  }
 }

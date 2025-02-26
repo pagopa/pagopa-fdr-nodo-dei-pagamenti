@@ -70,7 +70,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
 
       (for {
         _ <- Future.successful(())
-        _ = log.info(FdrLogConstant.logSintattico(actorClassId))
+        _ = log.debug(FdrLogConstant.logSintattico(actorClassId))
         _ <- Future.fromTry(parseInput(req))
 
         re_ = Re(
@@ -96,7 +96,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
 
         getPaymentResponse <- HttpFdrServiceManagement.internalGetFdrPayment(req.sessionId, req.testCaseId, "internalGetFdrPayment", Componente.FDR.toString, _fdr, _rev.toString, _psp, _organizationId, actorProps, reFlow.get)
 
-        _ = log.info(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
+        _ = log.debug(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
         flussoRiversamento = CtFlussoRiversamento(
           Number1u461,
           getResponse.fdr,
@@ -184,7 +184,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
             Future.successful(generateResponse(Some(pmae)))
       }).map( res => {
         callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
-        log.info(FdrLogConstant.logEnd(actorClassId))
+        logEndProcess(res)
         replyTo ! res
         complete()
       })
@@ -274,7 +274,7 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
   }
 
   private def generateResponse(exception: Option[RestException]) = {
-    log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Risposta"))
+    log.debug(FdrLogConstant.logGeneraPayload(actorClassId + "Risposta"))
     val httpStatusCode = exception.map(_.statusCode).getOrElse(StatusCodes.OK.intValue)
     log.debug(s"Generazione risposta $httpStatusCode")
     val responsePayload = exception.map(v => GenericResponse(GenericResponseOutcome.KO.toString).toJson.toString())

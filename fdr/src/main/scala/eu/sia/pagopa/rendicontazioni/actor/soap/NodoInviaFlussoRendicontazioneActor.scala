@@ -156,9 +156,9 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
         repositories.fdrRepository
       )
 
-      _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
+      _ = log.debug(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       nodoInviaFlussoRisposta = NodoInviaFlussoRendicontazioneRisposta(None, esito)
-      _ = log.info(FdrLogConstant.logSintattico(RESPONSE_NAME))
+      _ = log.debug(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
       _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
       _ = callTrace(traceInternalRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
@@ -176,14 +176,15 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       })
       .map {
         case sr: SoapResponse =>
-          log.info(FdrLogConstant.logEnd(s"Only SR ${actorClassId}"))
           callTrace(traceInterfaceRequest,reActor, soapRequest, reFlow.get, soapRequest.reExtra)
+          logEndProcess(sr)
           replyTo ! sr
+          complete()
         case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, rendicontazioneSaved: Rendicontazione) =>
-          log.info(FdrLogConstant.logEnd(s"SR, NIFR, RENDICONTAZIONE ${actorClassId}"))
           callTrace(traceInterfaceRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
+          logEndProcess(sr)
           Future {
-            log.info(FdrLogConstant.logEnd(s"Stato rendicontazione ${rendicontazioneSaved.stato}"))
+            log.debug(FdrLogConstant.logEnd(s"Stato rendicontazione ${rendicontazioneSaved.stato}"))
             if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
               // send data to history
               fdrMetadataActor ! FdREventToHistory(
@@ -200,9 +201,6 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
           }.recover {
             case e: Throwable => log.error(e, "Problem to send message to fdrMetadataActor")
           }
-
-        case _ =>
-          log.info("TODO [FC] MANAGE HERE")
       }
   }
 
@@ -246,7 +244,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
   }
 
   def parseInput(payload: String, inputXsdValid: Boolean): Try[NodoInviaFlussoRendicontazione] = {
-    log.info(FdrLogConstant.logSintattico(actorClassId))
+    log.debug(FdrLogConstant.logSintattico(actorClassId))
     (for {
       _ <- XsdValid.checkOnly(payload, XmlEnum.NODO_INVIA_FLUSSO_RENDICONTAZIONE_NODOPERPSP, inputXsdValid)
       body <- XmlEnum.str2nodoInviaFlussoRendicontazione_nodoperpsp(payload)
@@ -257,5 +255,4 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       Failure(cfb)
     }
   }
-
 }

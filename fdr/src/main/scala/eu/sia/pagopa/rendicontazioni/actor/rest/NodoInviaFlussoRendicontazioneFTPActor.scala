@@ -171,18 +171,12 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
       }).map {
           case sr: SoapResponse =>
             callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
-            sr.throwable match {
-              case Some(ex) => log.error(FdrLogConstant.logEndKO(actorClassId, Some(ex)))
-              case None => log.info(FdrLogConstant.logEndOK(actorClassId))
-            }
+            logEndProcess(sr)
             replyTo ! sr
             complete()
           case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
             callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
-            sr.throwable match {
-              case Some(ex) => log.error(FdrLogConstant.logEndKO(actorClassId, Some(ex)))
-              case None => log.info(FdrLogConstant.logEndOK(actorClassId))
-            }
+            logEndProcess(sr)
 
             Future {
               if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
@@ -288,5 +282,4 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
     val payload = exception.map(v => Error(v.getMessage).toJson.toString())
     RestResponse(req.sessionId, payload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
-
 }
