@@ -633,7 +633,7 @@ case class NodoRoute(
                       })
                       payloadTry match {
                         case Success(payload) =>
-                          log.info(FdrLogConstant.logStart(Constant.KeyName.REST_INPUT))
+                          log.info(FdrLogConstant.logStart(if (primitiva != null) primitiva else Constant.KeyName.REST_INPUT))
                           val request = ctx.request
                           log.info(s"Content-Type [${request.entity.contentType}]")
 
