@@ -122,7 +122,7 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
 
           tipiIdRendicontazioni = if ( flussiResponseNexi.isDefined) {
             val flussiTrovati = flussiResponseNexi.get.idRendicontazione
-            log.info(s"Returned ${flussiTrovati.size} reportings by ${SoapReceiverType.NEXI.toString}")
+            log.debug(s"Returned ${flussiTrovati.size} reportings by ${SoapReceiverType.NEXI.toString}")
             flussiTrovati
           } else {
             log.info(s"No reportings returned by ${SoapReceiverType.NEXI.toString}")

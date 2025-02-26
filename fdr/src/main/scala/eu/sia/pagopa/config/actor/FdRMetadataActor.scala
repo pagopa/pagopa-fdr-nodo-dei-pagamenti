@@ -105,7 +105,7 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
       val fdrMetadataEnabled = system.settings.config.getBoolean("fdrMetadataEnabled")
       log.debug(s"fdrMetadataEnabled ${fdrMetadataEnabled}")
       if (fdrMetadataEnabled) {
-        log.info(s"FdREventToHistory ${event.retry}")
+        log.debug(s"FdREventToHistory ${event.retry}")
         saveForHistory(event)
         context.become(idle) // clear reference after processing
       }

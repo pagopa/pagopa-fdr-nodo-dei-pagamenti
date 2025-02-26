@@ -62,7 +62,7 @@ case class PollerActor(repositories: Repositories, actorProps: ActorProps) exten
           replyTo ! TriggerJobResponse(req.sessionId, SchedulerStatus.OK, Some(s"Job triggered"), req.testCaseId)
         })
         .recover({ case e =>
-          log.info(s"job actor terminated with error ${req.job},${e.getMessage}")
+          log.error(s"job actor terminated with error ${req.job},${e.getMessage}")
           replyTo ! TriggerJobResponse(req.sessionId, SchedulerStatus.KO, Some(e.getMessage), req.testCaseId)
         })
     } else {

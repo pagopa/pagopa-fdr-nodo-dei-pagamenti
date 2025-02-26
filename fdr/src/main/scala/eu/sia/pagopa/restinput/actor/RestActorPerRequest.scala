@@ -200,7 +200,7 @@ class RestActorPerRequest(
   private def traceErrorResponse(e: Throwable, statusCode: Int): Unit = {
     log.error(e, s"Error response: [${e.getMessage}]")
     traceRequest(message, actorProps.ddataMap)
-    log.info("Generating negative response")
+    log.debug("Generating negative response")
     traceResponse(None, Error(e.getMessage).toJson.toString(), statusCode, EsitoRE.INVIATA_KO)
   }
 

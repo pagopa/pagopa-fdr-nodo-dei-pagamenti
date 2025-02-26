@@ -184,7 +184,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
           callTrace(traceInterfaceRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
           logEndProcess(sr)
           Future {
-            log.debug(FdrLogConstant.logEnd(s"Stato rendicontazione ${rendicontazioneSaved.stato}"))
+            log.debug(s"Stato rendicontazione ${rendicontazioneSaved.stato}")
             if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
               // send data to history
               fdrMetadataActor ! FdREventToHistory(

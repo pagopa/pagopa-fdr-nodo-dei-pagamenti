@@ -62,7 +62,7 @@ object ConfigUtil {
     import scala.concurrent.duration._
     val settings = ConnectionPoolSettings(system).withConnectionSettings(ClientConnectionSettings(system).withIdleTimeout(timeout.seconds).withConnectingTimeout(5.seconds))
     val uri = s"$apiConfigUrl$path"
-    log.info(s"calling ApiConfigCache on [$uri]")
+    log.debug(s"calling ApiConfigCache on [$uri]")
     for{
       req <- Future.fromTry(Try(HttpRequest(uri = uri, headers = Seq(RawHeader(HEADER_SUBSCRIPTION_KEY, subKey)))))
       res <- if (uri.startsWith("https")) {
@@ -98,7 +98,7 @@ object ConfigUtil {
   }
 
   def refreshConfigHttp(actorProps:ActorProps,manual:Boolean)(implicit log: NodoLogger, system: ActorSystem, ex: ExecutionContext): Future[ConfigData] = {
-    log.info(s"${if(manual) "manual" else "automatic"} refresh config")
+    log.debug(s"${if(manual) "manual" else "automatic"} refresh config")
     if(!reloading){
       reloading = true
       (for {
@@ -106,7 +106,7 @@ object ConfigUtil {
         resDec = decodeResponse(res)
         resBody <- Unmarshaller.stringUnmarshaller(resDec.entity)
         d = mapper.readValue(resBody, classOf[ConfigData])
-        _ = log.info("force refresh config done")
+        _ = log.debug("force refresh config done")
         _ = reloading = false
       } yield d).recoverWith({
         case e=>
@@ -117,10 +117,6 @@ object ConfigUtil {
       Future.failed(new RuntimeException("reloading in progress"))
     }
 
-  }
-
-  def getGdeConfigKey(primitiva: String, primitivaType: String): String = {
-    s"${primitiva}_$primitivaType".toUpperCase
   }
 
   def serializeJson(value: Any): String = {

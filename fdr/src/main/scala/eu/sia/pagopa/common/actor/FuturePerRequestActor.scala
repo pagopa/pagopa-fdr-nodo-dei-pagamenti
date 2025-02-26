@@ -53,7 +53,7 @@ trait FuturePerRequestActor extends Actor with NodoLogging {
     val f: Future[akka.http.scaladsl.server.RouteResult] = requestContext.complete(m)
     f.onComplete(a => donePromise.complete(a))
     log.debug(s"FuturePerRequest - DESTROY FutureActorPerRequest [$actorPathName]")
-    log.info(FdrLogConstant.logEnd(s"[${actorName}] $actorClassId"))
+    log.debug(FdrLogConstant.logEnd(s"[${actorName}] $actorClassId"))
     context.stop(context.self)
   }
 }

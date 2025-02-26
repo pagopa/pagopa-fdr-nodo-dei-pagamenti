@@ -264,7 +264,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
                   emptyReport <- Future.successful(None)
                 } yield emptyReport
               } else {
-                log.info(s"Report [${ncfr.identificativoFlusso}] returned by ${SoapReceiverType.NEXI.toString}")
+                log.debug(s"Report [${ncfr.identificativoFlusso}] returned by ${SoapReceiverType.NEXI.toString}")
                 Future.successful(ncfrResponse.get.xmlRendicontazione.get)
               }
               _ = ncfrResponse.get.fault.map(v => log.warn(s"Esito da ${SoapReceiverType.NEXI.toString}: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))

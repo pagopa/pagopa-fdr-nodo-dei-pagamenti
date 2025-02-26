@@ -74,14 +74,32 @@ trait PerRequestActor extends Actor with NodoLogging {
   }
 
   def logEndProcess(soapResponse: SoapResponse): Unit = {
-    logEndProcess(soapResponse.throwable)
+    soapResponse.throwable match {
+      case Some(_) => logEndProcess(soapResponse.throwable)
+      case None => {
+        if (soapResponse.payload.getOrElse("").contains("fault")) {
+          log.error(FdrLogConstant.logEndKO(actorClassId, "Error response: [" + soapResponse.payload.getOrElse("Generic error") + "]"))
+        } else {
+          log.info(FdrLogConstant.logEndOK(actorClassId))
+        }
+      }
+    }
   }
 
   def logEndProcess(restResponse: RestResponse): Unit = {
-    logEndProcess(restResponse.throwable)
+    restResponse.throwable match {
+      case Some(_) => logEndProcess(restResponse.throwable)
+      case None => {
+        if (restResponse.statusCode > 299) {
+          log.error(FdrLogConstant.logEndKO(actorClassId, "Error response: [" + restResponse.payload.getOrElse("Generic error") + "]"))
+        } else {
+          log.info(FdrLogConstant.logEndOK(actorClassId))
+        }
+      }
+    }
   }
 
-  private def logEndProcess(throwable: Option[Throwable]): Unit = {
+  def logEndProcess(throwable: Option[Throwable]): Unit = {
     throwable match {
       case Some(ex) => log.error(FdrLogConstant.logEndKO(actorClassId, Some(ex)))
       case None => log.info(FdrLogConstant.logEndOK(actorClassId))

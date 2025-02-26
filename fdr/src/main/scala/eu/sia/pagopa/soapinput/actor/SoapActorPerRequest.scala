@@ -167,7 +167,7 @@ class SoapActorPerRequest(
     Future {
       traceRequest(message)
 
-      log.info("Genero risposta negativa - generateReRequestError")
+      log.debug("Genero risposta negativa - generateReRequestError")
       Util.logPayload(log, sres.payload)
 
       val now = Util.now()

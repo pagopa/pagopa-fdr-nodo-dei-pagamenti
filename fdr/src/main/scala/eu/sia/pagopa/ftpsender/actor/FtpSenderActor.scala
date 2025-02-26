@@ -42,7 +42,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
 
         val pipeline = for {
           ftpconfig <- Future.successful(ftpconfigopt.get._2)
-          _ = log.info(FdrLogConstant.logSemantico(Constant.KeyName.FTP_SENDER))
+          _ = log.debug(FdrLogConstant.logSemantico(Constant.KeyName.FTP_SENDER))
           _ <- Future(validateInput(filename))
           _ = log.debug(s"File recovery from DB with fileId=[$fileId]")
           file <- repositories.fdrRepository.findFtpFileById(fileId, tipo).flatMap {
@@ -50,7 +50,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
               Future.successful(b)
             case None =>
               val message = s"File not found on database"
-              log.info(message)
+              log.error(message)
               Future.failed(DigitPaException(message, DigitPaErrorCodes.PPT_SYSTEM_ERROR))
           }
           inPath =
@@ -75,7 +75,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
             Try({
               log.debug(s"Destination directory existence check")
               createDirs(destpath)(ftp)
-              log.info(s"File upload in progress")
+              log.debug(s"File upload in progress")
               ftp.putBytes(file.content, destfile)
               log.debug(s"File upload completed")
             }) match {
@@ -95,7 +95,7 @@ final case class FtpSenderActorPerRequest(repositories: Repositories, actorProps
             Future.successful(FTPResponse(sessionId, testCaseId, Some(DigitPaErrorCodes.PPT_SYSTEM_ERROR)))
           }
           .map(resp => {
-            log.info(FdrLogConstant.logEnd(actorClassId))
+            logEndProcess(resp.throwable)
             sendto ! resp
             complete()
           })
