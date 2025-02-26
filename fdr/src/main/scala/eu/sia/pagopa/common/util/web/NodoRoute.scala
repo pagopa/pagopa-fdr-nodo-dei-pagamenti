@@ -536,7 +536,7 @@ case class NodoRoute(
                           payloadTry match {
                             case Success(payload) =>
                               val request = ctx.request
-                              log.info(s"Content-Type [${request.entity.contentType}]")
+                              log.debug(s"Content-Type [${request.entity.contentType}]")
                               val soapRouterRequest = SoapRouterRequest(
                                 sessionId,
                                 payload,

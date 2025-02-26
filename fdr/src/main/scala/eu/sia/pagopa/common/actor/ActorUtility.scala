@@ -76,7 +76,7 @@ class ActorUtility {
           ),
           reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.value), soapProtocol = isSoapProtocol))
         )
-        log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER))
+        log.debug(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER))
         sendReEvent(actorProps, reRequest)
       }
 

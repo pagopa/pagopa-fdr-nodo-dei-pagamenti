@@ -157,7 +157,7 @@ class SoapActorPerRequest(
         reExtra = Some(ReExtra(statusCode = Some(bundleResponse.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
       )
       Util.logPayload(log, sres.payload)
-      log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
+      log.debug(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
       reActor ! reRequest
     }
 
@@ -252,7 +252,7 @@ class SoapActorPerRequest(
         message.testCaseId
       )
     } yield (router, soapRequest)) map { case (router, soapRequest) =>
-      log.info(FdrLogConstant.callBundle(router.path.name))
+      log.debug(FdrLogConstant.callBundle(router.path.name))
       router ! soapRequest
     } recover {
       case sre: SoapRouterException =>
