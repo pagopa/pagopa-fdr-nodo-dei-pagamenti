@@ -34,3 +34,4 @@ lightbend.sbt
 .run/MainTest dev.run.xml
 .run/MainTest local.run.xml
 *.tmp
+/localresources/config-app-local.conf
