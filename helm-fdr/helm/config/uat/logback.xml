@@ -64,7 +64,7 @@
 
     <logger name="slick" level="INFO" />
     <logger name="slick.jdbc.DriverDataSource"              level="INFO" />
-    <logger name="slick.jdbc.JdbcBackend.statement"         level="INFO" />
+    <logger name="slick.jdbc.JdbcBackend.statement"         level="DEBUG" />
     <logger name="slick.jdbc.JdbcBackend.parameter"         level="INFO" />
     <logger name="slick.jdbc.JdbcBackend.benchmark"         level="INFO" />
     <logger name="slick.jdbc.StatementInvoker.result"       level="INFO" />
