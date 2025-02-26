@@ -508,7 +508,6 @@ case class NodoRoute(
       path("webservices" / "input") {
         val sessionId = UUID.randomUUID().toString
         MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-        log.info(FdrLogConstant.logStart(Constant.KeyName.SOAP_INPUT))
         import scala.concurrent.duration._
         val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
         withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {
@@ -518,7 +517,7 @@ case class NodoRoute(
                 optionalHeaderValueByName(X_PDD_HEADER) { originalRequestAddresOpt =>
                   log.debug(s"Request headers:\n${req.headers.map(s => s"${s.name()} => ${s.value()}").mkString("\n")}")
                   optionalHeaderValueByName("SOAPAction") { soapActionHeader =>
-                    log.debug(s"Ricevuta request [${soapActionHeader.getOrElse("No SOAPAction")}] @ ${LocalDateTime.now()}")
+                    log.info(FdrLogConstant.logStart(soapActionHeader.getOrElse(Constant.KeyName.SOAP_INPUT)))
                     optionalHeaderValueByName("testCaseId") { headerTestCaseId =>
                       extractRequestContext { ctx =>
                         entity(as[ByteString]) { bs =>
