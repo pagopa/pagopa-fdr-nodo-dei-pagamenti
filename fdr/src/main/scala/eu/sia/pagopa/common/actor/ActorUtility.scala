@@ -51,7 +51,7 @@ class ActorUtility {
         akka.http.scaladsl.model.HttpRequest(method = req.method, uri = req.uri, headers = akkaheaders)
     }
     val redate = Util.now()
-    log.info(s"HTTP NODO -> [${req.uri}] will timeout in [${req.timeout.toString}]")
+    log.debug(s"HTTP NODO -> [${req.uri}] will timeout in [${req.timeout.toString}]")
     (for {
       httpResponse <- dispatchRequest(req.timeout, req.proxyData, akkaReq, actorProps.httpsConnectionContext)
       payload <- Unmarshaller.stringUnmarshaller(httpResponse.entity)
@@ -76,7 +76,7 @@ class ActorUtility {
           ),
           reExtra = Some(ReExtra(uri = Some(req.uri), httpMethod = Some(req.method.value), soapProtocol = isSoapProtocol))
         )
-        log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER))
+        log.debug(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER))
         sendReEvent(actorProps, reRequest)
       }
 

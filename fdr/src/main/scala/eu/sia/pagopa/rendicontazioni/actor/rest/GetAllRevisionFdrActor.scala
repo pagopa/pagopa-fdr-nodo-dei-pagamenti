@@ -56,7 +56,7 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
 
       (for {
         _ <- Future.successful(())
-        _ = log.info(FdrLogConstant.logSintattico(actorClassId))
+        _ = log.debug(FdrLogConstant.logSintattico(actorClassId))
 
         organizationId = req.pathParams("organizationId")
         fdr = req.pathParams("fdr")
@@ -119,7 +119,7 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
             Future.successful(generateErrorResponse(Some(pmae)))
       }).map( res => {
         callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
-        log.info(FdrLogConstant.logEnd(actorClassId))
+        logEndProcess(res)
         replyTo ! res
         complete()
       })
@@ -159,7 +159,7 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
   }
 
   private def generateErrorResponse(exception: Option[RestException]) = {
-    log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Response"))
+    log.debug(FdrLogConstant.logGeneraPayload(actorClassId + "Response"))
     val httpStatusCode = exception.map(_.statusCode).getOrElse(StatusCodes.OK.intValue)
     log.debug(s"Generating response $httpStatusCode")
     val payload = exception.map(v => Error(v.getMessage).toJson.toString())
@@ -167,7 +167,7 @@ case class GetAllRevisionFdrActorPerRequest(repositories: Repositories, actorPro
   }
 
   private def generateErrorResponseFromSoap(exception: Option[Exception]) = {
-    log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Response"))
+    log.debug(FdrLogConstant.logGeneraPayload(actorClassId + "Response"))
     val httpStatusCode = StatusCodes.BadRequest.intValue
     log.debug(s"Generating response $httpStatusCode")
     val payload = exception.map(v => Error(v.getMessage).toJson.toString())

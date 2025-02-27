@@ -56,7 +56,7 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
   }
 
   override def receive: Receive = { case sch: WorkRequest =>
-    log.info(s"FTP Retry message received[${sch.sessionId}]")
+    log.debug(s"FTP Retry message received[${sch.sessionId}]")
     replyTo = sender()
 
     val jobName = Jobs.FTP_UPLOAD_RETRY.name
@@ -76,7 +76,7 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
             for {
               filesIdServerId <- fdrRepository.findToRetry(Constant.Sftp.RENDICONTAZIONI, maxRetry, timeLimit)
               grouped = filesIdServerId.groupBy(_._1)
-              _ = log.info(s"File summary found to upload:\n${grouped.map(g => s"Server[${g._1}], files number[${g._2.size}]").mkString("\n")}")
+              _ = log.debug(s"File summary found to upload:\n${grouped.map(g => s"Server[${g._1}], files number[${g._2.size}]").mkString("\n")}")
               subreqs = grouped.map(f => FTPRetryRequest(sch.sessionId, Constant.Sftp.RENDICONTAZIONI, f._1, f._2.map(_._2)))
               _ <- FutureUtils.groupedSerializeFuture(log, subreqs, 50)(d => uploadFile(d.sessionId, d.messageType, d.ftpServerId, d.fileIds))
               _ <- fdrRepository
@@ -111,7 +111,7 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
   }
 
   def uploadFile(sessionId: String, tipo: String, ftpServerId: Long, fileIds: Seq[Long]): Future[Unit] = {
-    log.info(FdrLogConstant.logStart(actorClassId) + "-per-request")
+    log.debug(FdrLogConstant.logStart(actorClassId) + "-per-request")
 
     log.debug(s"Received [FTPRetryRequest] [${sessionId}][$tipo]")
     val ftpconfigopt =
@@ -123,7 +123,7 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
 
     val pipeline = for {
       ftpconfig <- Future.successful(ftpconfigopt.get._2)
-      _ = log.info(FdrLogConstant.logSemantico(Constant.KeyName.FTP_RETRY) + "-per-request")
+      _ = log.debug(FdrLogConstant.logSemantico(Constant.KeyName.FTP_RETRY) + "-per-request")
       _ = log.debug(s"File recovery from DB")
       files <- fdrRepository.findFtpFilesByIds(fileIds, tipo)
 
@@ -149,10 +149,10 @@ final case class FtpRetryActorPerRequest(repositories: Repositories, actorProps:
       _ <- SSHFuture.ftp(ssh) { ftp: SSHFtp =>
         Future.sequence(filesWithData.map(f => {
           Try {
-            log.info(s"File [${f._3}]")
+            log.debug(s"File [${f._3}]")
             log.debug(s"Destination directory existence check")
             createDirs(f._2)(ftp)
-            log.info(s"File upload in progress")
+            log.debug(s"File upload in progress")
             ftp.putBytes(f._1.content, f._3)
             log.debug(s"File upload completed")
           } match {

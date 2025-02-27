@@ -71,7 +71,7 @@ case class RegisterFdrForValidationActorPerRequest(repositories: Repositories, a
 
       (for {
         _ <- Future.successful(())
-        _ = log.info(FdrLogConstant.logSintattico(actorClassId))
+        _ = log.debug(FdrLogConstant.logSintattico(actorClassId))
         (flowId, pspId, organizationId, flowTimestamp) <- Future.fromTry(parseInput(req))
 
         re_ = Re(
@@ -93,7 +93,7 @@ case class RegisterFdrForValidationActorPerRequest(repositories: Repositories, a
         )
         _ = reFlow = Some(re_)
 
-        _ = log.info(FdrLogConstant.logGeneraPayload(s"registerFdrForValidation REST"))
+        _ = log.debug(FdrLogConstant.logGeneraPayload(s"registerFdrForValidation REST"))
 
         (persistenceOutcome) <- saveRendicontazione(
           flowId,
@@ -117,7 +117,7 @@ case class RegisterFdrForValidationActorPerRequest(repositories: Repositories, a
             Future.successful(generateResponse(Some(pmae)))
         }).map(res => {
           callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
-          log.info(FdrLogConstant.logEnd(actorClassId))
+          logEndProcess(res)
           replyTo ! res
           complete()
         })
@@ -200,12 +200,11 @@ case class RegisterFdrForValidationActorPerRequest(repositories: Repositories, a
   }
 
   private def generateResponse(exception: Option[RestException]) = {
-    log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Risposta"))
+    log.debug(FdrLogConstant.logGeneraPayload(actorClassId + "Risposta"))
     val httpStatusCode = exception.map(_.statusCode).getOrElse(StatusCodes.OK.intValue)
     log.debug(s"Generazione risposta $httpStatusCode")
     val errorCause = exception.map(_.message).getOrElse("Generic error")
     val responsePayload = exception.map(v => GenericResponse(errorCause).toJson.toString())
     RestResponse(req.sessionId, responsePayload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
-
 }

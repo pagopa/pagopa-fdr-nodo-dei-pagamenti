@@ -44,6 +44,8 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
 
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
 
+  override val actorClassId = "NodoInviaFlussoRendicontazioneFTP"
+
   override def receive: Receive = {
     case restRequest: RestRequest =>
       replyTo = sender()
@@ -62,13 +64,13 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
           erogatore = Some(Componente.NDP_FDR.toString),
           businessProcess = Some(actorClassId),
           erogatoreDescr = Some(Componente.NDP_FDR.toString),
-          flowAction = Some("nodoInviaFlussoRendicontazioneFTP")
+          flowAction = Some("NodoInviaFlussoRendicontazioneFTP")
         )
       )
 
       (for {
         _ <- Future.successful(())
-        _ = log.info(FdrLogConstant.logSintattico(actorClassId))
+        _ = log.debug(FdrLogConstant.logSintattico(actorClassId))
         (nifrSoap, xmlPayload) <- Future.fromTry(parseInput(req))
 
         _ = MDC.put(Constant.MDCKey.FDR, nifrSoap.identificativoFlusso)
@@ -93,7 +95,7 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
         )
         _ = reFlow = Some(re_)
 
-        _ = log.info(FdrLogConstant.logSemantico(actorClassId))
+        _ = log.debug(FdrLogConstant.logSemantico(actorClassId))
         (pa, psp, canale) <- Future.fromTry(checks(ddataMap, nifrSoap, true, actorClassId))
 
         _ <- Future.fromTry(checkFormatoIdFlussoRendicontazione(nifrSoap.identificativoFlusso, nifrSoap.identificativoPSP, actorClassId))
@@ -169,11 +171,12 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
       }).map {
           case sr: SoapResponse =>
             callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
-            log.info(FdrLogConstant.logEnd(actorClassId))
+            logEndProcess(sr)
             replyTo ! sr
+            complete()
           case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
             callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
-            log.info(FdrLogConstant.logEnd(actorClassId))
+            logEndProcess(sr)
 
             Future {
               if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
@@ -192,10 +195,11 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
               }
             }
             replyTo ! sr
-
             complete()
-          case _ =>
-            log.info("TODO [FC] MANAGE HERE")
+          case rs: RestResponse =>
+            log.error(FdrLogConstant.logEndKO(actorClassId, rs.throwable))
+            replyTo ! rs
+            complete()
         }
       }
 
@@ -272,11 +276,10 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
   }
 
   private def generateErrorResponse(exception: Option[RestException]) = {
-    log.info(FdrLogConstant.logGeneraPayload(actorClassId + "Risposta"))
+    log.debug(FdrLogConstant.logGeneraPayload(actorClassId + "Risposta"))
     val httpStatusCode = exception.map(_.statusCode).getOrElse(StatusCodes.OK.intValue)
     log.debug(s"Generating response $httpStatusCode")
     val payload = exception.map(v => Error(v.getMessage).toJson.toString())
     RestResponse(req.sessionId, payload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
-
 }

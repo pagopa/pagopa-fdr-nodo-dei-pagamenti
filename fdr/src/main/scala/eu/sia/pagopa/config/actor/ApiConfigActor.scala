@@ -42,7 +42,7 @@ final case class ApiConfigActor(repositories: Repositories, actorProps: ActorPro
         context.system.scheduler.scheduleOnce(scheduleMinutes, self, CheckCache(UUID.randomUUID().toString))
       })
     case GetCache(_, cacheId) =>
-      log.info(s"GetCache $cacheId requested")
+      log.debug(s"GetCache $cacheId requested")
       val env = scala.util.Properties.envOrNone("INSTANCE")
       (for {
         cacheData <- ConfigUtil.getConfigHttp(actorProps.httpsConnectionContext)

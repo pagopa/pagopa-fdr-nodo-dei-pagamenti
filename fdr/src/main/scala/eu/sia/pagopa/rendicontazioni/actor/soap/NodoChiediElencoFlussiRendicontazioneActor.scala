@@ -60,7 +60,7 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
         flowAction = Some(req.primitive)
       )
     )
-    log.info(FdrLogConstant.logSintattico(actorClassId))
+    log.debug(FdrLogConstant.logSintattico(actorClassId))
     val pipeline = for {
 
       ncefr <- Future.fromTry(parseInput(soapRequest))
@@ -75,7 +75,7 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
         )
       )
 
-      _ = log.info(FdrLogConstant.logSemantico(actorClassId))
+      _ = log.debug(FdrLogConstant.logSemantico(actorClassId))
       (staz, psp) <- checks(ncefr)
 
       _ = re = re.map(r => r.copy(fruitoreDescr = Some(staz.stationCode), pspDescr = psp.flatMap(_.description)))
@@ -122,7 +122,7 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
 
           tipiIdRendicontazioni = if ( flussiResponseNexi.isDefined) {
             val flussiTrovati = flussiResponseNexi.get.idRendicontazione
-            log.info(s"Returned ${flussiTrovati.size} reportings by ${SoapReceiverType.NEXI.toString}")
+            log.debug(s"Returned ${flussiTrovati.size} reportings by ${SoapReceiverType.NEXI.toString}")
             flussiTrovati
           } else {
             log.info(s"No reportings returned by ${SoapReceiverType.NEXI.toString}")
@@ -142,7 +142,7 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
 
       ncrfrResponse = NodoChiediElencoFlussiRendicontazioneRisposta(None, elencoFlussiRendicontazione)
 
-      _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
+      _ = log.debug(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       env <- Future.fromTry(wrapInBundleMessage(ncrfrResponse))
     } yield SoapResponse(soapRequest.sessionId, Some(env), StatusCodes.OK.intValue, re, soapRequest.testCaseId, None)
 
@@ -155,7 +155,7 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, DigitPaErrorCodes.PPT_SYSTEM_ERROR, re)
     }) map (sr => {
       callTrace(traceInterfaceRequest, reActor, soapRequest, re.get, soapRequest.reExtra)
-      log.info(FdrLogConstant.logEnd(actorClassId))
+      logEndProcess(sr)
       replyTo ! sr
       complete()
     })
@@ -187,7 +187,7 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
   }
 
   private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediElencoFlussiRendicontazioneRisposta]] = {
-    log.info(FdrLogConstant.logSintattico(s"${SoapReceiverType.NEXI.toString} $RESPONSE_NAME"))
+    log.debug(FdrLogConstant.logSintattico(s"${SoapReceiverType.NEXI.toString} $RESPONSE_NAME"))
     (for {
       _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_ELENCO_FLUSSI_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
       body <- XmlEnum.str2nodoChiediElencoFlussiRendicontazioneResponse_nodoperpa(payloadResponse)
@@ -249,5 +249,4 @@ case class NodoChiediElencoFlussiRendicontazioneActorPerRequest(repositories: Re
       _ = log.debug("Valid response")
     } yield respPayload
   }
-
 }

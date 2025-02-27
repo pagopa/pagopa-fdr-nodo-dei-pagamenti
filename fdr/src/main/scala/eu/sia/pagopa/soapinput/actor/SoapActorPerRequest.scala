@@ -91,8 +91,6 @@ class SoapActorPerRequest(
 
     case sres: SoapResponse =>
       log.debug(s"RECEIVE SoapResponse from sender: ${sender().path.name}")
-      // [FC] terminateActor forces the actor to stop, otherwise it remains in pending until to bundleTimeoutSeconds
-      terminateActor(sender())
       sres.payload match {
         case Some(_) =>
           // risposta dal bundle positiva o negativa
@@ -157,7 +155,7 @@ class SoapActorPerRequest(
         reExtra = Some(ReExtra(statusCode = Some(bundleResponse.statusCode), elapsed = Some(message.timestamp.until(now,ChronoUnit.MILLIS)), soapProtocol = true))
       )
       Util.logPayload(log, sres.payload)
-      log.info(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
+      log.debug(FdrLogConstant.callBundle(Constant.KeyName.RE_FEEDER, isInput = false))
       reActor ! reRequest
     }
 
@@ -167,7 +165,7 @@ class SoapActorPerRequest(
     Future {
       traceRequest(message)
 
-      log.info("Genero risposta negativa - generateReRequestError")
+      log.debug("Genero risposta negativa - generateReRequestError")
       Util.logPayload(log, sres.payload)
 
       val now = Util.now()
@@ -187,11 +185,6 @@ class SoapActorPerRequest(
       )
       reActor ! reRequest
     }
-  }
-
-  private def terminateActor(actorRef: ActorRef): Unit = {
-    log.debug(s"Terminating ${actorRef.path.name}")
-    context.stop(actorRef)
   }
 
   def sendToBundle(message: SoapRouterRequest): Try[Unit] = {
@@ -252,7 +245,7 @@ class SoapActorPerRequest(
         message.testCaseId
       )
     } yield (router, soapRequest)) map { case (router, soapRequest) =>
-      log.info(FdrLogConstant.callBundle(router.path.name))
+      log.debug(FdrLogConstant.callBundle(router.path.name))
       router ! soapRequest
     } recover {
       case sre: SoapRouterException =>

@@ -473,8 +473,7 @@ case class NodoRoute(
     val payload = Util.faultXmlResponse(dpe.faultCode, dpe.faultString, Some("Internal timeout"))
     MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
     Util.logPayload(log, Some(payload))
-    log.debug(s"END request Http for AKKA HTTP TIMEOUT")
-    log.info(FdrLogConstant.logEnd(Constant.KeyName.SOAP_INPUT))
+    log.info(FdrLogConstant.logEndKO(Constant.KeyName.SOAP_INPUT, "AKKA HTTP Timeout"))
     HttpResponse(status = StatusCodes.ServiceUnavailable, entity = HttpEntity(MediaTypes.`application/xml` withCharset HttpCharsets.`UTF-8`, payload))
   }
 
@@ -483,8 +482,7 @@ case class NodoRoute(
     val payload = Util.faultXmlResponse(dpe.faultCode, dpe.faultString, Some(s"Error, data encoding is not $charset"))
     MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
     Util.logPayload(log, Some(payload))
-    log.debug(s"END request Http for AKKA HTTP TIMEOUT")
-    log.info(FdrLogConstant.logEnd(Constant.KeyName.SOAP_INPUT))
+    log.info(FdrLogConstant.logEndKO(Constant.KeyName.SOAP_INPUT, "AKKA HTTP Timeout"))
     HttpResponse(status = StatusCodes.BadRequest, entity = HttpEntity(MediaTypes.`application/xml` withCharset HttpCharsets.`UTF-8`, payload))
   }
 
@@ -510,7 +508,6 @@ case class NodoRoute(
       path("webservices" / "input") {
         val sessionId = UUID.randomUUID().toString
         MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-        log.info(FdrLogConstant.logStart(Constant.KeyName.SOAP_INPUT))
         import scala.concurrent.duration._
         val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
         withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {
@@ -520,7 +517,7 @@ case class NodoRoute(
                 optionalHeaderValueByName(X_PDD_HEADER) { originalRequestAddresOpt =>
                   log.debug(s"Request headers:\n${req.headers.map(s => s"${s.name()} => ${s.value()}").mkString("\n")}")
                   optionalHeaderValueByName("SOAPAction") { soapActionHeader =>
-                    log.info(s"Ricevuta request [${soapActionHeader.getOrElse("No SOAPAction")}] @ ${LocalDateTime.now()}")
+                    log.info(FdrLogConstant.logStart(soapActionHeader.getOrElse(Constant.KeyName.SOAP_INPUT)))
                     optionalHeaderValueByName("testCaseId") { headerTestCaseId =>
                       extractRequestContext { ctx =>
                         entity(as[ByteString]) { bs =>
@@ -536,7 +533,7 @@ case class NodoRoute(
                           payloadTry match {
                             case Success(payload) =>
                               val request = ctx.request
-                              log.info(s"Content-Type [${request.entity.contentType}]")
+                              log.debug(s"Content-Type [${request.entity.contentType}]")
                               val soapRouterRequest = SoapRouterRequest(
                                 sessionId,
                                 payload,
@@ -611,7 +608,7 @@ case class NodoRoute(
   private def restRoute(primitiva: String, httpmethod: String, pathParams: Map[String, String]) = {
     val sessionId = UUID.randomUUID().toString
     MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
-    log.info(s"Ricevuta request [$sessionId] @ ${LocalDateTime.now()} : [$primitiva]")
+    log.debug(s"Ricevuta request [$sessionId] @ ${LocalDateTime.now()} : [$primitiva]")
     MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, primitiva)
     val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
     withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {
@@ -633,9 +630,9 @@ case class NodoRoute(
                       })
                       payloadTry match {
                         case Success(payload) =>
-                          log.info(FdrLogConstant.logStart(Constant.KeyName.REST_INPUT))
+                          log.info(FdrLogConstant.logStart(if (primitiva != null) primitiva else Constant.KeyName.REST_INPUT))
                           val request = ctx.request
-                          log.info(s"Content-Type [${request.entity.contentType}]")
+                          log.debug(s"Content-Type [${request.entity.contentType}]")
 
                           val restRouterRequest: RestRouterRequest = RestRouterRequest(
                             sessionId,

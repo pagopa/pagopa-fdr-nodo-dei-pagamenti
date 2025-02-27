@@ -7,7 +7,9 @@ import eu.sia.pagopa.ActorProps
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
+import eu.sia.pagopa.common.message.{RestResponse, SoapResponse}
 import eu.sia.pagopa.common.repo.Repositories
+import eu.sia.pagopa.common.util.FdrLogConstant
 
 import java.util.concurrent.TimeUnit
 import scala.concurrent.duration.{FiniteDuration, _}
@@ -71,4 +73,36 @@ trait PerRequestActor extends Actor with NodoLogging {
     actor.ask(req)(BUNDLE_IDLE_TIMEOUT).mapTo[S]
   }
 
+  def logEndProcess(soapResponse: SoapResponse): Unit = {
+    soapResponse.throwable match {
+      case Some(_) => logEndProcess(soapResponse.throwable)
+      case None => {
+        if (soapResponse.payload.getOrElse("").contains("fault")) {
+          log.error(FdrLogConstant.logEndKO(actorClassId, "Error response: [" + soapResponse.payload.getOrElse("Generic error") + "]"))
+        } else {
+          log.info(FdrLogConstant.logEndOK(actorClassId))
+        }
+      }
+    }
+  }
+
+  def logEndProcess(restResponse: RestResponse): Unit = {
+    restResponse.throwable match {
+      case Some(_) => logEndProcess(restResponse.throwable)
+      case None => {
+        if (restResponse.statusCode > 299) {
+          log.error(FdrLogConstant.logEndKO(actorClassId, "Error response: [" + restResponse.payload.getOrElse("Generic error") + "]"))
+        } else {
+          log.info(FdrLogConstant.logEndOK(actorClassId))
+        }
+      }
+    }
+  }
+
+  def logEndProcess(throwable: Option[Throwable]): Unit = {
+    throwable match {
+      case Some(ex) => log.error(FdrLogConstant.logEndKO(actorClassId, Some(ex)))
+      case None => log.info(FdrLogConstant.logEndOK(actorClassId))
+    }
+  }
 }

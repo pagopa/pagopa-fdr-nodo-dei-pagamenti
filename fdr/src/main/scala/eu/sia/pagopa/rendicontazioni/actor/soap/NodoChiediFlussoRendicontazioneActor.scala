@@ -71,10 +71,10 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
     paOpt match {
       case Some(pa) =>
         if (pa.reportingFtp) {
-          log.info("FTP reporting")
+          log.debug("FTP reporting")
           Future.successful(None)
         } else {
-          log.info("NOT FTP reporting")
+          log.debug("NOT FTP reporting")
           if (binaryFileOption.isDefined) {
             val unzippedFilecontent = Util.ungzipContent(binaryFileOption.get.fileContent.get) match {
               case Success(content) => content
@@ -88,7 +88,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         }
 
       case None =>
-        log.info("Identificativo dominio NON presente")
+        log.debug("Identificativo dominio NON presente")
         if (binaryFileOption.isDefined) {
           val unzippedFilecontent = Util.ungzipContent(binaryFileOption.get.fileContent.get) match {
             case Success(content) => content
@@ -205,7 +205,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         flowAction = Some(req.primitive)
       )
     )
-    log.info(FdrLogConstant.logSintattico(actorClassId))
+    log.debug(FdrLogConstant.logSintattico(actorClassId))
     val pipeline = for {
       ncfr <- Future.fromTry(parseInput(soapRequest))
 
@@ -264,7 +264,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
                   emptyReport <- Future.successful(None)
                 } yield emptyReport
               } else {
-                log.info(s"Report [${ncfr.identificativoFlusso}] returned by ${SoapReceiverType.NEXI.toString}")
+                log.debug(s"Report [${ncfr.identificativoFlusso}] returned by ${SoapReceiverType.NEXI.toString}")
                 Future.successful(ncfrResponse.get.xmlRendicontazione.get)
               }
               _ = ncfrResponse.get.fault.map(v => log.warn(s"Esito da ${SoapReceiverType.NEXI.toString}: faultCode=[${v.faultCode}, faultString=[${v.faultString}], description=[${v.description}]"))
@@ -294,7 +294,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         throw new exception.DigitPaException("Rendicontazione sconosciuta o presente in SFTP", DigitPaErrorCodes.PPT_ID_FLUSSO_SCONOSCIUTO)
       }
 
-      _ = log.info(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
+      _ = log.debug(FdrLogConstant.logGeneraPayload(RESPONSE_NAME))
       ncfrResponse = NodoChiediFlussoRendicontazioneRisposta(None, xmlrendicontazione)
 
       resultMessage <- Future.fromTry(wrapInBundleMessage(ncfrResponse))
@@ -310,7 +310,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
         errorHandler(req.sessionId, req.testCaseId, outputXsdValid, exception.DigitPaException(DigitPaErrorCodes.PPT_SYSTEM_ERROR, e), reFlow)
     }) map (sr => {
       callTrace(traceInterfaceRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
-      log.info(FdrLogConstant.logEnd(actorClassId))
+      logEndProcess(sr)
       replyTo ! sr
       complete()
     })
@@ -328,7 +328,7 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
   }
 
   private def parseResponseNexi(payloadResponse: String): Try[Option[NodoChiediFlussoRendicontazioneRisposta]] = {
-    log.info(FdrLogConstant.logSintattico(s"${SoapReceiverType.NEXI.toString} $RESPONSE_NAME"))
+    log.debug(FdrLogConstant.logSintattico(s"${SoapReceiverType.NEXI.toString} $RESPONSE_NAME"))
     (for {
       _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_CHIEDI_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPA, inputXsdValid)
       body <- XmlEnum.str2nodoChiediFlussoRendicontazioneResponse_nodoperpa(payloadResponse)
@@ -336,5 +336,4 @@ case class NodoChiediFlussoRendicontazioneActorPerRequest(repositories: Reposito
       Failure(e)
     }
   }
-
 }
