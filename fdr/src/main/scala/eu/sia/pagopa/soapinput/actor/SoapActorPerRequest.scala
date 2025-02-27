@@ -91,8 +91,6 @@ class SoapActorPerRequest(
 
     case sres: SoapResponse =>
       log.debug(s"RECEIVE SoapResponse from sender: ${sender().path.name}")
-      // [FC] terminateActor forces the actor to stop, otherwise it remains in pending until to bundleTimeoutSeconds
-      terminateActor(sender())
       sres.payload match {
         case Some(_) =>
           // risposta dal bundle positiva o negativa
@@ -187,11 +185,6 @@ class SoapActorPerRequest(
       )
       reActor ! reRequest
     }
-  }
-
-  private def terminateActor(actorRef: ActorRef): Unit = {
-    log.debug(s"Terminating ${actorRef.path.name}")
-    context.stop(actorRef)
   }
 
   def sendToBundle(message: SoapRouterRequest): Try[Unit] = {
