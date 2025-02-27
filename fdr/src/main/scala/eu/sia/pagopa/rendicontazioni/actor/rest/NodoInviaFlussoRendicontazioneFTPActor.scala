@@ -169,12 +169,12 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateErrorResponse(Some(pmae)))
       }).map {
-          case sr: SoapResponse =>
+          case sr: RestResponse =>
             callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
             logEndProcess(sr)
             replyTo ! sr
             complete()
-          case (sr: SoapResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
+          case (sr: RestResponse, nifr: NodoInviaFlussoRendicontazione, flussoRiversamento: CtFlussoRiversamento, rendicontazioneSaved: Rendicontazione) =>
             callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
             logEndProcess(sr)
 
@@ -195,10 +195,6 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
               }
             }
             replyTo ! sr
-            complete()
-          case rs: RestResponse =>
-            log.error(FdrLogConstant.logEndKO(actorClassId, rs.throwable))
-            replyTo ! rs
             complete()
         }
       }
