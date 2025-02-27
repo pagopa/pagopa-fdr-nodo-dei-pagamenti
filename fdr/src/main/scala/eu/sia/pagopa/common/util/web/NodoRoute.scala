@@ -517,7 +517,7 @@ case class NodoRoute(
                 optionalHeaderValueByName(X_PDD_HEADER) { originalRequestAddresOpt =>
                   log.debug(s"Request headers:\n${req.headers.map(s => s"${s.name()} => ${s.value()}").mkString("\n")}")
                   optionalHeaderValueByName("SOAPAction") { soapActionHeader =>
-                    log.info(FdrLogConstant.logStart(soapActionHeader.getOrElse(Constant.KeyName.SOAP_INPUT)))
+                    log.debug(FdrLogConstant.logStart(soapActionHeader.getOrElse(Constant.KeyName.SOAP_INPUT)))
                     optionalHeaderValueByName("testCaseId") { headerTestCaseId =>
                       extractRequestContext { ctx =>
                         entity(as[ByteString]) { bs =>
@@ -630,7 +630,7 @@ case class NodoRoute(
                       })
                       payloadTry match {
                         case Success(payload) =>
-                          log.info(FdrLogConstant.logStart(if (primitiva != null) primitiva else Constant.KeyName.REST_INPUT))
+                          log.debug(FdrLogConstant.logStart(if (primitiva != null) primitiva else Constant.KeyName.REST_INPUT))
                           val request = ctx.request
                           log.debug(s"Content-Type [${request.entity.contentType}]")
 

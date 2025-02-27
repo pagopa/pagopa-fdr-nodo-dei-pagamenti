@@ -60,6 +60,8 @@
     <logger name="eu.sia.pagopa.input" level="INFO" />
     <logger name="eu.sia.pagopa.common.actor.HttpActorPerRequest" level="INFO" />
     <logger name="eu.sia.pagopa.config.actor.ApiConfigActor" level="ERROR" />
+    <logger name="eu.sia.pagopa.rendicontazioni.actor.soap.NodoChiediElencoFlussiRendicontazioneActorPerRequest" level="ERROR" />
+    <logger name="eu.sia.pagopa.rendicontazioni.actor.soap.NodoChiediFlussoRendicontazioneActorPerRequest" level="ERROR" />
 
     <logger name="com.zaxxer.hikari.HikariConfig" level="INFO"/>
 
