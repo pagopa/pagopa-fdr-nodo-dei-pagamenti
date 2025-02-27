@@ -12,6 +12,11 @@
             <column name="data_ora_flusso"/>
         </createIndex>
 
+        <createIndex indexName="rend_elenco_flussi_dp" tableName="rendicontazione">
+            <column name="dominio"/>
+            <column name="psp"/>
+        </createIndex>
+
         <dropIndex indexName="rend_elenco_flussi" tableName="rendicontazione" />
 
         <dropIndex indexName="rend_elenco_flussi_idx1" tableName="rendicontazione" />
