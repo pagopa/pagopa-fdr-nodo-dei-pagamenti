@@ -1,0 +1,30 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-4.6.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.6.xsd">
+
+    <changeSet author="liquibase" id="20250227000000-01">
+
+        <createIndex indexName="rend_elenco_flussi_ds" tableName="rendicontazione">
+            <column name="dominio"/>
+            <column name="stato"/>
+        </createIndex>
+
+        <createIndex indexName="rend_elenco_flussi_dof_idx1" tableName="rendicontazione">
+            <column name="data_ora_flusso"/>
+        </createIndex>
+
+        <createIndex indexName="rend_elenco_flussi_dp" tableName="rendicontazione">
+            <column name="dominio"/>
+            <column name="psp"/>
+        </createIndex>
+
+        <dropIndex indexName="rend_elenco_flussi" tableName="rendicontazione" />
+
+        <dropIndex indexName="rend_elenco_flussi_idx1" tableName="rendicontazione" />
+
+        <sql>
+            ANALYZE fdr.rendicontazione;
+        </sql>
+
+    </changeSet>
+
+</databaseChangeLog>
