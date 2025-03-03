@@ -69,7 +69,7 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
   }
 
   private def saveBlob(r: ReRequest, system: ActorSystem): Option[BlobBodyRef] = {
-    val connectionString = system.settings.config.getString("azure-storage-blob.connection-string")
+    val connectionString = system.settings.config.getString("azure-storage-blob.re-connection-string")
     val containerName = system.settings.config.getString("azure-storage-blob.re-payload-container-name")
 
     val filename = s"${r.sessionId}_${r.re.tipoEvento.get}_${r.re.sottoTipoEvento}_${UUID.randomUUID().toString}.xml.zip"
