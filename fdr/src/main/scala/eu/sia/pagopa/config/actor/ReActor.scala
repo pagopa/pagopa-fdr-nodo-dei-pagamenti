@@ -89,7 +89,7 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
       if (r.re.payload.isDefined) {
         val metadata: Map[String, String] = Map(
           "sessionId" -> r.sessionId,
-          "flowName" -> r.re.flowName,
+          "flowName" -> r.re.flowName.getOrElse("git "),
           "insertedTimestamp" -> r.re.insertedTimestamp.toString,
           "serviceIdentifier" -> Constant.FDR_VERSION
         )
