@@ -10,6 +10,7 @@ import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util.{Constant, Util}
 import eu.sia.pagopa.ActorProps
 
+import java.time.temporal.{ChronoUnit, TemporalField}
 import scala.jdk.CollectionConverters._
 import java.util.UUID
 import scala.util.{Failure, Success}
@@ -72,7 +73,11 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
     val connectionString = system.settings.config.getString("azure-storage-blob.re-connection-string")
     val containerName = system.settings.config.getString("azure-storage-blob.re-payload-container-name")
 
-    val filename = s"${r.sessionId}_${r.re.tipoEvento.get}_${r.re.sottoTipoEvento}_${UUID.randomUUID().toString}.xml.zip"
+    val month = "%02d".format(r.re.insertedTimestamp.getMonthValue)
+    val day = "%02d".format(r.re.insertedTimestamp.getDayOfMonth)
+    val hour = "%02d".format(r.re.insertedTimestamp.getHour)
+    val folder = s"${r.re.insertedTimestamp.getYear}/${month}/${day}/${hour}"
+    val filename = s"${folder}/${r.sessionId}_${r.re.tipoEvento.get}_${r.re.sottoTipoEvento}_${UUID.randomUUID().toString}.xml.zip"
 
     val blobAsyncClient = Some(new BlobClientBuilder()
       .connectionString(connectionString)
@@ -84,6 +89,7 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
       if (r.re.payload.isDefined) {
         val metadata: Map[String, String] = Map(
           "sessionId" -> r.sessionId,
+          "flowName" -> r.re.flowName,
           "insertedTimestamp" -> r.re.insertedTimestamp.toString,
           "serviceIdentifier" -> Constant.FDR_VERSION
         )
