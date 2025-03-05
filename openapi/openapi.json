@@ -4,7 +4,7 @@
     "title": "FDR - Flussi di rendicontazione FASE 1",
     "description": "FDR - Flussi di rendicontazione FASE 1",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "2.1.22"
+    "version": "2.1.22-173-PAGOPA-2642-fd-r-1-rivedere-log-e-dashboard-elk"
   },
   "servers": [
     {
