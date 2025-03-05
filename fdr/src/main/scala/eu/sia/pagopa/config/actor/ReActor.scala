@@ -9,6 +9,7 @@ import eu.sia.pagopa.common.message.{BlobBodyRef, CategoriaEvento, CategoriaEven
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util.{Constant, Util}
 import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.common.util.Appfunction.defaultOperation
 
 import java.time.temporal.{ChronoUnit, TemporalField}
 import scala.jdk.CollectionConverters._
@@ -54,6 +55,8 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
         blobBodyRef,
         request.reExtra.map(ex => ex.headers.groupBy(_._1).map(v => (v._1, v._2.map(_._2)))).getOrElse(Map())
       )
+
+      defaultOperation(request, log, reXmlLog = false, reJsonLog = true, ddataMap);
 
       val insertFuture = repositories.mongoRepository.saveReEvent(reEventHub)
       insertFuture.onComplete {
