@@ -32,7 +32,12 @@ object Constant {
 
   val HEADER_SUBSCRIPTION_KEY = "Ocp-Apim-Subscription-Key"
 
+  val RE_JSON_LOG = "reJsonLog"
+  val RE_XML_LOG = "reXmlLog"
+
   val UNKNOWN = "UNKNOWN"
+
+  val RE_UID = "eventHubId"
 
   val SERVER = "SERVER"
   val CLIENT = "CLIENT"

@@ -2,13 +2,15 @@ package eu.sia.pagopa.common.util
 
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.enums.EsitoRE
-import eu.sia.pagopa.common.message.{CategoriaEvento, ReExtra, SottoTipoEvento}
+import eu.sia.pagopa.common.message.{CategoriaEvento, ReExtra, ReRequest, SottoTipoEvento}
 import eu.sia.pagopa.common.repo.re.model.Re
+import org.slf4j.MDC
 import spray.json.DefaultJsonProtocol._
 import spray.json.{JsString, _}
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import scala.concurrent.{ExecutionContext, Future}
 import scala.util.Try
 
 object Appfunction {
@@ -20,6 +22,60 @@ object Appfunction {
   def formatDate(date: LocalDateTime): String = {
     reFormat.format(date)
   }
+
+  def defaultOperation(request: ReRequest, log: NodoLogger, reXmlLog: Boolean, reJsonLog: Boolean, data: ConfigData)(implicit ec: ExecutionContext): Unit = {
+    MDC.put(Constant.MDCKey.DATA_ORA_EVENTO, Appfunction.formatDate(request.re.insertedTimestamp))
+
+    if (reXmlLog) {
+      Future(
+        fmtMessage(request.re, request.reExtra)
+          .map(msg => {
+            MDC.put(Constant.RE_UID, request.re.uniqueId)
+            MDC.put(Constant.RE_XML_LOG, "true")
+            val elapsed = request.reExtra.flatMap(b => b.elapsed)
+            elapsed match {
+              case Some(a) => MDC.put(Constant.MDCKey.ELAPSED, a.toString)
+              case _ =>
+            }
+            log.info(msg)
+            elapsed match {
+              case Some(_) => MDC.remove(Constant.MDCKey.ELAPSED)
+              case _ =>
+            }
+            MDC.remove(Constant.RE_UID)
+            MDC.remove(Constant.RE_XML_LOG)
+          })
+          .recover({ case e: Throwable =>
+            log.error(e, "Format message error")
+          })
+      )
+    }
+    if (reJsonLog) {
+      Future(
+        fmtMessageJson(request.re, request.reExtra, data)
+          .map(msg => {
+            MDC.put(Constant.RE_UID, request.re.uniqueId)
+            MDC.put(Constant.RE_JSON_LOG, "true")
+            val elapsed = request.reExtra.flatMap(b => b.elapsed)
+            elapsed match {
+              case Some(a) => MDC.put(Constant.MDCKey.ELAPSED, a.toString)
+              case _ =>
+            }
+            log.info(msg)
+            elapsed match {
+              case Some(_) => MDC.remove(Constant.MDCKey.ELAPSED)
+              case _ =>
+            }
+            MDC.remove(Constant.RE_UID)
+            MDC.remove(Constant.RE_JSON_LOG)
+          })
+          .recover({ case e: Throwable =>
+            log.error(e, "Format message error")
+          })
+      )
+    }
+  }
+
 
   def formatHeaders(headersOpt: Option[Seq[(String, String)]]): String = {
     headersOpt
