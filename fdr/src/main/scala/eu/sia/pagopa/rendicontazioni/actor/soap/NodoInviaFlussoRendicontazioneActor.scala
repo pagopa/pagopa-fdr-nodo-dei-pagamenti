@@ -52,6 +52,8 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
     req = soapRequest
     replyTo = sender()
 
+    val isInternal = containsXInternal(soapRequest.headers);
+
     reFlow = Some(
       Re(
         componente = Componente.NDP_FDR.toString,
@@ -161,6 +163,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       _ = log.debug(FdrLogConstant.logSintattico(RESPONSE_NAME))
       resultMessage <- Future.fromTry(wrapInBundleMessage(nodoInviaFlussoRisposta))
       _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
+      if !isInternal
       _ = callTrace(traceInternalRequest, reActor, soapRequest, reFlow.get, soapRequest.reExtra)
       sr = SoapResponse(req.sessionId, Some(resultMessage), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
     } yield (sr, nifr, rendicontazioneSaved)
@@ -192,7 +195,7 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
                 nifr = nifr,
                 soapRequest = soapRequest.payload,
                 insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
-                elaborate = true,
+                elaborate = !isInternal,
                 retry = 0
               )
             }
@@ -254,5 +257,11 @@ case class NodoInviaFlussoRendicontazioneActor(repositories: Repositories, actor
       val cfb = exception.DigitPaException(e.getMessage, DigitPaErrorCodes.PPT_SINTASSI_EXTRAXSD, e)
       Failure(cfb)
     }
+  }
+
+  def containsXInternal(headers: Option[Seq[(String, String)]]): Boolean = {
+    headers.exists(_.exists {
+      case (key, value) => key == "X-Internal" && value == "true"
+    })
   }
 }

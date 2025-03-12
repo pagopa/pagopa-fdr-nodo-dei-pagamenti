@@ -7,6 +7,7 @@ import java.time.LocalDateTime
 case class SoapRequest(
     override val sessionId: String,
     payload: String,
+    headers: Option[Seq[(String, String)]],
     callRemoteAddress: String,
     primitive: String,
     sender: String,

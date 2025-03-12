@@ -237,6 +237,7 @@ class SoapActorPerRequest(
       soapRequest = SoapRequest(
         message.sessionId,
         message.payload,
+        message.headers,
         message.callRemoteAddress.getOrElse(""),
         primitiva,
         sender,
