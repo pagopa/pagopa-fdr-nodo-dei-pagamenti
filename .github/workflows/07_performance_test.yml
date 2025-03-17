@@ -15,13 +15,37 @@ on:
           - uat
       test-type:
         required: true
-        type: string
+        type: choice
         description: Select the Test Type
+        options:
+          - constant
+          - constant5k150k
+          - constant5k50k
+          - constantSoak
+          - constant_nodoChiediElencoFlussi
+          - constant_nodoChiediFlusso
+          - load
+          - ramping
+          - smoke
+          - soak
+          - spike
+          - spike_nodoChiediElencoFlussi
+          - spike_nodoChiediFlusso
+          - stress
 
       script-name:
         required: true
-        type: string
+        type: choice
         description: Select the Script Name
+        options:
+          - happy_case_scenario
+          - nodoChiediElencoFlussiRendicontazione_scenario
+          - nodoChiediFlussoRendicontazione_scenario
+          - only_nodoInviaFlussoRendicontazione_payments_ramp_scenario
+          - only_nodoInviaFlussoRendicontazione_scenario
+          - only_nodoInviaFlussoRendicontazione_scenario_5k150k
+          - only_nodoInviaFlussoRendicontazione_scenario_5k50k
+          - only_nodoInviaFlussoRendicontazione_scenario_soak
 
       flow-size:
         required: true
