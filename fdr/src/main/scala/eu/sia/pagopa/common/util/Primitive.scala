@@ -14,7 +14,7 @@ object Primitive {
   )
 
   val rest: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
-    "notifyFlussoRendicontazione" -> ("notify/fdr", _ => classOf[NotifyFlussoRendicontazioneActorPerRequest]),
+    "convertFlussoRendicontazione" -> ("convert/fdr3", _ => classOf[ConvertFlussoRendicontazioneActorPerRequest]),
     "nodoInviaFlussoRendicontazioneFTP" -> ("nodoInviaFlussoRendicontazioneFTP", _ => classOf[NodoInviaFlussoRendicontazioneFTPActorPerRequest]),
     "registerFdrForValidation" -> ("register-for-validation/fdr", _ => classOf[RegisterFdrForValidationActorPerRequest])
   )

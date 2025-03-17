@@ -28,7 +28,7 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
+case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
   extends PerRequestActor with BaseFlussiRendicontazioneActor with ReUtil {
 
   var req: RestRequest = _
@@ -91,10 +91,6 @@ case class NotifyFlussoRendicontazioneActorPerRequest(repositories: Repositories
           flowAction = Some(req.primitive)
         )
         _ = reFlow = Some(re_)
-
-        getResponse <- HttpFdrServiceManagement.internalGetWithRevision(req.sessionId, req.testCaseId, "internalGetWithRevision", Componente.FDR.toString, _fdr, _rev.toString, _psp, _organizationId, actorProps, reFlow.get)
-
-        getPaymentResponse <- HttpFdrServiceManagement.internalGetFdrPayment(req.sessionId, req.testCaseId, "internalGetFdrPayment", Componente.FDR.toString, _fdr, _rev.toString, _psp, _organizationId, actorProps, reFlow.get)
 
         _ = log.debug(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
         flussoRiversamento = CtFlussoRiversamento(
