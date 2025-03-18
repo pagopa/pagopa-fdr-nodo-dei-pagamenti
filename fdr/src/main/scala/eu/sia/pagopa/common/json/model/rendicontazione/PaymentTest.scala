@@ -45,11 +45,11 @@ case class PaymentTest(
                     iur: String,
                     index: Integer,
                     amount: Integer,
-                    payDate: LocalDateTime,
+                    payDate: String,
                     payStatus: PayStatusEnum.Value,
                     transferId: Integer,
-                    created: LocalDateTime,
-                    updated: LocalDateTime
+                    created: String,
+                    updated: String
 )
 
 //object ConvertFdrResponse extends DefaultJsonProtocol {

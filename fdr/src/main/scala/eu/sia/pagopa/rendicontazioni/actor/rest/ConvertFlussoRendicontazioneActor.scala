@@ -20,6 +20,7 @@ import eu.sia.pagopa.config.actor.ReActor
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import org.slf4j.MDC
+import scalaxbmodel.flussoriversamento.{CtDatiSingoliPagamenti, CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number1u461}
 import spray.json._
 
 import javax.xml.datatype.DatatypeFactory
@@ -74,28 +75,30 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
 
       val flow = parseInput(req)
 
-      reFlow = Re(
-        psp = Some(flow.pspDomainId),
-        idDominio = Some(flow.orgDomainId),
-        componente = Componente.NDP_FDR.toString,
-        categoriaEvento = CategoriaEvento.INTERNO.toString,
-        sessionId = Some(req.sessionId),
-        payload = None,
-        esito = Some(EsitoRE.CAMBIO_STATO.toString),
-        tipoEvento = Some(actorClassId),
-        sottoTipoEvento = SottoTipoEvento.INTERN.toString,
-        insertedTimestamp = restRequest.timestamp,
-        erogatore = Some(Componente.NDP_FDR.toString),
-        businessProcess = Some(actorClassId),
-        erogatoreDescr = Some(Componente.NDP_FDR.toString),
-        flowName = Some(flow.name),
-        flowAction = Some(req.primitive)
+      reFlow = Some(
+        Re(
+          psp = Some(flow.pspDomainId),
+          idDominio = Some(flow.orgDomainId),
+          componente = Componente.NDP_FDR.toString,
+          categoriaEvento = CategoriaEvento.INTERNO.toString,
+          sessionId = Some(req.sessionId),
+          payload = None,
+          esito = Some(EsitoRE.CAMBIO_STATO.toString),
+          tipoEvento = Some(actorClassId),
+          sottoTipoEvento = SottoTipoEvento.INTERN.toString,
+          insertedTimestamp = restRequest.timestamp,
+          erogatore = Some(Componente.NDP_FDR.toString),
+          businessProcess = Some(actorClassId),
+          erogatoreDescr = Some(Componente.NDP_FDR.toString),
+          flowName = Some(flow.name),
+          flowAction = Some(req.primitive)
+        )
       )
 
       log.debug(FdrLogConstant.logGeneraPayload(s"creating nodoInviaFlussoRendicontazione SOAP for convert"))
-      flussoRiversamento = CtFlussoRiversamento(
+      val flussoRiversamento = CtFlussoRiversamento(
         Number1u461,
-        _fdr,
+        flow.name,
         DatatypeFactory.newInstance().newXMLGregorianCalendar(flow.date),
         flow.regulation,
         DatatypeFactory.newInstance().newXMLGregorianCalendar(flow.regulationDate),
@@ -118,14 +121,14 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
           ),
           Some(flow.receiver.organizationName)
         ),
-        flow.computedTotPayments,
-        flow.computedSumPayments,
+        BigDecimal(flow.computedTotPayments),
+        BigDecimal(flow.computedTotAmount),
         flow.paymentList.map(p => {
           CtDatiSingoliPagamenti(
             p.iuv,
             p.iur,
             Some(BigInt.int2bigInt(p.transferId)),
-            p.pay,
+            BigDecimal(p.amount),
             p.payStatus match {
               case PayStatusEnum.NO_RPT => scalaxbmodel.flussoriversamento.Number9
               case PayStatusEnum.REVOKED => scalaxbmodel.flussoriversamento.Number3

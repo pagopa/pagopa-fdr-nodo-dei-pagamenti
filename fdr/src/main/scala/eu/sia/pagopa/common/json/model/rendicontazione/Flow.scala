@@ -1,12 +1,7 @@
 package eu.sia.pagopa.common.json.model.rendicontazione
 
-import org.joda.time.format.ISODateTimeFormat
-import spray.json.{DefaultJsonProtocol, DeserializationException, JsArray, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
+import spray.json.{DefaultJsonProtocol, DeserializationException, JsArray, JsNumber, JsObject, JsString, JsValue}
 
-import java.time.LocalDateTime
-import java.util.Date
-import scala.collection.immutable.Nil.:::
-import scala.collection.mutable.ListBuffer
 import scala.language.implicitConversions
 import scala.util.Try
 
@@ -34,17 +29,17 @@ object Flow extends DefaultJsonProtocol {
           v.asInstanceOf[JsObject].fields("iur").asInstanceOf[JsString].value,
           v.asInstanceOf[JsObject].fields("index").asInstanceOf[JsNumber].value.intValue,
           v.asInstanceOf[JsObject].fields("amount").asInstanceOf[JsNumber].value.toInt,
-          v.asInstanceOf[JsObject].fields("payDate").asInstanceOf[LocalDateTime],
+          v.asInstanceOf[JsObject].fields("payDate").asInstanceOf[JsString].value,
           v.asInstanceOf[JsObject].fields("payStatus").asInstanceOf[PayStatusEnum.Value],
           v.asInstanceOf[JsObject].fields("transferId").asInstanceOf[JsNumber].value.toInt,
-          v.asInstanceOf[JsObject].fields("created").asInstanceOf[LocalDateTime],
-          v.asInstanceOf[JsObject].fields("updated").asInstanceOf[LocalDateTime],
+          v.asInstanceOf[JsObject].fields("created").asInstanceOf[JsString].value,
+          v.asInstanceOf[JsObject].fields("updated").asInstanceOf[JsString].value,
         )
       )
       Try(
         Flow(
           map("name").asInstanceOf[JsString].value,
-          map("date").asInstanceOf[LocalDateTime],
+          map("date").asInstanceOf[JsString].value,
           map("revision").asInstanceOf[JsNumber].value.toInt,
           map("status").asInstanceOf[JsString].value,
           map("isLatest").asInstanceOf[Boolean],
@@ -54,14 +49,14 @@ object Flow extends DefaultJsonProtocol {
           map("totAmount").asInstanceOf[JsNumber].value.toInt,
           map("computedTotPayments").asInstanceOf[JsNumber].value.toInt,
           map("computedTotAmount").asInstanceOf[JsNumber].value.toInt,
-          map("regulationDate").asInstanceOf[LocalDateTime],
+          map("regulationDate").asInstanceOf[JsString].value,
           map("regulation").asInstanceOf[JsString].value,
           Sender(SenderTypeEnum.withName(senderType), senderId, senderPspId, senderPspName, senderBrokerId, senderChannelId, senderPassword),
           Receiver(receiverId, receiverEcId, receiverEcName),
           map("bicCodePouringBank").asInstanceOf[JsString].value,
-          map("created").asInstanceOf[LocalDateTime],
-          map("updated").asInstanceOf[LocalDateTime],
-          map("published").asInstanceOf[LocalDateTime],
+          map("created").asInstanceOf[JsString].value,
+          map("updated").asInstanceOf[JsString].value,
+          map("published").asInstanceOf[JsString].value,
           payments
         )
       ).recover({ case _ =>
@@ -72,7 +67,7 @@ object Flow extends DefaultJsonProtocol {
 
 case class Flow(
                               name: String,
-                              date: LocalDateTime,
+                              date: String,
                               revision: Integer,
                               status: String,
                               isLatest: Boolean,
@@ -82,14 +77,14 @@ case class Flow(
                               totAmount: Integer,
                               computedTotPayments: Integer,
                               computedTotAmount: Integer,
-                              regulationDate: LocalDateTime,
+                              regulationDate: String,
                               regulation: String,
                               sender: Sender,
                               receiver: Receiver,
                               bicCodePouringBank: String,
-                              created: LocalDateTime,
-                              updated: LocalDateTime,
-                              published: LocalDateTime,
+                              created: String,
+                              updated: String,
+                              published: String,
                               paymentList: Seq[PaymentTest]
                             )
 
