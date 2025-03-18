@@ -1,0 +1,120 @@
+{
+  "type": "object",
+  "required": ["name", "pspDomainId", "orgDomainId", "revision"],
+  "properties": {
+    "name": {
+      "type": "string"
+    },
+    "date": {
+      "type": "string"
+    },
+    "revision": {
+      "type": "integer"
+    },
+    "status": {
+      "type": "string"
+    },
+    "isLatest": {
+      "type": "boolean"
+    },
+    "pspDomainId": {
+      "type": "string"
+    },
+    "orgDomainId": {
+      "type": "string"
+    },
+    "totPayments": {
+      "type": "integer"
+    },
+    "totAmount": {
+      "type": "integer"
+    },
+    "computedTotPayments": {
+      "type": "integer"
+    },
+    "computedTotAmount": {
+      "type": "integer"
+    },
+    "regulation": {
+      "type": "string"
+    },
+    "regulationDate": {
+      "type": "string"
+    },
+    "sender": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "pspName": {
+          "type": "string"
+        },
+        "pspBrokerId": {
+          "type": "string"
+        },
+        "channelId": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "receiver": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "organizationName": {
+          "type": "string"
+        }
+      }
+    },
+    "bicCodePouringBank": {
+      "type": "string"
+    },
+    "created": {
+      "type": "string"
+    },
+    "updated": {
+      "type": "string"
+    },
+    "published": {
+      "type": "string"
+    },
+    "paymentList": {
+      "type": "array",
+      "items": [
+        {
+          "type": "object",
+          "properties": {
+            "iuv": {
+              "type": "string"
+            },
+            "iur": {
+              "type": "string"
+            },
+            "index": {
+              "type": "integer"
+            },
+            "amount": {
+              "type": "number"
+            },
+            "payStatus": {
+              "type": "string"
+            },
+            "payDate": {
+              "type": "string"
+            }
+          }
+        }
+      ]
+    },
+    "additionalProperties": false
+  }
+}

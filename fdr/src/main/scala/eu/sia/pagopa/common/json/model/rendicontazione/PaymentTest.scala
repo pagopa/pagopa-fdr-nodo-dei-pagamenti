@@ -1,14 +1,17 @@
 package eu.sia.pagopa.common.json.model.rendicontazione
 
+import org.joda.time.format.ISODateTimeFormat
 import spray.json.{DefaultJsonProtocol, DeserializationException, JsNumber, JsObject, JsString, JsValue, RootJsonFormat}
 
+import java.time.LocalDateTime
+import java.util.Date
 import scala.language.implicitConversions
 import scala.util.Try
 
-object NotifyFdrRequest extends DefaultJsonProtocol {
+object PaymentTest extends DefaultJsonProtocol {
 
-  implicit val format: RootJsonFormat[NotifyFdrRequest] = new RootJsonFormat[NotifyFdrRequest] {
-    def write(req: NotifyFdrRequest): JsObject = {
+  implicit val format: RootJsonFormat[PaymentTest] = new RootJsonFormat[PaymentTest] {
+    def write(req: PaymentTest): JsObject = {
       JsObject(Map[String, JsValue](
         "fdr" -> JsString(req.fdr),
         "pspId" -> JsString(req.pspId),
@@ -18,10 +21,10 @@ object NotifyFdrRequest extends DefaultJsonProtocol {
       ))
     }
 
-    def read(json: JsValue): NotifyFdrRequest = {
+    def read(json: JsValue): Payment = {
       val map = json.asJsObject.fields
       Try(
-        NotifyFdrRequest(
+        PaymentTest(
           map("fdr").asInstanceOf[JsString].value,
           map("pspId").asInstanceOf[JsString].value,
           map("organizationId").asInstanceOf[JsString].value,
@@ -36,12 +39,23 @@ object NotifyFdrRequest extends DefaultJsonProtocol {
   }
 }
 
-case class NotifyFdrRequest(fdr: String, pspId: String, organizationId: String, retry: Integer, revision: Integer)
+case class PaymentTest(
+                    flowId: Integer,
+                    iuv: String,
+                    iur: String,
+                    index: Integer,
+                    amount: Integer,
+                    payDate: LocalDateTime,
+                    payStatus: PayStatusEnum.Value,
+                    transferId: Integer,
+                    created: LocalDateTime,
+                    updated: LocalDateTime
+)
 
-//object NotifyFdrResponse extends DefaultJsonProtocol {
+//object ConvertFdrResponse extends DefaultJsonProtocol {
 //
-//  implicit val format: RootJsonFormat[NotifyFdrResponse] = new RootJsonFormat[NotifyFdrResponse] {
-//    def write(res: NotifyFdrResponse): JsObject = {
+//  implicit val format: RootJsonFormat[ConvertFdrResponse] = new RootJsonFormat[ConvertFdrResponse] {
+//    def write(res: ConvertFdrResponse): JsObject = {
 //      var fields: Map[String, JsValue] =
 //        Map("outcome" -> JsString(res.outcome))
 //      if (res.description.isDefined) {

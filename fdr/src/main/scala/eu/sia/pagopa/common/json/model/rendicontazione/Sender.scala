@@ -1,6 +1,9 @@
 package eu.sia.pagopa.common.json.model.rendicontazione
 
-import spray.json.{DefaultJsonProtocol, JsObject, JsString, JsValue, RootJsonFormat}
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonEntityStreamingSupport.json
+import spray.json.{DefaultJsonProtocol, DeserializationException, JsObject, JsString, JsValue, RootJsonFormat}
+
+import scala.reflect.runtime.universe.Try
 
 object Sender extends DefaultJsonProtocol {
 
@@ -22,7 +25,22 @@ object Sender extends DefaultJsonProtocol {
       JsObject(fields)
     }
 
-    def read(value: JsValue): Sender = ???
+    def read(json: JsValue): Sender = {
+      val map = json.asJsObject.fields
+      Try(
+        Sender(
+          map("sender_type").asInstanceOf[SenderTypeEnum.Value],
+          map("sender_id").asInstanceOf[JsString].value,
+          map("psp_id").asInstanceOf[JsString].value
+          map("sender_psp_name").asInstanceOf[JsString].value,
+          map("sender_psp_broker_id").asInstanceOf[JsString].value,
+          map("sender_channel_id").asInstanceOf[JsString].value,
+          map("sender_password").asInstanceOf[JsString].value
+        )
+      ).recover({ case _ =>
+        throw DeserializationException("ConvertFlowRequest expected")
+      }).get
+    }
   }
 
 }

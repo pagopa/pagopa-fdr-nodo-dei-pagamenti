@@ -12,6 +12,7 @@ import eu.sia.pagopa.common.message._
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.DDataChecks.checkPsp
+import eu.sia.pagopa.common.util.Util.ungzipContent
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XmlUtil
 import eu.sia.pagopa.commonxml.XmlEnum
@@ -19,12 +20,11 @@ import eu.sia.pagopa.config.actor.ReActor
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
 import org.slf4j.MDC
-import scalaxbmodel.flussoriversamento.{CtDatiSingoliPagamenti, CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number1u461}
-import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
 import spray.json._
 
 import javax.xml.datatype.DatatypeFactory
 import scala.concurrent.Future
+import scala.concurrent.Future.filterFailure.recoverWith
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
@@ -40,6 +40,9 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
   private var _rev: Integer = _
   private var _retry: Integer = _
 
+  private var uncompressedPayload: Array[Byte] = _
+  val inputXsdValid: Boolean = Try(DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean).getOrElse(false)
+
   var reFlow: Option[Re] = None
 
   val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
@@ -50,6 +53,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
     case restRequest: RestRequest =>
       replyTo = sender()
       req = restRequest
+
 
       reFlow = Some(
         Re(
@@ -68,122 +72,105 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         )
       )
 
-      (for {
-        _ <- Future.successful(())
-        _ = log.debug(FdrLogConstant.logSintattico(actorClassId))
-        _ <- Future.fromTry(parseInput(req))
+      val flow = parseInput(req)
 
-        re_ = Re(
-          psp = Some(_psp),
-          idDominio = Some(_organizationId),
-          componente = Componente.NDP_FDR.toString,
-          categoriaEvento = CategoriaEvento.INTERNO.toString,
-          sessionId = Some(req.sessionId),
-          payload = None,
-          esito = Some(EsitoRE.CAMBIO_STATO.toString),
-          tipoEvento = Some(actorClassId),
-          sottoTipoEvento = SottoTipoEvento.INTERN.toString,
-          insertedTimestamp = restRequest.timestamp,
-          erogatore = Some(Componente.NDP_FDR.toString),
-          businessProcess = Some(actorClassId),
-          erogatoreDescr = Some(Componente.NDP_FDR.toString),
-          flowName = Some(_fdr),
-          flowAction = Some(req.primitive)
-        )
-        _ = reFlow = Some(re_)
+      reFlow = Re(
+        psp = Some(flow.pspDomainId),
+        idDominio = Some(flow.orgDomainId),
+        componente = Componente.NDP_FDR.toString,
+        categoriaEvento = CategoriaEvento.INTERNO.toString,
+        sessionId = Some(req.sessionId),
+        payload = None,
+        esito = Some(EsitoRE.CAMBIO_STATO.toString),
+        tipoEvento = Some(actorClassId),
+        sottoTipoEvento = SottoTipoEvento.INTERN.toString,
+        insertedTimestamp = restRequest.timestamp,
+        erogatore = Some(Componente.NDP_FDR.toString),
+        businessProcess = Some(actorClassId),
+        erogatoreDescr = Some(Componente.NDP_FDR.toString),
+        flowName = Some(flow.name),
+        flowAction = Some(req.primitive)
+      )
 
-        _ = log.debug(FdrLogConstant.logGeneraPayload(s"nodoInviaFlussoRendicontazione SOAP"))
-        flussoRiversamento = CtFlussoRiversamento(
-          Number1u461,
-          getResponse.fdr,
-          DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
-          getResponse.regulation,
-          DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.regulationDate),
-          CtIstitutoMittente(
-            CtIdentificativoUnivoco(
-              getResponse.sender._type match {
-                case SenderTypeEnum.ABI_CODE => scalaxbmodel.flussoriversamento.A
-                case SenderTypeEnum.BIC_CODE => scalaxbmodel.flussoriversamento.B
-                case _ => scalaxbmodel.flussoriversamento.GValue
-              },
-              getResponse.sender.id
-            ),
-            Some(getResponse.sender.pspName)
+      log.debug(FdrLogConstant.logGeneraPayload(s"creating nodoInviaFlussoRendicontazione SOAP for convert"))
+      flussoRiversamento = CtFlussoRiversamento(
+        Number1u461,
+        _fdr,
+        DatatypeFactory.newInstance().newXMLGregorianCalendar(flow.date),
+        flow.regulation,
+        DatatypeFactory.newInstance().newXMLGregorianCalendar(flow.regulationDate),
+        CtIstitutoMittente(
+          CtIdentificativoUnivoco(
+            flow.sender._type match {
+              case SenderTypeEnum.ABI_CODE => scalaxbmodel.flussoriversamento.A
+              case SenderTypeEnum.BIC_CODE => scalaxbmodel.flussoriversamento.B
+              case _ => scalaxbmodel.flussoriversamento.GValue
+            },
+            flow.sender.id
           ),
-          Some(getResponse.bicCodePouringBank),
-          CtIstitutoRicevente(
-            CtIdentificativoUnivocoPersonaG(
-              scalaxbmodel.flussoriversamento.G,
-              getResponse.receiver.id
-            ),
-            Some(getResponse.receiver.organizationName)
+          Some(flow.sender.pspName)
+        ),
+        Some(flow.bicCodePouringBank),
+        CtIstitutoRicevente(
+          CtIdentificativoUnivocoPersonaG(
+            scalaxbmodel.flussoriversamento.G,
+            flow.receiver.id
           ),
-          getResponse.computedTotPayments,
-          getResponse.computedSumPayments,
-          getPaymentResponse.data.map(p => {
-            CtDatiSingoliPagamenti(
-              p.iuv,
-              p.iur,
-              Some(BigInt.int2bigInt(p.idTransfer)),
-              p.pay,
-              p.payStatus match {
-                case PayStatusEnum.NO_RPT => scalaxbmodel.flussoriversamento.Number9
-                case PayStatusEnum.REVOKED => scalaxbmodel.flussoriversamento.Number3
-                case PayStatusEnum.STAND_IN => scalaxbmodel.flussoriversamento.Number4
-                case PayStatusEnum.STAND_IN_NO_RPT => scalaxbmodel.flussoriversamento.Number8
-                case _ => scalaxbmodel.flussoriversamento.Number0
-              },
-              DatatypeFactory.newInstance().newXMLGregorianCalendar(p.payDate)
-            )
-          })
-        )
-        flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
-        flussoRiversamentoBase64 = XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
+          Some(flow.receiver.organizationName)
+        ),
+        flow.computedTotPayments,
+        flow.computedSumPayments,
+        flow.paymentList.map(p => {
+          CtDatiSingoliPagamenti(
+            p.iuv,
+            p.iur,
+            Some(BigInt.int2bigInt(p.transferId)),
+            p.pay,
+            p.payStatus match {
+              case PayStatusEnum.NO_RPT => scalaxbmodel.flussoriversamento.Number9
+              case PayStatusEnum.REVOKED => scalaxbmodel.flussoriversamento.Number3
+              case PayStatusEnum.STAND_IN => scalaxbmodel.flussoriversamento.Number4
+              case PayStatusEnum.STAND_IN_NO_RPT => scalaxbmodel.flussoriversamento.Number8
+              case _ => scalaxbmodel.flussoriversamento.Number0
+            },
+            DatatypeFactory.newInstance().newXMLGregorianCalendar(p.payDate)
+          )
+        })
+      )
+      flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
+      flussoRiversamentoBase64 = XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
 
-        nifr = NodoInviaFlussoRendicontazione(
-          getResponse.sender.pspId,
-          getResponse.sender.pspBrokerId,
-          getResponse.sender.channelId,
-          getResponse.sender.password,
-          getResponse.receiver.organizationId,
-          getResponse.fdr,
-          DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
-          flussoRiversamentoBase64
-        )
+      nifr = NodoInviaFlussoRendicontazione(
+        getResponse.sender.pspId,
+        getResponse.sender.pspBrokerId,
+        getResponse.sender.channelId,
+        getResponse.sender.password,
+        getResponse.receiver.organizationId,
+        getResponse.fdr,
+        DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
+        flussoRiversamentoBase64
+      )
 
-        (pa, _, _) <- Future.fromTry(checks(ddataMap, nifr, false, actorClassId))
+      (pa, _, _) <- Future.fromTry(checks(ddataMap, nifr, false, actorClassId))
 
-        (esito, _, sftpFile, _) <- saveRendicontazione(
-          getResponse.fdr,
-          getResponse.sender.pspId,
-          getResponse.sender.pspBrokerId,
-          getResponse.sender.channelId,
-          getResponse.receiver.organizationId,
-          DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
-          flussoRiversamentoBase64,
-          checkUTF8,
-          flussoRiversamento,
-          repositories.fdrRepository
-        )
+      (esito, _, flow, _) <- saveRendicontazione(
+        flow.name,
+        getResponse.sender.pspId,
+        getResponse.sender.pspBrokerId,
+        getResponse.sender.channelId,
+        getResponse.receiver.organizationId,
+        DatatypeFactory.newInstance().newXMLGregorianCalendar(getResponse.fdrDate),
+        flussoRiversamentoBase64,
+        checkUTF8,
+        flussoRiversamento,
+        repositories.fdrRepository
+      )
 
-        _ = if (esito == Constant.KO) {
-          throw RestException("Error saving fdr on Db", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
-        } else {
-          Future.successful(())
+      _ = if (esito == Constant.KO) {
+        throw RestException("Error saving fdr on Db", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
+          } else {
+            Future.successful(())
         }
-      } yield RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
-        .recoverWith({
-          case rex: RestException =>
-            Future.successful(generateResponse(Some(rex)))
-          case cause: Throwable =>
-            val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
-            Future.successful(generateResponse(Some(pmae)))
-      }).map( res => {
-        callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
-        logEndProcess(res)
-        replyTo ! res
-        complete()
-      })
   }
 
   private def callTrace(callback: (ActorRef, RestRequest, Re, ReExtra) => Unit,
@@ -197,58 +184,33 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
     }
   }
 
-  private def parseInput(restRequest: RestRequest) = {
-    Try({
-      val nfrReq = if( restRequest.payload.isEmpty ) {
-        Failure(RestException("Invalid request", Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue))
+  private def parseInput(restRequest: RestRequest): Flow = {
+      if( restRequest.payload.isEmpty ) {
+        throw RestException("Invalid request", Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue)
       } else {
-        JsonValid.check(restRequest.payload.get, JsonEnum.NOTIFY_FLOW) match {
+        var decompressedPayload = "";
+        Try({
+          decompressedPayload = ungzipContent(restRequest.payload.get.getBytes).toString
+        })
+        JsonValid.check(decompressedPayload, JsonEnum.CONVERT_FLOW) match {
           case Success(_) =>
-            val obj = restRequest.payload.get.parseJson.convertTo[NotifyFdrRequest]
-            Success(obj)
+            Flow.read(decompressedPayload.parseJson)
           case Failure(e) =>
             if (e.getMessage.contains("fdr")) {
-              Failure(RestException("Invalid fdr", "", StatusCodes.BadRequest.intValue, e))
+              throw RestException("Invalid fdr", "", StatusCodes.BadRequest.intValue, e)
             } else if (e.getMessage.contains("pspId")) {
-              Failure(RestException("Invalid pspId", "", StatusCodes.BadRequest.intValue, e))
+              throw RestException("Invalid pspId", "", StatusCodes.BadRequest.intValue, e)
             } else if (e.getMessage.contains("organizationId")) {
-              Failure(RestException("Invalid organizationId", "", StatusCodes.BadRequest.intValue, e))
+              throw RestException("Invalid organizationId", "", StatusCodes.BadRequest.intValue, e)
             } else if (e.getMessage.contains("retry")) {
-              Failure(RestException("Invalid retry", "", StatusCodes.BadRequest.intValue, e))
+              throw RestException("Invalid retry", "", StatusCodes.BadRequest.intValue, e)
             } else if (e.getMessage.contains("revision")) {
-              Failure(RestException("Invalid revision", "", StatusCodes.BadRequest.intValue, e))
+              throw RestException("Invalid revision", "", StatusCodes.BadRequest.intValue, e)
             } else {
-              Failure(RestException("Invalid request", "", StatusCodes.BadRequest.intValue, e))
+              throw RestException("Invalid request", "", StatusCodes.BadRequest.intValue, e)
             }
-        }
+          }
       }
-
-      val psp = nfrReq.get.pspId
-      val organizationId = nfrReq.get.organizationId
-      val fdr = nfrReq.get.fdr
-      MDC.put(Constant.MDCKey.FDR, fdr)
-      val revision = nfrReq.get.revision
-      val retry = nfrReq.get.retry
-      checkPsp(log, ddataMap, psp) match {
-        case Success(value) => value
-        case Failure(e: DigitPaException) =>
-          throw RestException(e.getMessage, Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue)
-        case _ =>
-          throw RestException("Error during check psp", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
-      }
-      CheckRendicontazioni.checkFormatoIdFlussoRendicontazione(fdr, psp) match {
-        case Success(value) => value
-        case Failure(e: DigitPaException) =>
-          throw RestException(e.getMessage, Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue)
-        case _ =>
-          throw RestException("Error during check fdr format", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
-      }
-      _psp = psp
-      _organizationId = organizationId
-      _fdr = fdr
-      _rev = revision
-      _retry = retry
-    })
   }
 
   override def actorError(dpe: DigitPaException): Unit = {
