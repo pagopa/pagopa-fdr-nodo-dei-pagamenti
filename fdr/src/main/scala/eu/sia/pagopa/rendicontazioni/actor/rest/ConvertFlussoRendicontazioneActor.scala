@@ -6,6 +6,7 @@ import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
+import eu.sia.pagopa.common.json.model.FdREventToHistory
 import eu.sia.pagopa.common.json.model.rendicontazione._
 import eu.sia.pagopa.common.json.{JsonEnum, JsonValid}
 import eu.sia.pagopa.common.message._
@@ -15,13 +16,14 @@ import eu.sia.pagopa.common.util.Util.ungzipContent
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XmlUtil
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.config.actor.ReActor
+import eu.sia.pagopa.config.actor.{FdRMetadataActor, ReActor}
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import org.slf4j.MDC
 import scalaxbmodel.flussoriversamento.{CtDatiSingoliPagamenti, CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number1u461}
 import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
 import spray.json._
 
+import java.time.LocalDateTime
 import javax.xml.datatype.DatatypeFactory
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -44,6 +46,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
 
   var reFlow: Option[Re] = None
 
+  private val fdrMetadataActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
   val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
 
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
@@ -169,6 +172,21 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         _ = if (esito == Constant.KO) {
           throw RestException("Error saving fdr on Db", Constant.HttpStatusDescription.INTERNAL_SERVER_ERROR, StatusCodes.InternalServerError.intValue)
         } else {
+          // WIP testing addition to blob
+          Future {
+            actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
+              .tell(
+                FdREventToHistory(
+                  sessionId = req.sessionId,
+                  nifr = nifr,
+                  soapRequest = req.payload.get,
+                  insertedTimestamp = LocalDateTime.now(),
+                  elaborate = true,
+                  retry = 0
+                ),
+                null)
+          }
+          // end testing
           Future.successful(())
         }
       } yield RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None) )
