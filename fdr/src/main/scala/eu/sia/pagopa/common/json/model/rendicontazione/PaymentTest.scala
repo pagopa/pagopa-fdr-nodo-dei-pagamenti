@@ -1,32 +1,35 @@
 package eu.sia.pagopa.common.json.model.rendicontazione
 
-case class PaymentTest(
-                    flowId: Integer,
-                    iuv: String,
-                    iur: String,
-                    index: Integer,
-                    amount: Integer,
-                    payDate: String,
-                    payStatus: PayStatusEnum.Value,
-                    transferId: Integer,
-                    created: String,
-                    updated: String
-)
+import spray.json.{DefaultJsonProtocol, DeserializationException, JsNumber, JsString, JsValue}
 
-//object ConvertFdrResponse extends DefaultJsonProtocol {
-//
-//  implicit val format: RootJsonFormat[ConvertFdrResponse] = new RootJsonFormat[ConvertFdrResponse] {
-//    def write(res: ConvertFdrResponse): JsObject = {
-//      var fields: Map[String, JsValue] =
-//        Map("outcome" -> JsString(res.outcome))
-//      if (res.description.isDefined) {
-//        fields = fields + ("description" -> JsString(res.description.get))
-//      }
-//      JsObject(fields)
-//    }
-//
-//    def read(json: JsValue): NotifyFdrResponse = ???
-//  }
-//}
-//
-//case class NotifyFdrResponse(outcome: String, description: Option[String])
+import scala.util.Try
+
+object PaymentTest extends DefaultJsonProtocol {
+
+  def read(json: JsValue): PaymentTest = {
+    val map = json.asJsObject.fields
+    Try(
+      PaymentTest(
+        map("iuv").asInstanceOf[JsString].value,
+        map("iur").asInstanceOf[JsString].value,
+        map("index").asInstanceOf[JsNumber].value.intValue,
+        map("pay").asInstanceOf[JsNumber].value.toInt,
+        map("payDate").asInstanceOf[JsString].value,
+        PayStatusEnum.withName(map("payStatus").asInstanceOf[JsString].value),
+        map("idTransfer").asInstanceOf[JsNumber].value.toInt,
+      )
+    ).recover({ case e =>
+      throw DeserializationException("Error on mapping Payment fields: " + e.getMessage)
+    }).get
+  }
+}
+
+case class PaymentTest(
+                        iuv: String,
+                        iur: String,
+                        index: Integer,
+                        pay: Integer,
+                        payDate: String,
+                        payStatus: PayStatusEnum.Value,
+                        transferId: Integer
+                      )

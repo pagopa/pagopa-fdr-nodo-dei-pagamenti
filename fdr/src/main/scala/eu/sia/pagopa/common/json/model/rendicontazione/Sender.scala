@@ -1,45 +1,42 @@
 package eu.sia.pagopa.common.json.model.rendicontazione
 
-import spray.json.{DefaultJsonProtocol, DeserializationException, JsObject, JsString, JsValue, RootJsonFormat}
+import spray.json.{DefaultJsonProtocol, DeserializationException, JsObject, JsString, JsValue}
 
 import scala.util.Try
 
 object Sender extends DefaultJsonProtocol {
 
-  implicit object SenderJsonFormat extends RootJsonFormat[Sender] {
-
-    def write(sender: Sender): JsObject = {
-      var fields: Map[String, JsValue] = {
-        Map(
-          "type" -> JsString(sender._type.toString),
-          "id" -> JsString(sender.id),
-          "pspId" -> JsString(sender.pspId),
-          "pspName" -> JsString(sender.pspName),
-          "pspBrokerId" -> JsString(sender.pspBrokerId),
-          "channelId" -> JsString(sender.channelId),
-          "password" -> JsString(sender.password)
-        )
-      }
-
-      JsObject(fields)
+  def write(sender: Sender): JsObject = {
+    var fields: Map[String, JsValue] = {
+      Map(
+        "type" -> JsString(sender._type.toString),
+        "id" -> JsString(sender.id),
+        "pspId" -> JsString(sender.pspId),
+        "pspName" -> JsString(sender.pspName),
+        "pspBrokerId" -> JsString(sender.pspBrokerId),
+        "channelId" -> JsString(sender.channelId),
+        "password" -> JsString(sender.password)
+      )
     }
 
-    def read(json: JsValue): Sender = {
-      val map = json.asJsObject.fields
-      Try(
-        Sender(
-          map("sender_type").asInstanceOf[SenderTypeEnum.Value],
-          map("sender_id").asInstanceOf[JsString].value,
-          map("psp_id").asInstanceOf[JsString].value,
-          map("sender_psp_name").asInstanceOf[JsString].value,
-          map("sender_psp_broker_id").asInstanceOf[JsString].value,
-          map("sender_channel_id").asInstanceOf[JsString].value,
-          map("sender_password").asInstanceOf[JsString].value
-        )
-      ).recover({ case _ =>
-        throw DeserializationException("ConvertFlowRequest expected")
-      }).get
-    }
+    JsObject(fields)
+  }
+
+  def read(json: JsValue): Sender = {
+    val map = json.asJsObject.fields
+    Try(
+      Sender(
+        SenderTypeEnum.withName(map("type").asInstanceOf[JsString].value),
+        map("id").asInstanceOf[JsString].value,
+        map("pspId").asInstanceOf[JsString].value,
+        map("pspName").asInstanceOf[JsString].value,
+        map("pspBrokerId").asInstanceOf[JsString].value,
+        map("channelId").asInstanceOf[JsString].value,
+        map("password").asInstanceOf[JsString].value
+      )
+    ).recover({ case e =>
+      throw DeserializationException("Error on mapping Sender fields: " + e.getMessage)
+    }).get
   }
 
 }
