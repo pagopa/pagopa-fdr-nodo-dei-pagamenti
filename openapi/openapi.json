@@ -63,19 +63,20 @@
         }
       }
     },
-    "/notify/fdr": {
+    "/convert/fdr3": {
       "post": {
         "tags": [
           "Fdr fase 1"
         ],
-        "summary": "Notify fdr to convert",
-        "description": "Notify fdr to convert",
-        "operationId": "notifyFdrToConvert",
+        "summary": "Convert FdR 3 flow to FdR 1 flow",
+        "description": "Convert FdR 3 flow to FdR 1 flow and persist it on DB and Blob storage",
+        "operationId": "convertFlussoRendicontazione",
         "requestBody": {
           "content": {
-            "application/json": {
+            "application/gzip": {
               "schema": {
-                "$ref": "#/components/schemas/Fdr"
+                "type": "string",
+                "format": "binary"
               }
             }
           }
@@ -203,42 +204,6 @@
           "flowTimestamp": {
             "type": "string",
             "example": "2025-01-01T12:00:00"
-          }
-        }
-      },
-      "Fdr": {
-        "required": [
-          "fdr",
-          "pspId",
-          "organizationId",
-          "retry",
-          "revision"
-        ],
-        "type": "object",
-        "properties": {
-          "fdr": {
-            "description": "[XML NodoInviaFlussoRendicontazione]=[identificativoFlusso]",
-            "pattern": "[a-zA-Z0-9\\-_]{1,35}",
-            "type": "string",
-            "example": "2016-08-16pspTest-1178"
-          },
-          "pspId": {
-            "type": "string",
-            "example": "1"
-          },
-          "organizationId": {
-            "type": "string",
-            "example": "1"
-          },
-          "retry": {
-            "format": "int64",
-            "type": "integer",
-            "example": 1
-          },
-          "revision": {
-            "format": "int64",
-            "type": "integer",
-            "example": 1
           }
         }
       },
