@@ -12,7 +12,7 @@ import eu.sia.pagopa.common.repo.{DBComponent, Repositories}
 import eu.sia.pagopa.common.util.xml.XmlUtil
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.rendicontazioni.actor.rest.NodoInviaFlussoRendicontazioneFTPActorPerRequest
+import eu.sia.pagopa.rendicontazioni.actor.rest.{ConvertFlussoRendicontazioneActor, NodoInviaFlussoRendicontazioneFTPActorPerRequest}
 import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActor}
 import eu.sia.pagopa.testutil._
 import liquibase.database.DatabaseFactory
@@ -461,28 +461,28 @@ abstract class BaseUnitTest()
     actRes.get
   }
 
-  def notifyFlussoRendicontazione(
+  def convertFlussoRendicontazioneActor(
                          payload: Option[String],
                          testCase: Option[String] = Some("OK"),
                          responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
                          newdata: Option[ConfigData] = None
                        ): Future[String] = {
     val p = Promise[Boolean]()
-    val notifyFlussoRendicontazione =
+    val convertFlussoRendicontazioneActor =
       system.actorOf(
-        Props.create(classOf[NotifyFlussoRendicontazioneTest], p, repositories, props.copy(actorClassId = "notifyFlussoRendicontazione", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        Props.create(classOf[ConvertFlussoRendicontazioneActor], p, repositories, props.copy(actorClassId = "convertFlussoRendicontazione", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
         s"notifyFlussoRendicontazione${Util.now()}"
       )
 
     val restResponse = askActor(
-      notifyFlussoRendicontazione,
+      convertFlussoRendicontazioneActor,
       RestRequest(
         UUID.randomUUID().toString,
         payload,
         Nil,
         Map(),
         TestItems.testPDD,
-        "notifyFlussoRendicontazione",
+        "convertFlussoRendicontazioneActor",
         Util.now(),
         ReExtra(),
         testCase

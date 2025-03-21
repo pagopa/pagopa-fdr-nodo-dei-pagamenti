@@ -1,9 +1,8 @@
 package eu.sia.pagopa.common.json.model.rendicontazione
 
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonEntityStreamingSupport.json
 import spray.json.{DefaultJsonProtocol, DeserializationException, JsObject, JsString, JsValue, RootJsonFormat}
 
-import scala.reflect.runtime.universe.Try
+import scala.util.Try
 
 object Sender extends DefaultJsonProtocol {
 
@@ -31,7 +30,7 @@ object Sender extends DefaultJsonProtocol {
         Sender(
           map("sender_type").asInstanceOf[SenderTypeEnum.Value],
           map("sender_id").asInstanceOf[JsString].value,
-          map("psp_id").asInstanceOf[JsString].value
+          map("psp_id").asInstanceOf[JsString].value,
           map("sender_psp_name").asInstanceOf[JsString].value,
           map("sender_psp_broker_id").asInstanceOf[JsString].value,
           map("sender_channel_id").asInstanceOf[JsString].value,

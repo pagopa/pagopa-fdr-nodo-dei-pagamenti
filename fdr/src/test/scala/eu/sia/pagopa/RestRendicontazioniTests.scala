@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter
 //@org.scalatest.Ignore
 class RestRendicontazioniTests() extends BaseUnitTest {
 
-  "notifyFlussoRendicontazione" must {
+  "convertFlussoRendicontazione" must {
     "ok" in {
       val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
       val random = RandomStringUtils.randomNumeric(9)
@@ -24,7 +24,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       }""".stripMargin
 
       await(
-        notifyFlussoRendicontazione(
+        convertFlussoRendicontazioneActor(
           Some(payload),
           testCase = Some("OK"),
           responseAssert = (resp, status) => {
@@ -49,7 +49,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       }""".stripMargin
 
       await(
-        notifyFlussoRendicontazione(
+        convertFlussoRendicontazioneActor(
           Some(payload),
           testCase = Some("KO"),
           responseAssert = (resp, status) => {
@@ -82,7 +82,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         }
         })
 
-        notifyFlussoRendicontazione(
+        convertFlussoRendicontazioneActor(
           Some(payload),
           testCase = Some("KO"),
           responseAssert = (resp, status) => {
