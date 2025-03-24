@@ -28,7 +28,7 @@ import spray.json._
 import javax.xml.datatype.DatatypeFactory
 import scala.concurrent.Future
 import scala.language.postfixOps
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 case class ConvertFlussoRendicontazioneActor(repositories: Repositories, actorProps: ActorProps)
   extends PerRequestActor with BaseFlussiRendicontazioneActor with ReUtil {
@@ -223,8 +223,11 @@ case class ConvertFlussoRendicontazioneActor(repositories: Repositories, actorPr
         case Success(content) =>
           val decompressedPayload = content.toString
           JsonValid.check(decompressedPayload, JsonEnum.CONVERT_FLOW) match {
-            case Success(_) => Success(Flow.read(decompressedPayload.parseJson))
-            case Failure(e) => Failure(RestException("Invalid FdR 3 flow JSON: " + e.getMessage, "", StatusCodes.BadRequest.intValue, e))
+            case Success(_) => Try(Success(Flow.read(decompressedPayload.parseJson)))
+              .recoverWith({ case e =>
+                Failure(RestException(e.getMessage, "", StatusCodes.BadRequest.intValue, e))
+              }).get
+            case Failure(e) => Failure(RestException("The provided FdR 3 flow JSON is invalid: " + e.getMessage, "", StatusCodes.BadRequest.intValue, e))
           }
         case Failure(e) => Failure(RestException("Error during request content unzip: " + e.getMessage, "", StatusCodes.BadRequest.intValue, e))
       }
