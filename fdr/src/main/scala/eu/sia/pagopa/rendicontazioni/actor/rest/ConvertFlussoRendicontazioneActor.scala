@@ -26,6 +26,8 @@ import scalaxbmodel.nodeforpsp.NodoInviaFlussoRendicontazioneRequest
 import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
 import spray.json._
 
+import java.nio.charset.StandardCharsets
+import java.util.Base64
 import javax.xml.datatype.DatatypeFactory
 import scala.concurrent.Future
 import scala.language.postfixOps
@@ -68,7 +70,7 @@ case class ConvertFlussoRendicontazioneActor(repositories: Repositories, actorPr
       (for {
         _ <- Future.successful(())
         _ = log.debug(FdrLogConstant.logStart(actorClassId))
-        flow <- Future.fromTry(parseInput(req))
+        flow <- Future.fromTry(decodeInput(req))
 
         re_ = Re(
           psp = Some(flow.sender.pspId),
@@ -229,21 +231,32 @@ case class ConvertFlussoRendicontazioneActor(repositories: Repositories, actorPr
     }
   }
 
-  private def parseInput(restRequest: RestRequest) = {
+  private def parseInput(byteArray: Array[Byte]) = {
+    ungzipContent(byteArray) match {
+      case Success(content) =>
+        val decompressedPayload = new String(content, StandardCharsets.UTF_8)
+        JsonValid.check(decompressedPayload, JsonEnum.CONVERT_FLOW) match {
+          case Success(_) => Try(Success(Flow.read(decompressedPayload.parseJson)))
+            .recoverWith({ case e =>
+              Failure(RestException(e.getMessage, "", StatusCodes.BadRequest.intValue, e))
+            }).get
+          case Failure(e) => Failure(RestException("The provided FdR 3 flow JSON is invalid: " + e.getMessage, "", StatusCodes.BadRequest.intValue, e))
+        }
+      case Failure(e) => Failure(RestException("Error during request content unzip: " + e.getMessage, "", StatusCodes.BadRequest.intValue, e))
+    }
+  }
+
+  private def decodeInput(restRequest: RestRequest) = {
     if (restRequest.payload.isEmpty) {
       Failure(RestException("Invalid request", Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue))
     } else {
-      ungzipContent(restRequest.payload.get.getBytes) match {
-        case Success(content) =>
-          val decompressedPayload = content.toString
-          JsonValid.check(decompressedPayload, JsonEnum.CONVERT_FLOW) match {
-            case Success(_) => Try(Success(Flow.read(decompressedPayload.parseJson)))
-              .recoverWith({ case e =>
-                Failure(RestException(e.getMessage, "", StatusCodes.BadRequest.intValue, e))
-              }).get
-            case Failure(e) => Failure(RestException("The provided FdR 3 flow JSON is invalid: " + e.getMessage, "", StatusCodes.BadRequest.intValue, e))
+      JsonValid.check(restRequest.payload.get, JsonEnum.CONVERT) match {
+        case Success(_) =>
+          Try(Success(Convert.read(restRequest.payload.get.parseJson))) match {
+            case Success(convert) => parseInput(Base64.getDecoder.decode(convert.get.payload))
+            case Failure(e) => Failure(RestException(e.getMessage, "", StatusCodes.BadRequest.intValue, e))
           }
-        case Failure(e) => Failure(RestException("Error during request content unzip: " + e.getMessage, "", StatusCodes.BadRequest.intValue, e))
+        case Failure(e) => Failure(RestException("Error during request content read: " + e.getMessage, "", StatusCodes.BadRequest.intValue, e))
       }
     }
   }

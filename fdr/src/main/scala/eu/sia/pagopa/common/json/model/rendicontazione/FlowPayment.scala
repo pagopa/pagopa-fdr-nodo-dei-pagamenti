@@ -4,12 +4,12 @@ import spray.json.{DefaultJsonProtocol, DeserializationException, JsNumber, JsSt
 
 import scala.util.Try
 
-object PaymentTest extends DefaultJsonProtocol {
+object FlowPayment extends DefaultJsonProtocol {
 
-  def read(json: JsValue): PaymentTest = {
+  def read(json: JsValue): FlowPayment = {
     val map = json.asJsObject.fields
     Try(
-      PaymentTest(
+      FlowPayment(
         map("iuv").asInstanceOf[JsString].value,
         map("iur").asInstanceOf[JsString].value,
         map("index").asInstanceOf[JsNumber].value.intValue,
@@ -24,7 +24,7 @@ object PaymentTest extends DefaultJsonProtocol {
   }
 }
 
-case class PaymentTest(
+case class FlowPayment(
                         iuv: String,
                         iur: String,
                         index: Integer,

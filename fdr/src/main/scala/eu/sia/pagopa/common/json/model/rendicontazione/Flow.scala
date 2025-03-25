@@ -13,9 +13,9 @@ object Flow extends DefaultJsonProtocol {
     val sender = Sender.read(map("sender").asInstanceOf[JsObject])
     val receiver = Receiver.read(map("receiver").asInstanceOf[JsObject])
 
-    val paymentListInput = map("paymentList").asInstanceOf[JsArray].elements
+    val paymentListInput = map("payments").asInstanceOf[JsArray].elements
     val payments = paymentListInput.map(v =>
-      PaymentTest.read(v)
+      FlowPayment.read(v)
     )
     Try(
       Flow(
@@ -54,5 +54,5 @@ case class Flow(
                  bicCodePouringBank: String,
                  created: String,
                  updated: String,
-                 paymentList: Seq[PaymentTest]
+                 paymentList: Seq[FlowPayment]
                )
