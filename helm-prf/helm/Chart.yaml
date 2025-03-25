@@ -6,6 +6,6 @@ version: 0.21.0
 appVersion: 2.1.9-104-PAGOPA-2600-housekeeping-evh-qi
 dependencies:
   - name: microservice-chart
-    version: 3.0.0
+    version: 7.1.1
     repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
     alias: prfnodo
