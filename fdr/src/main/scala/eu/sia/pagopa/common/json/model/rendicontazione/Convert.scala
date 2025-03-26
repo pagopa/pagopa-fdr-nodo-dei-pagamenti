@@ -13,7 +13,7 @@ object Convert extends DefaultJsonProtocol {
     Try(
       Convert(
         map("payload").asInstanceOf[JsString].value,
-        map("encoding").asInstanceOf[JsString].value,
+        Try{map("encoding").asInstanceOf[JsString].value}.toOption,
       )
     ).recover({ case e =>
       throw DeserializationException("Error on mapping Flow fields: " + e.getMessage)
@@ -23,5 +23,5 @@ object Convert extends DefaultJsonProtocol {
 
 case class Convert(
                  payload: String,
-                 encoding: String
+                 encoding: Option[String]
                )
