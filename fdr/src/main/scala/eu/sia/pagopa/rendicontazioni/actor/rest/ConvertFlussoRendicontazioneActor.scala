@@ -209,7 +209,7 @@ case class ConvertFlussoRendicontazioneActor(repositories: Repositories, actorPr
                       nifr = nifr,
                       soapRequest = nifrEncoded,
                       insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
-                      elaborate = true,
+                      elaborate = false,
                       retry = 0
                     ),
                     null)
