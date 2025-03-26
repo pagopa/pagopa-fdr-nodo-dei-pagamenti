@@ -29,7 +29,7 @@ const parameters = {
     brokerPspId:  `${vars.broker_psp}`,
     channelId: `${vars.channel}`,
     password: `${vars.password}`,
-    creditorInstitutionId: `${vars.creditor_institution}`,
+    creditorInstitutionId: `${vars.creditor_institution_nodo_invia}`,
     brokerCiId: `${vars.broker_ci}`,
     stationId: `${vars.station}`,
     today: new Date().toISOString().slice(0, 10),
@@ -83,6 +83,7 @@ export default function () {
 
   // Testing: nodoChiediElencoFlussiRendicontazione
   params.headers['SOAPAction'] = 'nodoChiediElencoFlussiRendicontazione';
+  parameters.creditorInstitutionId = `${vars.creditor_institution_nodo_chiedi}`;
   var request_ncefr = generateNodoChiediElencoFlussiRendicontazione(parameters);
   response = http.post(parameters.url_nodo_ci, request_ncefr, params)
   check(response, {
@@ -94,6 +95,7 @@ export default function () {
 
   // Testing: nodoChiediFlussoRendicontazione
   params.headers['SOAPAction'] = 'nodoChiediFlussoRendicontazione';
+  parameters.creditorInstitutionId = `${vars.creditor_institution_nodo_invia}`;
   var request_ncfr = generateNodoChiediFlussoRendicontazione(parameters, flow_id);
   response = http.post(parameters.url_nodo_ci, request_ncfr, params)
   check(response, {
