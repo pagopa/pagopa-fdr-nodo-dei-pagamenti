@@ -21,7 +21,7 @@ object Flow extends DefaultJsonProtocol {
       Flow(
         map("fdr").asInstanceOf[JsString].value,
         Instant.ofEpochSecond(map("fdrDate").asInstanceOf[JsNumber].value.toLong).toString,
-        map("revision").asInstanceOf[JsNumber].value.toInt,
+        Try{map("revision").asInstanceOf[JsNumber].value.toInt}.toOption,
         map("status").asInstanceOf[JsString].value,
         map("computedTotPayments").asInstanceOf[JsNumber].value.toInt,
         map("computedSumPayments").asInstanceOf[JsNumber].value.toInt,
@@ -29,7 +29,7 @@ object Flow extends DefaultJsonProtocol {
         map("regulation").asInstanceOf[JsString].value,
         sender,
         receiver,
-        map("bicCodePouringBank").asInstanceOf[JsString].value,
+        Try{map("bicCodePouringBank").asInstanceOf[JsString].value}.toOption,
         Instant.ofEpochSecond(map("created").asInstanceOf[JsNumber].value.toLong).toString,
         Instant.ofEpochSecond(map("updated").asInstanceOf[JsNumber].value.toLong).toString,
         payments
@@ -43,7 +43,7 @@ object Flow extends DefaultJsonProtocol {
 case class Flow(
                  name: String,
                  date: String,
-                 revision: Integer,
+                 revision: Option[Int],
                  status: String,
                  computedTotPayments: Integer,
                  computedSumPayments: Integer,
@@ -51,7 +51,7 @@ case class Flow(
                  regulation: String,
                  sender: Sender,
                  receiver: Receiver,
-                 bicCodePouringBank: String,
+                 bicCodePouringBank: Option[String],
                  created: String,
                  updated: String,
                  paymentList: Seq[FlowPayment]

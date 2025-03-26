@@ -109,7 +109,7 @@ case class ConvertFlussoRendicontazioneActor(repositories: Repositories, actorPr
             ),
             Some(flow.sender.pspName)
           ),
-          Some(flow.bicCodePouringBank),
+          Some(flow.bicCodePouringBank.getOrElse("TEST")),
           CtIstitutoRicevente(
             CtIdentificativoUnivocoPersonaG(
               scalaxbmodel.flussoriversamento.G,
