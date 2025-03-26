@@ -316,7 +316,7 @@ abstract class BaseUnitTest()
     val payload = SpecsUtils
       .loadTestJSON("/requests/convertFlow.json")
       .replace("{flowId}", fdr)
-      .replace("{flowDate}", date)
+      .replace("\"{flowDate}\"", date)
       .replace("{regulationDate}", regulationDate)
       .replace("{regulation}", regulation)
       .replace("{psp_name}", pspName)

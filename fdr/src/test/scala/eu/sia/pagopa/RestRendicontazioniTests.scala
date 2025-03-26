@@ -5,6 +5,7 @@ import eu.sia.pagopa.common.util.Util.gzipContent
 import eu.sia.pagopa.common.util.{RandomStringUtils, Util}
 import eu.sia.pagopa.testutil.TestItems
 
+import java.time.Instant
 import java.time.format.DateTimeFormatter
 import java.util.Base64
 
@@ -13,12 +14,12 @@ class RestRendicontazioniTests() extends BaseUnitTest {
 
   "convertFlussoRendicontazione" must {
     "ok" in {
-      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+      val date = Instant.now()
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
       val regulation = "1234567890"
 
-      val jsonContent = convertFlussoRendicontazionePayload(idFlusso, date, date, regulation)
+      val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation)
       val encodedComnpressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
       val payload = s"""{
          |  "payload": "$encodedComnpressedFlow",
