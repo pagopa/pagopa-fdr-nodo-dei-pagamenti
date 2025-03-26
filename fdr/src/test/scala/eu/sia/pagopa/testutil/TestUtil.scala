@@ -17,6 +17,7 @@ object TestItems {
   val PA_old = "12345678901"
   val PA_FTP = "90000000002"
   val PA_DISABLED = "90000000099"
+  val PA_name = "pa_test"
   val prefixOld = "002"
   val prefixNew = "001"
   val stazione = "stazioneTest"
@@ -30,6 +31,7 @@ object TestItems {
   val codStazionePA = "02"
   val auxDigit = "0"
   val codIUV = "171920000002204"
+  val codIUR = "171920000002205"
   val PAUnknown = "01010101010"
 
   val PSP = "pspTest"

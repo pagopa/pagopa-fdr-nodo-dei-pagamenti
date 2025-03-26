@@ -1,10 +1,12 @@
 package eu.sia.pagopa
 
 import akka.http.javadsl.model.StatusCodes
+import eu.sia.pagopa.common.util.Util.gzipContent
 import eu.sia.pagopa.common.util.{RandomStringUtils, Util}
 import eu.sia.pagopa.testutil.TestItems
 
 import java.time.format.DateTimeFormatter
+import java.util.Base64
 
 //@org.scalatest.Ignore
 class RestRendicontazioniTests() extends BaseUnitTest {
@@ -14,13 +16,13 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
+      val regulation = "1234567890"
 
+      val jsonContent = convertFlussoRendicontazionePayload(idFlusso, date, date, regulation)
+      val encodedComnpressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
       val payload = s"""{
-         |  "fdr": "$idFlusso",
-         |  "pspId": "${TestItems.PSP}",
-         |  "organizationId": "${TestItems.PA}",
-         |  "retry": 1,
-         |  "revision": 1
+         |  "payload": "$encodedComnpressedFlow",
+         |  "encoding": "base64"
       }""".stripMargin
 
       await(

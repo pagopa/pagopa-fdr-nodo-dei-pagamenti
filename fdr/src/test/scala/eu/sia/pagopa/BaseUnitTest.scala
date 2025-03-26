@@ -297,6 +297,41 @@ abstract class BaseUnitTest()
       .replace("{stationPwd}", stationPwd)
   }
 
+  def convertFlussoRendicontazionePayload(
+                                         fdr: String,
+                                         date: String,
+                                         regulationDate: String,
+                                         regulation: String,
+                                         psp: String = TestItems.PSP,
+                                         pspName: String = TestItems.PSP,
+                                         brokerPsp: String = TestItems.intPSP,
+                                         channel: String = TestItems.canale,
+                                         channelPwd: String = TestItems.canalePwd,
+                                         pa: String = TestItems.PA,
+                                         paName: String = TestItems.PA_name,
+                                         iuv: String = TestItems.codIUV,
+                                         iur: String = TestItems.codIUR
+                                       ) = {
+    val paymentDate = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now().minusDays(1L))
+    val payload = SpecsUtils
+      .loadTestJSON("/requests/convertFlow.json")
+      .replace("{flowId}", fdr)
+      .replace("{flowDate}", date)
+      .replace("{regulationDate}", regulationDate)
+      .replace("{regulation}", regulation)
+      .replace("{psp_name}", pspName)
+      .replace("{psp_broker_id}", brokerPsp)
+      .replace("{channel_id}", channel)
+      .replace("{psp_id}", psp)
+      .replace("{password}", channelPwd)
+      .replace("{organization_name}", paName)
+      .replace("{organization_id}", pa)
+      .replace("{iuv}", iuv)
+      .replace("{iur}", iur)
+      .replace("{payDate}", paymentDate)
+    payload
+  }
+
   def inviaFlussoRendicontazione(
                                   testCase: Option[String] = None,
                                   pa: String = TestItems.PA,
@@ -470,8 +505,8 @@ abstract class BaseUnitTest()
     val p = Promise[Boolean]()
     val convertFlussoRendicontazioneActor =
       system.actorOf(
-        Props.create(classOf[ConvertFlussoRendicontazioneActor], p, repositories, props.copy(actorClassId = "convertFlussoRendicontazione", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
-        s"notifyFlussoRendicontazione${Util.now()}"
+        Props.create(classOf[ConvertFlussoRendicontazioneActor], repositories, props.copy(actorClassId = "convertFlussoRendicontazione", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        s"convertFlussoRendicontazione${Util.now()}"
       )
 
     val restResponse = askActor(
