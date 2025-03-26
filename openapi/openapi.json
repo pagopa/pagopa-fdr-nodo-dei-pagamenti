@@ -73,10 +73,9 @@
         "operationId": "convertFlussoRendicontazione",
         "requestBody": {
           "content": {
-            "application/gzip": {
+            "application/json": {
               "schema": {
-                "type": "string",
-                "format": "binary"
+                "$ref": "#/components/schemas/ConvertRequest"
               }
             }
           }
@@ -175,6 +174,23 @@
           "xmlRendicontazione": {
             "type": "string",
             "example": "H4sIAAAAAAAAAN1XXW+bMBR951cg3gn+wNhUhGrR2q..."
+          }
+        }
+      },
+      "ConvertRequest": {
+        "required": [
+          "payload"
+        ],
+        "type": "object",
+        "properties": {
+          "payload": {
+            "description": "Payload with the encoded flow from FdR3",
+            "type": "string",
+            "example": "YWJjZGVmZw=="
+          },
+          "encoding": {
+            "type": "string",
+            "example": "base64"
           }
         }
       },
