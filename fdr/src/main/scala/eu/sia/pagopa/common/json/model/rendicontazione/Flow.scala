@@ -22,7 +22,7 @@ object Flow extends DefaultJsonProtocol {
         map("fdr").asInstanceOf[JsString].value,
         Instant.ofEpochSecond(map("fdrDate").asInstanceOf[JsNumber].value.toLong).toString,
         Try{map("revision").asInstanceOf[JsNumber].value.toInt}.toOption,
-        map("status").asInstanceOf[JsString].value,
+        Try{map("status").asInstanceOf[JsString].value}.toOption,
         map("computedTotPayments").asInstanceOf[JsNumber].value.toInt,
         map("computedSumPayments").asInstanceOf[JsNumber].value.toInt,
         map("regulationDate").asInstanceOf[JsString].value,
@@ -30,8 +30,8 @@ object Flow extends DefaultJsonProtocol {
         sender,
         receiver,
         Try{map("bicCodePouringBank").asInstanceOf[JsString].value}.toOption,
-        Instant.ofEpochSecond(map("created").asInstanceOf[JsNumber].value.toLong).toString,
-        Instant.ofEpochSecond(map("updated").asInstanceOf[JsNumber].value.toLong).toString,
+        Try{Instant.ofEpochSecond(map("created").asInstanceOf[JsNumber].value.toLong).toString}.toOption,
+        Try{Instant.ofEpochSecond(map("updated").asInstanceOf[JsNumber].value.toLong).toString}.toOption,
         payments
       )
     ).recover({ case e =>
@@ -44,7 +44,7 @@ case class Flow(
                  name: String,
                  date: String,
                  revision: Option[Int],
-                 status: String,
+                 status: Option[String],
                  computedTotPayments: Integer,
                  computedSumPayments: Integer,
                  regulationDate: String,
@@ -52,7 +52,7 @@ case class Flow(
                  sender: Sender,
                  receiver: Receiver,
                  bicCodePouringBank: Option[String],
-                 created: String,
-                 updated: String,
+                 created: Option[String],
+                 updated: Option[String],
                  paymentList: Seq[FlowPayment]
                )
