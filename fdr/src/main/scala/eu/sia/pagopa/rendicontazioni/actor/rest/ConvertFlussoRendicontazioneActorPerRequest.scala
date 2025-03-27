@@ -33,7 +33,7 @@ import scala.concurrent.Future
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
-case class ConvertFlussoRendicontazioneActor(repositories: Repositories, actorProps: ActorProps)
+case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositories, actorProps: ActorProps)
   extends PerRequestActor with BaseFlussiRendicontazioneActor with ReUtil {
 
   var req: RestRequest = _

@@ -12,7 +12,7 @@ import eu.sia.pagopa.common.repo.{DBComponent, Repositories}
 import eu.sia.pagopa.common.util.xml.XmlUtil
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.rendicontazioni.actor.rest.{ConvertFlussoRendicontazioneActor, NodoInviaFlussoRendicontazioneFTPActorPerRequest}
+import eu.sia.pagopa.rendicontazioni.actor.rest.{ConvertFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneFTPActorPerRequest}
 import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActor}
 import eu.sia.pagopa.testutil._
 import liquibase.database.DatabaseFactory
@@ -496,28 +496,28 @@ abstract class BaseUnitTest()
     actRes.get
   }
 
-  def convertFlussoRendicontazioneActor(
+  def convertFlussoRendicontazioneActorPerRequest(
                          payload: Option[String],
                          testCase: Option[String] = Some("OK"),
                          responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
                          newdata: Option[ConfigData] = None
                        ): Future[String] = {
     val p = Promise[Boolean]()
-    val convertFlussoRendicontazioneActor =
+    val convertFlussoRendicontazioneActorPerRequest =
       system.actorOf(
-        Props.create(classOf[ConvertFlussoRendicontazioneActorTest], p, repositories, props.copy(actorClassId = "convertFlussoRendicontazione", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        Props.create(classOf[ConvertFlussoRendicontazioneActorPerRequestTest], p, repositories, props.copy(actorClassId = "convertFlussoRendicontazione", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
         s"convertFlussoRendicontazione${Util.now()}"
       )
 
     val restResponse = askActor(
-      convertFlussoRendicontazioneActor,
+      convertFlussoRendicontazioneActorPerRequest,
       RestRequest(
         UUID.randomUUID().toString,
         payload,
         Nil,
         Map(),
         TestItems.testPDD,
-        "convertFlussoRendicontazioneActor",
+        "convertFlussoRendicontazione",
         Util.now(),
         ReExtra(),
         testCase

@@ -27,7 +27,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       }""".stripMargin
 
       await(
-        convertFlussoRendicontazioneActor(
+        convertFlussoRendicontazioneActorPerRequest(
           Some(payload),
           testCase = Some("OK"),
           responseAssert = (resp, status) => {
@@ -51,7 +51,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       }""".stripMargin
 
       await(
-        convertFlussoRendicontazioneActor(
+        convertFlussoRendicontazioneActorPerRequest(
           Some(payload),
           testCase = Some("KO"),
           responseAssert = (resp, status) => {
@@ -74,7 +74,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       }""".stripMargin
 
       await(
-        convertFlussoRendicontazioneActor(
+        convertFlussoRendicontazioneActorPerRequest(
           Some(payload),
           testCase = Some("OK"),
           responseAssert = (resp, status) => {
@@ -100,7 +100,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       }""".stripMargin
 
     await(
-      convertFlussoRendicontazioneActor(
+      convertFlussoRendicontazioneActorPerRequest(
         Some(payload),
         testCase = Some("KO"),
         responseAssert = (resp, status) => {
