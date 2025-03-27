@@ -505,7 +505,7 @@ abstract class BaseUnitTest()
     val p = Promise[Boolean]()
     val convertFlussoRendicontazioneActor =
       system.actorOf(
-        Props.create(classOf[ConvertFlussoRendicontazioneActor], repositories, props.copy(actorClassId = "convertFlussoRendicontazione", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        Props.create(classOf[ConvertFlussoRendicontazioneActorTest], p, repositories, props.copy(actorClassId = "convertFlussoRendicontazione", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
         s"convertFlussoRendicontazione${Util.now()}"
       )
 
