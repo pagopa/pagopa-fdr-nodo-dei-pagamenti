@@ -20,9 +20,9 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       val regulation = "1234567890"
 
       val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation)
-      val encodedComnpressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
+      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
       val payload = s"""{
-         |  "payload": "$encodedComnpressedFlow",
+         |  "payload": "$encodedCompressedFlow",
          |  "encoding": "base64"
       }""".stripMargin
 
@@ -44,9 +44,9 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       val regulation = "1234567890"
 
       val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.toEpochMilli), date.toString, regulation)
-      val encodedComnpressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
+      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
       val payload = s"""{
-                       |  "payload": "$encodedComnpressedFlow",
+                       |  "payload": "$encodedCompressedFlow",
                        |  "encoding": "base64"
       }""".stripMargin
 
@@ -68,9 +68,9 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       val regulation = "1234567890"
 
       val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation)
-      val encodedComnpressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
+      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
       val payload = s"""{
-                       |  "payload": "$encodedComnpressedFlow"
+                       |  "payload": "$encodedCompressedFlow"
       }""".stripMargin
 
       await(
@@ -94,9 +94,9 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       s"""{
          |  "fdr": "$idFlusso",
       }""".stripMargin
-    val encodedComnpressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
+    val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
     val payload = s"""{
-                     |  "payload": "$encodedComnpressedFlow"
+                     |  "payload": "$encodedCompressedFlow"
       }""".stripMargin
 
     await(
