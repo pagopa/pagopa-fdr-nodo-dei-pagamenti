@@ -1,30 +1,33 @@
 package eu.sia.pagopa
 
 import akka.http.javadsl.model.StatusCodes
+import eu.sia.pagopa.common.util.Util.gzipContent
 import eu.sia.pagopa.common.util.{RandomStringUtils, Util}
 import eu.sia.pagopa.testutil.TestItems
 
+import java.time.Instant
 import java.time.format.DateTimeFormatter
+import java.util.Base64
 
 //@org.scalatest.Ignore
 class RestRendicontazioniTests() extends BaseUnitTest {
 
-  "notifyFlussoRendicontazione" must {
+  "convertFlussoRendicontazione" must {
     "ok" in {
-      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+      val date = Instant.now()
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
+      val regulation = "1234567890"
 
+      val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation)
+      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
       val payload = s"""{
-         |  "fdr": "$idFlusso",
-         |  "pspId": "${TestItems.PSP}",
-         |  "organizationId": "${TestItems.PA}",
-         |  "retry": 1,
-         |  "revision": 1
+         |  "payload": "$encodedCompressedFlow",
+         |  "encoding": "base64"
       }""".stripMargin
 
       await(
-        notifyFlussoRendicontazione(
+        convertFlussoRendicontazioneActorPerRequest(
           Some(payload),
           testCase = Some("OK"),
           responseAssert = (resp, status) => {
@@ -34,66 +37,79 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         )
       )
     }
-    "ko fdr fase3 error" in {
-      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+    "ko fdr fase3 error in date format" in {
+      val date = Instant.now()
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
+      val regulation = "1234567890"
 
-      val payload =
-        s"""{
-           |  "fdr": "$idFlusso",
-           |  "pspId": "${TestItems.PSP}",
-           |  "organizationId": "${TestItems.PA}",
-           |  "retry": 1,
-           |  "revision": 1
+      val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.toEpochMilli), date.toString, regulation)
+      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
+      val payload = s"""{
+                       |  "payload": "$encodedCompressedFlow",
+                       |  "encoding": "base64"
       }""".stripMargin
 
       await(
-        notifyFlussoRendicontazione(
+        convertFlussoRendicontazioneActorPerRequest(
           Some(payload),
           testCase = Some("KO"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.INTERNAL_SERVER_ERROR.intValue)
-            assert(resp.contains("{\"message\":\"KO\"}"))
+            assert(resp.contains("{\"error\":\"Errore generico.\"}"))
           }
         )
       )
     }
-    "ko fdr fase3 error payments" in {
-      val date = DateTimeFormatter.ofPattern("yyyy-MM-dd").format(Util.now())
+    "ko fdr fase3 no encoding" in {
+      val date = Instant.now()
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
+      val regulation = "1234567890"
 
-      val payload =
-        s"""{
-           |  "fdr": "$idFlusso",
-           |  "pspId": "${TestItems.PSP}",
-           |  "organizationId": "${TestItems.PA}",
-           |  "retry": 1,
-           |  "revision": 1
+      val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation)
+      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
+      val payload = s"""{
+                       |  "payload": "$encodedCompressedFlow"
       }""".stripMargin
 
-      await({
-        actorUtility.configureMocker("OK" -> { (messageType, _) => {
-          messageType match {
-            case "internalGetFdrPayment" => "KO"
-            case _ => "OK"
-          }
-        }
-        })
-
-        notifyFlussoRendicontazione(
+      await(
+        convertFlussoRendicontazioneActorPerRequest(
           Some(payload),
-          testCase = Some("KO"),
+          testCase = Some("OK"),
           responseAssert = (resp, status) => {
-            assert(status == StatusCodes.INTERNAL_SERVER_ERROR.intValue)
-            assert(resp.contains("{\"message\":\"KO\"}"))
+            assert(status == StatusCodes.OK.intValue)
+            assert(resp.contains("{\"message\":\"OK\"}"))
           }
         )
-      })
+      )
     }
   }
 
+  "ko fdr fase3 bad request" in {
+    val date = Instant.now()
+    val random = RandomStringUtils.randomNumeric(9)
+    val idFlusso = s"${date}${TestItems.PSP}-$random"
+    val jsonContent =
+      s"""{
+         |  "fdr": "$idFlusso",
+      }""".stripMargin
+    val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
+    val payload = s"""{
+                     |  "payload": "$encodedCompressedFlow"
+      }""".stripMargin
+
+    await(
+      convertFlussoRendicontazioneActorPerRequest(
+        Some(payload),
+        testCase = Some("KO"),
+        responseAssert = (resp, status) => {
+          assert(status == StatusCodes.BAD_REQUEST.intValue())
+          assert(resp.contains("{\"error\":\"The provided FdR 3 flow JSON is invalid:"))
+        }
+      )
+    )
+  }
 
   "registerFdrForValidation" must {
     "ok" in {
