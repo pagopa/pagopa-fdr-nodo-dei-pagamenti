@@ -8,7 +8,8 @@
       "broker_psp": "88888888888",
       "channel": "88888888888_01",
       "password": "PLACEHOLDER",
-      "creditor_institution": "15376371009",
+      "creditor_institution_nodo_invia": "15376371009",
+      "creditor_institution_nodo_chiedi": "15376371009",
       "broker_ci": "15376371009",
       "station": "15376371009_09",
       "flow_id": "2025-01-2888888888888-469680782"

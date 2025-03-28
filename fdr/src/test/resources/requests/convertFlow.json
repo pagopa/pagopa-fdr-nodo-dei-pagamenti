@@ -1,0 +1,34 @@
+{
+  "fdr": "{flowId}",
+  "fdrDate": "{flowDate}",
+  "computedTotPayments": 1,
+  "computedSumPayments": 10,
+  "regulationDate": "{regulationDate}",
+  "regulation": "{regulation}",
+  "revision": 1,
+  "sender": {
+    "type": "LEGAL_PERSON",
+    "id": "test_id",
+    "pspName": "{psp_name}",
+    "pspBrokerId": "{psp_broker_id}",
+    "channelId": "{channel_id}",
+    "password": "{password}",
+    "pspId": "{psp_id}"
+  },
+  "receiver": {
+    "id":"test_id",
+    "organizationName":"{organization_name}",
+    "organizationId":"{organization_id}"
+  },
+  "payments": [
+    {
+      "index": 1,
+      "iuv": "{iuv}",
+      "iur": "{iur}",
+      "pay": 10,
+      "payDate":"{payDate}",
+      "payStatus":"EXECUTED",
+      "idTransfer":1
+    }
+  ]
+}

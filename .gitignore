@@ -7,6 +7,7 @@ target
 *.lock.db
 .metals/
 .vscode/
+.run/
 tmp_.json
 .bsp
 .bloop*/

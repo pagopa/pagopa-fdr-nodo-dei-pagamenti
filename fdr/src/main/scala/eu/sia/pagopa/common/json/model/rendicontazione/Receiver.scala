@@ -1,20 +1,30 @@
 package eu.sia.pagopa.common.json.model.rendicontazione
 
-import spray.json.{DefaultJsonProtocol, JsObject, JsString, JsValue, RootJsonFormat}
+import spray.json.{DefaultJsonProtocol, DeserializationException, JsObject, JsString, JsValue}
+
+import scala.util.Try
 
 object Receiver extends DefaultJsonProtocol {
 
-  implicit object SenderJsonFormat extends RootJsonFormat[Receiver] {
+  def write(receiver: Receiver): JsObject = {
+    JsObject(Map(
+      "id" -> JsString(receiver.id),
+      "organizationId" -> JsString(receiver.organizationId),
+      "organizationName" -> JsString(receiver.organizationName)
+    ))
+  }
 
-    def write(receiver: Receiver): JsObject = {
-      JsObject(Map(
-        "id" -> JsString(receiver.id),
-        "organizationId" -> JsString(receiver.organizationId),
-        "organizationName" -> JsString(receiver.organizationName)
-      ))
-    }
-
-    def read(value: JsValue): Receiver = ???
+  def read(json: JsValue): Receiver = {
+    val map = json.asJsObject.fields
+    Try(
+      Receiver(
+        map("id").asInstanceOf[JsString].value,
+        map("organizationId").asInstanceOf[JsString].value,
+        map("organizationName").asInstanceOf[JsString].value
+      )
+    ).recover({ case e =>
+      throw DeserializationException("Error on mapping Receiver fields: " + e.getMessage)
+    }).get
   }
 
 }
