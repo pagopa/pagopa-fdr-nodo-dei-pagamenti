@@ -168,13 +168,9 @@ jobs:
     name: Deploy on AKS
     needs: [ setup, release, image ]
     if: ${{ always() && !contains(needs.*.result, 'failure') && !contains(needs.*.result, 'cancelled') }}
-    strategy:
-      matrix:
-        environment: [ dev, uat, prod ]
     uses: ./.github/workflows/04h_deploy_with_github_runner.yml
     with:
-      environment: ${{ matrix.environment }}
-      target: ${{ needs.setup.outputs.environment }}
+      environment: ${{ needs.setup.outputs.environment }}
       component: ${{ inputs.component }}
     secrets: inherit
 
