@@ -48,7 +48,7 @@ jobs:
           cluster_name: ${{ vars.CLUSTER_NAME }}
           resource_group: ${{ vars.CLUSTER_RESOURCE_GROUP }}
           app_name: ${{ env.APP_NAME }}
-          helm_upgrade_options: '--debug --set microservice-chart.azure.workloadIdentityClientId=${{vars.WORKLOAD_IDENTITY_ID}} --set-file ${{ inputs.component }}nodo.configMapFromFile.logback\\.xml=./helm/config/${{ inputs.environment }}/logback.xml --set-file ${{ inputs.component }}nodo.configMapFromFile.config-app\\.conf=./helm/config/${{ inputs.environment }}/config-app.conf'
+          helm_upgrade_options: '--debug --set ${{ inputs.component }}nodo.azure.workloadIdentityClientId=${{vars.WORKLOAD_IDENTITY_ID}} --set-file ${{ inputs.component }}nodo.configMapFromFile.logback\\.xml=./helm/config/${{ inputs.environment }}/logback.xml --set-file ${{ inputs.component }}nodo.configMapFromFile.config-app\\.conf=./helm/config/${{ inputs.environment }}/config-app.conf'
           working_directory: ${{ env.component }}
           timeout: '10m0s'
 
