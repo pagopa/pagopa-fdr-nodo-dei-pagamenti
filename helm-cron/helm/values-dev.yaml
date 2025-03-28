@@ -24,6 +24,11 @@ cronnodo:
     configMaps:
       - name: fdr-cacerts
         key: cacerts
+  # Workload identity not yet implemented in cron-chart
+  # serviceAccount:
+  #   name: "fdr-workload-identity"
+  # azure:
+  #   workloadIdentityClientId: <workload-identity-client-id-set-automatically-by-gha>
   envConfig:
     AZURE_INSIGHTS_ENABLED: "true"
     APPLICATIONINSIGHTS_ROLE_NAME: "fdr-nodo-cron"

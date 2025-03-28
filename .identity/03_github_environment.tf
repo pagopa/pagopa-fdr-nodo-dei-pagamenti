@@ -21,7 +21,7 @@ resource "github_repository_environment" "github_repository_environment" {
 
 locals {
   env_secrets = {
-    "CD_CLIENT_ID" : data.azurerm_user_assigned_identity.identity_cd.client_id,
+    "CD_CLIENT_ID" : data.azurerm_user_assigned_identity.identity_cd_01.client_id,
     "TENANT_ID" : data.azurerm_client_config.current.tenant_id,
     "SUBSCRIPTION_ID" : data.azurerm_subscription.current.subscription_id,
     "INTEGRATION_TEST_SUBSCRIPTION_KEY": var.env_short != "p" ? data.azurerm_key_vault_secret.integration_test_subscription_key[0].value : ""
@@ -33,7 +33,12 @@ locals {
     "CLUSTER_RESOURCE_GROUP" : local.aks_cluster.resource_group_name,
     "NAMESPACE" : local.domain,
     "INTEGRATION_TEST_STORAGE_ACCOUNT_NAME": local.integration_test.storage_account_name,
-    "INTEGRATION_TEST_REPORTS_FOLDER": local.integration_test.reports_folder
+    "INTEGRATION_TEST_REPORTS_FOLDER": local.integration_test.reports_folder,
+    "WORKLOAD_IDENTITY_ID": data.azurerm_user_assigned_identity.workload_identity_clientid.client_id
+  }
+  repo_secrets = {
+    "SONAR_TOKEN" : data.azurerm_key_vault_secret.key_vault_sonar.value,
+    "BOT_TOKEN_GITHUB" : data.azurerm_key_vault_secret.key_vault_bot_cd_token.value,
   }
   special_repo_secrets = {
     "CLIENT_ID" : {
@@ -90,14 +95,14 @@ resource "github_actions_secret" "secret_bot_token" {
 
   repository       = local.github.repository
   secret_name      = "BOT_TOKEN_GITHUB"
-  plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_token.value
+  plaintext_value  = data.azurerm_key_vault_secret.key_vault_bot_cd_token.value
 }
 
 #tfsec:ignore:github-actions-no-plain-text-action-secrets # not real secret
 resource "github_actions_secret" "secret_slack_webhook" {
 
   repository       = local.github.repository
-  secret_name      = "SLACK_WEBHOOK_URL"
+  secret_name      = "SLACK_WEBHOOK_URL_DEPLOY"
   plaintext_value  = data.azurerm_key_vault_secret.key_vault_pagopa-pagamenti-deploy-slack-webhook.value
 }
 
