@@ -113,7 +113,7 @@ jobs:
     needs: [ setup, release ]
     name: Build and Push Docker Image
     runs-on: ubuntu-22.04
-    if: ${{ inputs.semver != 'skip' }}
+    if: ${{ needs.setup.outputs.semver != 'skip' }}
     steps:
 
       - name: Checkout Java
