@@ -20,11 +20,11 @@ microservice-chart: &microservice-chart
     initialDelaySeconds: 10
     failureThreshold: 10
     periodSeconds: 5
-  externalConfigMapValues:
+  externalConfigMapFiles:
+    create: true
     configMaps:
-      fdr-cacerts: cacerts
-#      - name: fdr-cacerts
-#        key: cacerts
+      - name: fdr-cacerts
+        key: cacerts
   tmpVolumeMount:
     create: true
   resources:
