@@ -19,12 +19,11 @@ on:
       component:
         required: true
         type: choice
-        description: Select fdr or cron
+        description: Select fdr or cron (disabled)
         default: "fdr"
         options:
           - fdr
-          - cron
-          - prf
+#          - cron
       beta:
         required: false
         type: boolean
@@ -191,4 +190,4 @@ jobs:
           footer: 'Linked to <{workflow_url}| workflow file>'
           icon_success: ':white_check_mark:'
         env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL_DEPLOY }}

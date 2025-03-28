@@ -102,7 +102,7 @@ resource "github_actions_secret" "secret_bot_token" {
 resource "github_actions_secret" "secret_slack_webhook" {
 
   repository       = local.github.repository
-  secret_name      = "SLACK_WEBHOOK_URL"
+  secret_name      = "SLACK_WEBHOOK_URL_DEPLOY"
   plaintext_value  = data.azurerm_key_vault_secret.key_vault_pagopa-pagamenti-deploy-slack-webhook.value
 }
 
