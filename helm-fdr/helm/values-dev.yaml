@@ -158,7 +158,7 @@ fdrnodo:
   ingress:
     create: true
     host: "weudev.fdr.internal.dev.platform.pagopa.it"
-    path: /pagopa-fdr-nodo-service(/|$)(.*)
+    path: /pagopa-fdr-nodo-service/(.*)
     annotations:
       nginx.ingress.kubernetes.io/proxy-read-timeout: "130"
     proxyBodySize: 100m
