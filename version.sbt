@@ -1,1 +1,1 @@
-ThisBuild / version := "2.2.1-187-fix-ingress-path"
+ThisBuild / version := "2.2.1-188-fix-ingress-path"
