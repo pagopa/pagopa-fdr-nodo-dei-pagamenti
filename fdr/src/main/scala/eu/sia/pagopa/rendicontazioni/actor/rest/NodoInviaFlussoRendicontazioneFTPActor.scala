@@ -186,7 +186,7 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
                     FdREventToHistory(
                       sessionId = req.sessionId,
                       nifr = nifr,
-                      soapRequest = req.payload.get,
+                      soapRequest = getSoapContent(req).get,
                       insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
                       elaborate = true,
                       retry = 0
@@ -234,6 +234,31 @@ case class NodoInviaFlussoRendicontazioneFTPActorPerRequest(repositories: Reposi
         }
       }
       (nfrReq, restRequest.payload.get)
+    })
+  }
+
+  private def getSoapContent(restRequest: RestRequest) = {
+    Try({
+      val nfrReq = if( restRequest.payload.isEmpty ) {
+        throw RestException("Invalid request", Constant.HttpStatusDescription.BAD_REQUEST, StatusCodes.BadRequest.intValue)
+      } else {
+        JsonValid.check(restRequest.payload.get, JsonEnum.INVIA_FLUSSO_FTP) match {
+          case Success(_) =>
+            val obj = restRequest.payload.get.parseJson.asJsObject()
+            val nodoInviaFlussoRendicontazione = obj.fields.get("content") match {
+              case Some(JsString(value)) => value
+              case _ => throw new Exception("Key 'content' not found or not a string")
+            }
+            nodoInviaFlussoRendicontazione
+          case Failure(e) =>
+            if (e.getMessage.contains("content")) {
+              throw RestException("Invalid content", "", StatusCodes.BadRequest.intValue, e)
+            } else {
+              throw RestException("Invalid request", "", StatusCodes.BadRequest.intValue, e)
+            }
+        }
+      }
+      nfrReq
     })
   }
 
