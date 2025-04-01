@@ -26,8 +26,8 @@ const POST_URL=ENVIRONMENT==="DEV"?
     'https://api.uat.platform.pagopa.it/nodo-ndp/nodo-per-psp/v1';
 
 const FD3_GET_URL=ENVIRONMENT==="DEV"?
-    'https://api.dev.platform.pagopa.it/nodo/nodo-per-psp/v1':
-    'https://api.uat.platform.pagopa.it/nodo-ndp/nodo-per-psp/v1';
+    'https://api.dev.platform.pagopa.it/fdr-org/service/v1':
+    'https://api.uat.platform.pagopa.it/fdr-org/service/v1';
 
 PSP = ENVIRONMENT==="DEV"?"60000000001":"88888888888";
 BROKER_PSP=ENVIRONMENT==="DEV"?"60000000001":"88888888888";
