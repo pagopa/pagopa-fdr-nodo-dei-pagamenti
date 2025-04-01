@@ -11,6 +11,10 @@ curl  -H "Transfer-Encoding: chunked" --location --request POST -d @"${FILENAME}
 
 echo "Flow correctly sent by PSP ${PSP} with ID ${FLOW_ID} to ${CI} via ${POST_URL}";
 echo "After a while you can use the below curl to verify the flow status";
-echo "curl --location --request GET ${FD3_GET_URL}/organizations/${CI}/fdrs/${FLOW_ID}/revisions/1/psps/${PSP} --header 'Accept: application/json' --header 'Ocp-Apim-Subscription-Key: <Insert Correct SUBKEY>' ";
+echo "curl --location --request GET ${FD3_GET_URL}/organizations/${CI}/fdrs/${FLOW_ID}/revisions/1/psps/${PSP} --header 'Accept: application/json' --header 'Ocp-Apim-Subscription-Key: ${SUBKEY}' ";
+
+
+echo "Alternatively you can run the below script with the parameters: ";
+echo "./fdr3-verify-flow.sh ${FD3_GET_URL} ${CI} ${FLOW_ID} ${PSP} ${SUBKEY} ";
 
 #rm ${FILENAME}
