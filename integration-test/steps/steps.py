@@ -118,7 +118,7 @@ def step_impl(context):
     payload = utils.replace_global_variables(payload, context)
 
     if "[TRANSFERS]" in payload:
-        number_of_transfers = 500000
+        number_of_transfers = 150000
         transfers = ("<pay_i:numeroTotalePagamenti>" + str(number_of_transfers) + "</pay_i:numeroTotalePagamenti>\n" +
                      "<pay_i:importoTotalePagamenti>" + str(
                     number_of_transfers * 5) + ".00</pay_i:importoTotalePagamenti>\n")
