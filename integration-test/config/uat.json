@@ -8,9 +8,9 @@
     }
   },
   "global_configuration": {
-    "psp": "88888888889",
-    "broker_psp": "88888888889",
-    "channel": "88888888889_01",
+    "psp": "88888888888",
+    "broker_psp": "88888888888",
+    "channel": "88888888888_01",
     "password": "PLACEHOLDER",
     "creditor_institution_code": "77777777777",
     "creditor_institution_code_diffent": "99999999998",
