@@ -589,7 +589,7 @@ Feature: Complete happy path for reporting flow operations
         </soapenv:Body>
     </soapenv:Envelope>
     """
-    And EC sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
+    And PSP sends SOAP nodoInviaFlussoRendicontazione to nodo-dei-pagamenti
     And check esito is OK of nodoInviaFlussoRendicontazione response
     # Requiring the list of reports with nodoChiediElencoFlussiRendicontazione
     And an XML for nodoChiediElencoFlussiRendicontazione
