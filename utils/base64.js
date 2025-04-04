@@ -140,6 +140,7 @@ console.log(CI);
 console.log(identificativoFlusso);
 console.log(PSP);
 console.log(FD3_GET_URL);
+console.log(ENVIRONMENT);
 
 //console.log("identificativoFlusso: "+identificativoFlusso);
 

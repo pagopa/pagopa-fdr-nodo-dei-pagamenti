@@ -28,12 +28,12 @@ NUM_PAYMENTS=111 node DEV base64.js
 
 Example script to check the uploaded FdR on Phase 3 CI side:
 The parameters required for the fdr3-verify-flow.sh script are:
-- FD3_GET_URL: The URL of the FdR Phase 3 CI service.
+- ENV: The environment to be used (DEV or UAT).
 - CI: The CI identifier (e.g., "15376371009").
 - FLOW_ID: The ID of the flow to be checked.
 - PSP: The ID of the PSP.
 - SUBKEY: The API Management subscription key for authentication.
 ```
-./fdr3-verify-flow.sh https://api.dev.platform.pagopa.it/fdr-org/service/v1 15376371009 2025-04-0160000000001-S241698127 60000000001 <Valid APIM SUBKEY>
+./fdr3-verify-flow.sh DEV 15376371009 2025-04-0160000000001-S241698127 60000000001 <Valid APIM SUBKEY>
 ```
 This script and the required parameters are mentioned on a successful run of the chunked.sh script run by nodoInviaFlussoRendicontazione.sh
