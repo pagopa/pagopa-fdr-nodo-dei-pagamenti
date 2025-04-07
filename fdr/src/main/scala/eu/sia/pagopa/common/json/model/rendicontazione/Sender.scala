@@ -15,7 +15,7 @@ object Sender extends DefaultJsonProtocol {
         "pspName" -> JsString(sender.pspName),
         "pspBrokerId" -> JsString(sender.pspBrokerId),
         "channelId" -> JsString(sender.channelId),
-        "password" -> JsString(sender.password)
+        "password" -> JsString(sender.password.getOrElse("PLACEHOLDER"))
       )
     }
 
@@ -32,7 +32,7 @@ object Sender extends DefaultJsonProtocol {
         map("pspName").asInstanceOf[JsString].value,
         map("pspBrokerId").asInstanceOf[JsString].value,
         map("channelId").asInstanceOf[JsString].value,
-        map("password").asInstanceOf[JsString].value
+        Try{map("password").asInstanceOf[JsString].value}.toOption,
       )
     ).recover({ case e =>
       throw DeserializationException("Error on mapping Sender fields: " + e.getMessage)
@@ -48,7 +48,7 @@ case class Sender(
                    pspName: String,
                    pspBrokerId: String,
                    channelId: String,
-                   password: String
+                   password: Option[String]
                  )
 
 object SenderTypeEnum extends Enumeration {
