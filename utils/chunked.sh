@@ -1,5 +1,5 @@
+#!/bin/bash -x
 # https://everything.curl.dev/http/post/chunked
-
 FILENAME=$1 POST_URL=$2 SUBKEY=$3 CI=$4 FLOW_ID=$5 PSP=$6 FD3_GET_URL=$7 ENV=$8
 #curl  -H "Transfer-Encoding: chunked" --location --request POST -d @${FILENAME} 'https://api.uat.platform.pagopa.it/nodo-ndp/nodo-per-psp/v1' \
 #curl  -H "Transfer-Encoding: chunked" --location --request POST -d @${FILENAME} 'https://api.dev.platform.pagopa.it/nodo/nodo-per-psp/v1' \

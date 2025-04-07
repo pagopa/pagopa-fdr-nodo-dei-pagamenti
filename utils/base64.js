@@ -1,10 +1,6 @@
 const NUM_PAYMENTS = process.env.NUM_PAYMENTS || 100; // default 100 payments
 const ENVIRONMENT = process.env.ENVIRONMENT || "DEV"; // default DEV
-
 const SUBKEY = process.env.SUBKEY;
-
-//console.log("ENVIRONMENT: "+ENVIRONMENT);
-//console.log("NUM_PAYMENTS: "+NUM_PAYMENTS);
 
 // DEV
 // PSP = "60000000001"
@@ -22,8 +18,8 @@ const SUBKEY = process.env.SUBKEY;
 
 // const POST_URL='localhost:8088/webservices/input';
 const POST_URL=ENVIRONMENT==="DEV"?
-    'https://api.dev.platform.pagopa.it/nodo/nodo-per-psp/v1':
-    'https://api.uat.platform.pagopa.it/nodo-ndp/nodo-per-psp/v1';
+    'https://api.dev.platform.pagopa.it/nodo-auth/nodo-per-psp/v1':
+    'https://api.uat.platform.pagopa.it/nodo-auth/nodo-per-psp/v1';
 
 const FD3_GET_URL=ENVIRONMENT==="DEV"?
     'https://api.dev.platform.pagopa.it/fdr-org/service/v1':
