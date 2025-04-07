@@ -150,18 +150,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
           flussoRiversamentoBase64
         )
 
-        nifrRequest = NodoInviaFlussoRendicontazioneRequest(
-          flow.sender.pspId,
-          flow.sender.pspBrokerId,
-          flow.sender.channelId,
-          flow.sender.password.getOrElse("PLACEHOLDER"),
-          flow.receiver.organizationId,
-          flow.name,
-          DatatypeFactory.newInstance().newXMLGregorianCalendar(flow.date),
-          flussoRiversamentoBase64
-        )
-
-        nifrEncoded <- Future.fromTry(XmlEnum.nodoInviaFlussoRendicontazioneRequest2Str_nodeforpsp(nifrRequest))
+        nifr2Str <- Future.fromTry(XmlEnum.nodoInviaFlussoRendicontazione2Str_nodoperpsp(nifr))
 
         (_, rendicontazioneSaved, _, _) <- saveRendicontazione(
           flow.name,
@@ -179,7 +168,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         _ = reFlow = reFlow.map(r => r.copy(status = Some("PUBLISHED")))
         _ = callTrace(traceInternalRequest, reActor, restRequest, reFlow.get, restRequest.reExtra)
         sr = RestResponse(req.sessionId, Some(GenericResponse(GenericResponseOutcome.OK.toString).toJson.toString), StatusCodes.OK.intValue, reFlow, req.testCaseId, None)
-      } yield (sr, nifr, nifrEncoded, rendicontazioneSaved))
+      } yield (sr, nifr, nifr2Str, rendicontazioneSaved))
         .recoverWith({
           case rex: RestException =>
             Future.successful(generateErrorResponse(Some(rex)))
@@ -195,7 +184,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             logEndProcess(sr)
             replyTo ! sr
             complete()
-          case (sr: RestResponse, nifr: NodoInviaFlussoRendicontazione, nifrEncoded: String, rendicontazioneSaved: Rendicontazione) =>
+          case (sr: RestResponse, nifr: NodoInviaFlussoRendicontazione, nifr2str: String, rendicontazioneSaved: Rendicontazione) =>
             callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
             logEndProcess(sr)
 
@@ -207,7 +196,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
                     FdREventToHistory(
                       sessionId = req.sessionId,
                       nifr = nifr,
-                      soapRequest = nifrEncoded,
+                      soapRequest = nifr2str,
                       insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
                       elaborate = false,
                       retry = 0
