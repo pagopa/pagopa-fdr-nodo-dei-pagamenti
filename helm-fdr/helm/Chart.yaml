@@ -2,8 +2,8 @@ apiVersion: v2
 name: fdr-chart
 description: Flussi di rendicontazione
 type: application
-version: 0.42.0
-appVersion: 2.2.2
+version: 0.43.0
+appVersion: 2.2.2-199-PAGOPA-2968
 dependencies:
   - name: microservice-chart
     version: 7.1.1
