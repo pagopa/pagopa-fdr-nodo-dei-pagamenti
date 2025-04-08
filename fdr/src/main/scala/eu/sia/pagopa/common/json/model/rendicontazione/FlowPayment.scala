@@ -13,7 +13,7 @@ object FlowPayment extends DefaultJsonProtocol {
         map("iuv").asInstanceOf[JsString].value,
         map("iur").asInstanceOf[JsString].value,
         map("index").asInstanceOf[JsNumber].value.intValue,
-        map("pay").asInstanceOf[JsNumber].value.toInt,
+        map("pay").asInstanceOf[JsNumber].value.toDouble,
         map("payDate").asInstanceOf[JsString].value,
         PayStatusEnum.withName(map("payStatus").asInstanceOf[JsString].value),
         map("idTransfer").asInstanceOf[JsNumber].value.toInt,
@@ -28,7 +28,7 @@ case class FlowPayment(
                         iuv: String,
                         iur: String,
                         index: Integer,
-                        pay: Integer,
+                        pay: Double,
                         payDate: String,
                         payStatus: PayStatusEnum.Value,
                         transferId: Integer

@@ -118,13 +118,13 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             Some(flow.receiver.organizationName)
           ),
           BigDecimal(flow.computedTotPayments),
-          BigDecimal(flow.computedSumPayments),
+          BigDecimal(flow.computedSumPayments).setScale(2),
           flow.paymentList.map(p => {
             CtDatiSingoliPagamenti(
               p.iuv,
               p.iur,
               Some(BigInt.int2bigInt(p.transferId)),
-              BigDecimal(p.pay),
+              BigDecimal(p.pay).setScale(2),
               p.payStatus match {
                 case PayStatusEnum.NO_RPT => scalaxbmodel.flussoriversamento.Number9
                 case PayStatusEnum.REVOKED => scalaxbmodel.flussoriversamento.Number3
