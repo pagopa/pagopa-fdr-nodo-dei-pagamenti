@@ -46,7 +46,7 @@ case class Flow(
                  revision: Option[Int],
                  status: Option[String],
                  computedTotPayments: Integer,
-                 computedSumPayments: Integer,
+                 computedSumPayments: Double,
                  regulationDate: String,
                  regulation: String,
                  sender: Sender,

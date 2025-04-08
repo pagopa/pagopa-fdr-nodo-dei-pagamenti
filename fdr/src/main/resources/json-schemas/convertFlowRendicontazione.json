@@ -110,7 +110,7 @@
     "regulationDate": {
       "description": "Data regolamento",
       "type": "string",
-      "example": "2023-04-03T12:00:30.900000Z"
+      "example": "2023-04-03"
     },
     "bicCodePouringBank": {
       "description": "Bic",
@@ -132,7 +132,7 @@
     "computedSumPayments": {
       "description": "Importo totale dei pagamenti",
       "type": "number",
-      "pattern": "^\\d{1,2147483647}([.]\\d{1,2})?$",
+      "pattern": "^\\d{1,2147483647}[.]\\d{1,2}$",
       "example": 0.01,
       "exclusiveMinimum": 0
     },
@@ -167,7 +167,7 @@
           "pay": {
             "description": "Importo pagamento",
             "type": "number",
-            "pattern": "^\\d{1,2147483647}([.]\\d{1,2})?$",
+            "pattern": "^\\d{1,2147483647}[.]\\d{1,2}$",
             "example": 0.01,
             "exclusiveMinimum": 0
           },
