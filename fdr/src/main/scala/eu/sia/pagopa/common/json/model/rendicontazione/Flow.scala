@@ -24,7 +24,7 @@ object Flow extends DefaultJsonProtocol {
         Try{map("revision").asInstanceOf[JsNumber].value.toInt}.toOption,
         Try{map("status").asInstanceOf[JsString].value}.toOption,
         map("computedTotPayments").asInstanceOf[JsNumber].value.toInt,
-        map("computedSumPayments").asInstanceOf[JsNumber].value.toInt,
+        map("computedSumPayments").asInstanceOf[JsNumber].value.toDouble,
         map("regulationDate").asInstanceOf[JsString].value,
         map("regulation").asInstanceOf[JsString].value,
         sender,
