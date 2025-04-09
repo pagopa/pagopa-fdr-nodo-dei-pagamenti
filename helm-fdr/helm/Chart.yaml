@@ -2,10 +2,10 @@ apiVersion: v2
 name: fdr-chart
 description: Flussi di rendicontazione
 type: application
-version: 0.32.0
-appVersion: 2.1.21-165-PAGOPA-2720
+version: 0.47.0
+appVersion: 2.2.4
 dependencies:
   - name: microservice-chart
-    version: 3.0.0
+    version: 7.1.1
     repository: "https://pagopa.github.io/aks-microservice-chart-blueprint"
     alias: fdrnodo

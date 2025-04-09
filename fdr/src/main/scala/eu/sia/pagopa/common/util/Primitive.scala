@@ -2,7 +2,7 @@ package eu.sia.pagopa.common.util
 
 import eu.sia.pagopa.common.actor.PerRequestActor
 import eu.sia.pagopa.ftpsender.actor.FtpRetryActorPerRequest
-import eu.sia.pagopa.rendicontazioni.actor.rest.{GetAllRevisionFdrActorPerRequest, NodoInviaFlussoRendicontazioneFTPActorPerRequest, NotifyFlussoRendicontazioneActorPerRequest, RegisterFdrForValidationActorPerRequest}
+import eu.sia.pagopa.rendicontazioni.actor.rest.{ConvertFlussoRendicontazioneActorPerRequest, GetAllRevisionFdrActorPerRequest, NodoInviaFlussoRendicontazioneFTPActorPerRequest, RegisterFdrForValidationActorPerRequest}
 import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActor}
 
 object Primitive {
@@ -14,7 +14,7 @@ object Primitive {
   )
 
   val rest: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
-    "notifyFlussoRendicontazione" -> ("notify/fdr", _ => classOf[NotifyFlussoRendicontazioneActorPerRequest]),
+    "convertFlussoRendicontazione" -> ("convert/fdr3", _ => classOf[ConvertFlussoRendicontazioneActorPerRequest]),
     "nodoInviaFlussoRendicontazioneFTP" -> ("nodoInviaFlussoRendicontazioneFTP", _ => classOf[NodoInviaFlussoRendicontazioneFTPActorPerRequest]),
     "registerFdrForValidation" -> ("register-for-validation/fdr", _ => classOf[RegisterFdrForValidationActorPerRequest])
   )

@@ -18,7 +18,7 @@ object GetResponse extends DefaultJsonProtocol {
       val senderPspName = map("sender").asInstanceOf[JsObject].fields("pspName").asInstanceOf[JsString].value
       val senderBrokerId = map("sender").asInstanceOf[JsObject].fields("pspBrokerId").asInstanceOf[JsString].value
       val senderChannelId = map("sender").asInstanceOf[JsObject].fields("channelId").asInstanceOf[JsString].value
-      val senderPassword = map("sender").asInstanceOf[JsObject].fields("password").asInstanceOf[JsString].value
+      val senderPassword = Try{map("sender").asInstanceOf[JsObject].fields("password").asInstanceOf[JsString].value}.toOption
 
       val receiverId = map("receiver").asInstanceOf[JsObject].fields("id").asInstanceOf[JsString].value
       val receiverEcId = map("receiver").asInstanceOf[JsObject].fields("organizationId").asInstanceOf[JsString].value

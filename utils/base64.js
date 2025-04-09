@@ -1,9 +1,13 @@
+const NUM_PAYMENTS = process.env.NUM_PAYMENTS || 100; // default 100 payments
+const ENVIRONMENT = process.env.ENVIRONMENT || "DEV"; // default DEV
+const SUBKEY = process.env.SUBKEY;
+
 // DEV
-PSP = "60000000001"
-BROKER_PSP="60000000001"
-CHANNEL="15376371009_04"
-PASSWORD="PLACEHOLDER"
-CI="15376371009"
+// PSP = "60000000001"
+// BROKER_PSP="60000000001"
+// CHANNEL="15376371009_04"
+// PASSWORD="PLACEHOLDER"
+// CI="15376371009"
 
 // UAT
 // PSP = "88888888888"
@@ -12,15 +16,31 @@ CI="15376371009"
 // PASSWORD="PLACEHOLDER"
 // CI="15376371009"
 
+// const POST_URL='localhost:8088/webservices/input';
+const POST_URL=ENVIRONMENT==="DEV"?
+    'https://api.dev.platform.pagopa.it/nodo-auth/nodo-per-psp/v1':
+    'https://api.uat.platform.pagopa.it/nodo-auth/nodo-per-psp/v1';
+
+const FD3_GET_URL=ENVIRONMENT==="DEV"?
+    'https://api.dev.platform.pagopa.it/fdr-org/service/v1':
+    'https://api.uat.platform.pagopa.it/fdr-org/service/v1';
+
+PSP = ENVIRONMENT==="DEV"?"60000000001":"88888888888";
+BROKER_PSP=ENVIRONMENT==="DEV"?"60000000001":"88888888888";
+CHANNEL=ENVIRONMENT==="DEV"?"15376371009_04":"88888888888_01";
+PASSWORD="PLACEHOLDER"
+CI="15376371009"
+
+
 function makeid(length) {
     var result           = '';
     var characters       = '0123456789';
     var charactersLength = characters.length;
     for ( var i = 0; i < length; i++ ) {
-      result += characters.charAt(Math.floor(Math.random() * 
- charactersLength));
-   }
-   return result;
+        result += characters.charAt(Math.floor(Math.random() *
+            charactersLength));
+    }
+    return result;
 }
 
 function howManyDatiSingoliPagamenti(n, data) {
@@ -56,7 +76,6 @@ istitutoMittente=PSP
 
 identificativoFlusso = `${dataRegolamento}${istitutoMittente}-S${makeid(9)}`;
 
-const NUM_PAYMENTS = process.env.NUM_PAYMENTS || 100; // default 100 payments
 
 xmlFlusso = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                 <FlussoRiversamento xmlns="http://www.digitpa.gov.it/schemas/2011/Pagamenti/">
@@ -110,7 +129,17 @@ nodoInviaFlussoRendicontazione=`
 //console.log(nodoInviaFlussoRendicontazione);
 let nomeFile=`${NUM_PAYMENTS}-${identificativoFlusso}.xml`
 require("fs").writeFileSync(nomeFile, nodoInviaFlussoRendicontazione);
-console.log(nomeFile)
+console.log(nomeFile)//First parameter for chunked script, post body
+console.log(POST_URL);//Second  parameter for chunked script, url for POST request
+console.log(SUBKEY);//Third parameter for chunked script, subscription Key
+console.log(CI);
+console.log(identificativoFlusso);
+console.log(PSP);
+console.log(FD3_GET_URL);
+console.log(ENVIRONMENT);
+
+//console.log("identificativoFlusso: "+identificativoFlusso);
+
 // only for local debug use
 //let nomeFileOnlyFlow=`${NUM_PAYMENTS}identificativoPSP--identificativoIntermediarioPSP--identificativoCanale--identificativoDominio--${identificativoFlusso}--dataOraFlusso.xml`
 //require("fs").writeFileSync(nomeFileOnlyFlow, xmlFlusso);

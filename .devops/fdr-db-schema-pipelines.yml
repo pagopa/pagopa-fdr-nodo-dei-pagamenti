@@ -40,6 +40,7 @@ variables:
   ADMIN_USERNAME: azureuser
   FDR_USERNAME: fdr
   FDR_SCHEMA: fdr
+  FDR_USERNAME_READ: fdr1r
 
 stages:
   - stage: initialization_jobs
@@ -54,7 +55,7 @@ stages:
             inputs:
               azureSubscription: $(AZURE_SERVICE_CONNECTION)
               keyVaultName: $(KEY_VAULT_NAME)
-              secretsFilter: 'db-administrator-login-password,db-fdr-password'
+              secretsFilter: 'db-administrator-login-password,db-fdr-password,db-fdr1-password-read'
           - task: AzureCLI@2
             displayName: "create all schemas"
             inputs:
@@ -86,3 +87,36 @@ stages:
                 }
 
                 create_schema "$FDR_SCHEMA"     "$FDR_USERNAME"     "$(db-fdr-password)"
+          - task: AzureCLI@2
+            displayName: "create FDR1 user READ"
+            inputs:
+              azureSubscription: $(AZURE_SERVICE_CONNECTION)
+              scriptLocation: inlineScript
+              scriptType: bash
+              inlineScript: |
+
+                az config set extension.use_dynamic_install=yes_without_prompt
+                az postgres flexible-server execute --name $(DB_HOST) --admin-user $(ADMIN_USERNAME) \
+                --admin-password '$(db-administrator-login-password)' --database-name "$(DATABASE_NAME)" \
+                --querytext "
+                do \$\$
+
+                BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = '$FDR_USERNAME_READ') THEN
+                    CREATE ROLE $FDR_USERNAME_READ WITH
+                    NOSUPERUSER
+                    LOGIN
+                    NOREPLICATION
+                    NOBYPASSRLS
+                    CONNECTION LIMIT -1;
+                  END IF;
+
+                  ALTER ROLE $FDR_USERNAME_READ PASSWORD '$(db-fdr1-password-read)';
+
+                  GRANT SELECT ON ALL TABLES IN SCHEMA $FDR_SCHEMA TO $FDR_USERNAME_READ;
+                  GRANT USAGE ON SCHEMA $FDR_SCHEMA TO $FDR_USERNAME_READ;
+
+                END;
+
+                \$\$;
+                "

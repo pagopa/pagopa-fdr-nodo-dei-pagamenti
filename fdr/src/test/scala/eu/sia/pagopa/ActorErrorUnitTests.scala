@@ -6,13 +6,14 @@ import eu.sia.pagopa.common.exception.DigitPaErrorCodes
 import eu.sia.pagopa.common.message.{ReExtra, RestResponse, SoapRequest, SoapResponse, WorkRequest, WorkResponse}
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util.Util
-import eu.sia.pagopa.rendicontazioni.actor.rest.{GetAllRevisionFdrActorPerRequest, NodoInviaFlussoRendicontazioneFTPActorPerRequest, NotifyFlussoRendicontazioneActorPerRequest, RegisterFdrForValidationActorPerRequest}
+import eu.sia.pagopa.rendicontazioni.actor.rest.{ConvertFlussoRendicontazioneActorPerRequest, GetAllRevisionFdrActorPerRequest, NodoInviaFlussoRendicontazioneFTPActorPerRequest, RegisterFdrForValidationActorPerRequest}
 import eu.sia.pagopa.rendicontazioni.actor.soap.{NodoChiediElencoFlussiRendicontazioneActorPerRequest, NodoChiediFlussoRendicontazioneActorPerRequest, NodoInviaFlussoRendicontazioneActor}
 
 import scala.concurrent.Promise
 
-class NotifyFlussoRendicontazioneTest(testPromise: Promise[Boolean], override val repositories: Repositories, override val actorProps: ActorProps)
-    extends NotifyFlussoRendicontazioneActorPerRequest(repositories, actorProps) {
+class ConvertFlussoRendicontazioneActorPerRequestTest(testPromise: Promise[Boolean], override val repositories: Repositories, override val actorProps: ActorProps)
+    extends ConvertFlussoRendicontazioneActorPerRequest(repositories, actorProps) {
+
 
   override def complete(fn: () => Unit): Unit = {
     testPromise.success(true)

@@ -29,7 +29,8 @@ object JsonValid {
       jsonEnum, {
         val path = jsonEnum match {
           case JsonEnum.ERROR         => "/json-schemas/error.json"
-          case JsonEnum.NOTIFY_FLOW   => "/json-schemas/notifyFlowRendicontazione.json"
+          case JsonEnum.CONVERT_FLOW  => "/json-schemas/convertFlowRendicontazione.json"
+          case JsonEnum.CONVERT       => "/json-schemas/convert.json"
           case JsonEnum.INVIA_FLUSSO_FTP        => "/json-schemas/nodoInviaFlussoRendicontazioneFTP.json"
           case JsonEnum.REGISTER_FOR_VALIDATION => "/json-schemas/registerFdrForValidation.json"
         }

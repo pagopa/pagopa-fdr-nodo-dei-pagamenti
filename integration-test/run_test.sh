@@ -30,8 +30,3 @@ behave --format allure_behave.formatter:AllureFormatter -o results $junit --tags
 rm -rf results/history && cp -R reports/history results/history 2>/dev/null
 
 allure generate results -o reports --clean
-
-if ! [ -z $ENV ]
-then
-  mv config/${ENV}.json.orig config/${ENV}.json
-fi
