@@ -93,6 +93,7 @@ microservice-chart: &microservice-chart
   envSecret:
     APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-connection-string"
     AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
+    AZURE_STORAGE_RE_CONNECTION_STRING: "fdr-re-sa-connection-string"
     API_CONFIG_CACHE_SUBSCRIPTION_KEY: "api-config-cache-subscription-key-string"
     FDR_SUBSCRIPTION_KEY: "fdr-internal-product-subscription-key"
     FDR_LEGACY_SUBSCRIPTION_KEY: "fdr-legacy-subscription-key"
