@@ -4,7 +4,7 @@ import eu.sia.pagopa.common.message.BlobBodyRef
 import org.mongodb.scala.bson.{BsonInt32, BsonString, Document}
 
 import java.time.format.DateTimeFormatter
-import java.time.{ZoneOffset, ZonedDateTime}
+import java.time.{LocalDate, ZoneOffset, ZonedDateTime}
 
 
 case class Fdr1Metadata(
@@ -24,10 +24,14 @@ case class Fdr1Metadata(
   def toDocument: Document = {
     val formatter = DateTimeFormatter.ISO_INSTANT
 
+
+
     // convert flowDate to ISO-8601 string
     val flowDateString = ZonedDateTime.ofInstant(flowDate.toGregorianCalendar.toInstant, ZoneOffset.UTC).format(formatter)
+    val partitionKey = ZonedDateTime.ofInstant(flowDate.toGregorianCalendar.toInstant, ZoneOffset.UTC).format(DateTimeFormatter.ofPattern("yyyy-MM-dd"))
 
     Document(
+      "PartitionKey" -> partitionKey,
       "psp" -> psp,
       "brokerPsp" -> brokerPsp,
       "channel" -> channel,
