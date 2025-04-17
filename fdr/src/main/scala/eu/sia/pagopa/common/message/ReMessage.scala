@@ -54,6 +54,7 @@ case class ReEventHub(
                      ) {
   def toDocument: Document = {
     Document(
+      "PartitionKey" -> created.toLocalDate.toString,
       "serviceIdentifier" -> serviceIdentifier,
       "uniqueId" -> uniqueId,
       "created" -> created.toString,
