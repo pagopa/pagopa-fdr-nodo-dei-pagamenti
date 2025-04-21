@@ -11,13 +11,14 @@ import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
+import it.pagopa.config.{Channel, CreditorInstitution, PaymentServiceProvider}
 import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
 
@@ -166,7 +167,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
     } yield r
   }
 
-  def checks(ddataMap: ConfigData, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, checkPassword: Boolean, actorClassId: String)(implicit log: NodoLogger) = {
+  def checks(ddataMap: ConfigData, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, checkPassword: Boolean, actorClassId: String)(implicit log: NodoLogger): Try[(CreditorInstitution, Option[PaymentServiceProvider], Option[Channel], Boolean)] = {
     log.debug(FdrLogConstant.logSemantico(actorClassId) + " psp, broker, channel, password, ci")
     val paaa = for {
       (psp, canale) <- DDataChecks
@@ -181,7 +182,16 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
         )
         .map(pc => pc._1 -> pc._3)
       pa <- DDataChecks.checkPA(log, ddataMap, nodoInviaFlussoRendicontazione.identificativoDominio)
-    } yield (pa, psp, canale)
+
+      // Check reporting_ftp flag
+      reportingFtpEnabled = ddataMap.creditorInstitutions
+        .get(nodoInviaFlussoRendicontazione.identificativoDominio)
+        .exists(_.reportingFtp)
+
+      _ = if (!reportingFtpEnabled)
+        log.debug(s"Forwarding to Nexi not expected for the domain ${nodoInviaFlussoRendicontazione.identificativoDominio}")
+
+    } yield (pa, psp, canale, reportingFtpEnabled)
 
     paaa.recoverWith({
       case ex: DigitPaException =>
