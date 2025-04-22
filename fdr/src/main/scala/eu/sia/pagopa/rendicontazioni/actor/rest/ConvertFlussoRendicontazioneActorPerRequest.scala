@@ -150,6 +150,15 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
           flussoRiversamentoBase64
         )
 
+        reportingFtpEnabled = ddataMap.creditorInstitutions
+          .get(flow.receiver.organizationId)
+          .exists(_.reportingFtp)
+        _ = if (reportingFtpEnabled) {
+          // TODO forward NodoInviaFlussoRendicontazione also to nexi
+        } else {
+          log.debug(s"Forwarding to Nexi not expected for the domain ${flow.receiver.organizationId}")
+        }
+
         nifr2Str <- Future.fromTry(XmlEnum.nodoInviaFlussoRendicontazione2Str_nodoperpsp(nifr))
 
         (_, rendicontazioneSaved, _, _) <- saveRendicontazione(

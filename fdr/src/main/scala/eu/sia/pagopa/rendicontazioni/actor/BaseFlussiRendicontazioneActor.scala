@@ -1,28 +1,23 @@
 package eu.sia.pagopa.rendicontazioni.actor
 
-import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import eu.sia.pagopa.Main.ConfigData
 import eu.sia.pagopa.common.actor.NodoLogging
 import eu.sia.pagopa.common.exception
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException}
-import eu.sia.pagopa.common.message.{ReExtra, SoapRequest}
 import eu.sia.pagopa.common.repo.fdr.FdrRepository
 import eu.sia.pagopa.common.repo.fdr.enums.RendicontazioneStatus
 import eu.sia.pagopa.common.repo.fdr.model.{BinaryFile, Rendicontazione}
 import eu.sia.pagopa.common.util._
 import eu.sia.pagopa.common.util.xml.XsdValid
 import eu.sia.pagopa.commonxml.XmlEnum
-import eu.sia.pagopa.rendicontazioni.actor.soap.NodoInviaFlussoRendicontazioneActor
 import eu.sia.pagopa.rendicontazioni.util.CheckRendicontazioni
-import it.pagopa.config.{Channel, CreditorInstitution, PaymentServiceProvider}
 import scalaxbmodel.flussoriversamento.CtFlussoRiversamento
 import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
 
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
-import java.util.UUID
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
 trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
 
@@ -44,7 +39,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
             XmlEnum.str2FlussoRiversamento_flussoriversamento(content).getOrElse(throw exception.DigitPaException(DigitPaErrorCodes.PPT_SINTASSI_XSD))
 
           if (flussoRiversamento.identificativoFlusso != nifr.identificativoFlusso) {
-            throw exception.DigitPaException("Il campo [identificativoFlusso] non è uguale al campo dentro xml flusso riversamento [identificativoFlusso]", DigitPaErrorCodes.PPT_SEMANTICA)
+            throw exception.DigitPaException("Il campo [identificativoFlusso] non Ã¨ uguale al campo dentro xml flusso riversamento [identificativoFlusso]", DigitPaErrorCodes.PPT_SEMANTICA)
           }
 
           val dataOraFlussoFlussoRiversamento = flussoRiversamento.dataOraFlusso.toGregorianCalendar.toZonedDateTime.toLocalDateTime
@@ -58,7 +53,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
               dataOraFlussoFlussoRiversamento.getMinute != dataOraFlusso.getMinute ||
               dataOraFlussoFlussoRiversamento.getSecond != dataOraFlusso.getSecond
           ) {
-            throw exception.DigitPaException("Il campo [dataOraFlusso] non è uguale al campo dentro xml flusso riversamento [dataOraFlusso]", DigitPaErrorCodes.PPT_SEMANTICA)
+            throw exception.DigitPaException("Il campo [dataOraFlusso] non Ã¨ uguale al campo dentro xml flusso riversamento [dataOraFlusso]", DigitPaErrorCodes.PPT_SEMANTICA)
           }
           Future.successful(flussoRiversamento, content)
 
@@ -91,18 +86,16 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
   }
 
   def saveRendicontazione(
-                          identificativoFlusso: String,
-                          identificativoPSP: String,
-                          identificativoIntermediarioPSP: String,
-                          identificativoCanale: String,
-                          identificativoDominio: String,
-                          dataOraFlusso: javax.xml.datatype.XMLGregorianCalendar,
-                          xmlRendicontazione: scalaxb.Base64Binary,
-                          checkUTF8: Boolean,
-                          flussoRiversamento: CtFlussoRiversamento,
-                          fdrRepository: FdrRepository,
-                          reportingFtpEnabled: Boolean,
-                          actorProps: ActorProps)(implicit log: NodoLogger, ec: ExecutionContext) = {
+                           identificativoFlusso: String,
+                           identificativoPSP: String,
+                           identificativoIntermediarioPSP: String,
+                           identificativoCanale: String,
+                           identificativoDominio: String,
+                           dataOraFlusso: javax.xml.datatype.XMLGregorianCalendar,
+                           xmlRendicontazione: scalaxb.Base64Binary,
+                           checkUTF8: Boolean,
+                           flussoRiversamento: CtFlussoRiversamento,
+                           fdrRepository: FdrRepository)(implicit log: NodoLogger, ec: ExecutionContext) = {
 
     for {
       r <- {
@@ -130,33 +123,9 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
           .recoverWith({ case e =>
             Future.failed(exception.DigitPaException("Errore salvataggio rendicontazione", DigitPaErrorCodes.PPT_SYSTEM_ERROR, e))
           })
-          /*
           .flatMap(data => {
             Future.successful((Constant.OK, data._1, None, flussoRiversamento))
-          })*/
-          .map { data =>
-            // Send to NodoInviaFlussoRendicontazioneActor if FTP enabled
-            if (reportingFtpEnabled) {
-              val nodoInviaFlussoActor =
-                actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[NodoInviaFlussoRendicontazioneActor])))
-
-              val soapRequest = SoapRequest(
-                sessionId = UUID.randomUUID().toString,
-                payload = content,
-                callRemoteAddress = "localhost",
-                primitive = "nodoInviaFlussoRendicontazione",
-                sender = "test-client",
-                timestamp = Util.now(),
-                reExtra = ReExtra(),
-                testCaseId = None
-              )
-
-              nodoInviaFlussoActor ! soapRequest
-              log.debug(s"Inviato SoapRequest a NodoInviaFlussoRendicontazioneActor per il dominio $identificativoDominio")
-            }
-
-            (Constant.OK, data._1, None, flussoRiversamento)
-          }
+          })
       }
     } yield r
   }
@@ -197,7 +166,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
     } yield r
   }
 
-  def checks(ddataMap: ConfigData, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, checkPassword: Boolean, actorClassId: String)(implicit log: NodoLogger): Try[(CreditorInstitution, Option[PaymentServiceProvider], Option[Channel], Boolean)] = {
+  def checks(ddataMap: ConfigData, nodoInviaFlussoRendicontazione: NodoInviaFlussoRendicontazione, checkPassword: Boolean, actorClassId: String)(implicit log: NodoLogger) = {
     log.debug(FdrLogConstant.logSemantico(actorClassId) + " psp, broker, channel, password, ci")
     val paaa = for {
       (psp, canale) <- DDataChecks
@@ -212,16 +181,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
         )
         .map(pc => pc._1 -> pc._3)
       pa <- DDataChecks.checkPA(log, ddataMap, nodoInviaFlussoRendicontazione.identificativoDominio)
-
-      // Check reporting_ftp flag
-      reportingFtpEnabled = ddataMap.creditorInstitutions
-        .get(nodoInviaFlussoRendicontazione.identificativoDominio)
-        .exists(_.reportingFtp)
-
-      _ = if (!reportingFtpEnabled)
-        log.debug(s"Forwarding to Nexi not expected for the domain ${nodoInviaFlussoRendicontazione.identificativoDominio}")
-
-    } yield (pa, psp, canale, reportingFtpEnabled)
+    } yield (pa, psp, canale)
 
     paaa.recoverWith({
       case ex: DigitPaException =>
