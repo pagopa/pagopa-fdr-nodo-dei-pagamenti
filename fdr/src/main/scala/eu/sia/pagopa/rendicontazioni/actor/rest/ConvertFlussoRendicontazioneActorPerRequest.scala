@@ -321,7 +321,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
     log.debug(FdrLogConstant.logSintattico(s"${SoapReceiverType.NEXI.toString} $RESPONSE_NAME"))
     (for {
       _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_INVIA_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPSP, inputXsdValid)
-      body <- XmlEnum.str2nodoChiediElencoFlussiRendicontazioneResponse_nodoperpa(payloadResponse)
+      body <- XmlEnum.str2nodoInviaFlussoRendicontazioneResponse_nodoperpsp(payloadResponse)
     } yield Some(body)) recoverWith { case e =>
       Failure(e)
     }
