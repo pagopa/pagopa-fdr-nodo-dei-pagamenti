@@ -39,7 +39,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
             XmlEnum.str2FlussoRiversamento_flussoriversamento(content).getOrElse(throw exception.DigitPaException(DigitPaErrorCodes.PPT_SINTASSI_XSD))
 
           if (flussoRiversamento.identificativoFlusso != nifr.identificativoFlusso) {
-            throw exception.DigitPaException("Il campo [identificativoFlusso] non Ã¨ uguale al campo dentro xml flusso riversamento [identificativoFlusso]", DigitPaErrorCodes.PPT_SEMANTICA)
+            throw exception.DigitPaException("Il campo [identificativoFlusso] non è uguale al campo dentro xml flusso riversamento [identificativoFlusso]", DigitPaErrorCodes.PPT_SEMANTICA)
           }
 
           val dataOraFlussoFlussoRiversamento = flussoRiversamento.dataOraFlusso.toGregorianCalendar.toZonedDateTime.toLocalDateTime
@@ -53,7 +53,7 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
               dataOraFlussoFlussoRiversamento.getMinute != dataOraFlusso.getMinute ||
               dataOraFlussoFlussoRiversamento.getSecond != dataOraFlusso.getSecond
           ) {
-            throw exception.DigitPaException("Il campo [dataOraFlusso] non Ã¨ uguale al campo dentro xml flusso riversamento [dataOraFlusso]", DigitPaErrorCodes.PPT_SEMANTICA)
+            throw exception.DigitPaException("Il campo [dataOraFlusso] non è uguale al campo dentro xml flusso riversamento [dataOraFlusso]", DigitPaErrorCodes.PPT_SEMANTICA)
           }
           Future.successful(flussoRiversamento, content)
 
