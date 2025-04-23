@@ -168,7 +168,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
               sessionId  = req.sessionId,
               testCaseId = req.testCaseId,
               action     = "nodoInviaFlussoRendicontazione",
-              receiver   = flow.receiver.organizationId,
+              receiver   = SoapReceiverType.NEXI.toString,
               payload    = nifr2Str,
               actorProps = actorProps,
               re         = reFlow.get
