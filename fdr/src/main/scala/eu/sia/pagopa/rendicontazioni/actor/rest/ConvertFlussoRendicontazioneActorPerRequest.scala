@@ -162,32 +162,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         _ = if (reportingFtpEnabled) {
 
           // forward NodoInviaFlussoRendicontazione also to nexi
-
-          for {
-            response <- HttpSoapServiceManagement.createRequestSoapAction(
-              sessionId  = req.sessionId,
-              testCaseId = req.testCaseId,
-              action     = "nodoInviaFlussoRendicontazione",
-              receiver   = SoapReceiverType.NEXI.toString,
-              payload    = nifr2Str,
-              actorProps = actorProps,
-              re         = reFlow.get
-            )
-
-            _ = {
-              if (response.payload.isDefined) {
-                parseResponseNexi(response.payload.get) match {
-                  case Success(v) => Future.successful(v)
-                  case Failure(e) => {
-                    log.error(e, e.getMessage)
-                    Future.successful(None)
-                  }
-                }
-              } else {
-                log.warn(s"No SOAP payload returned for nodoInviaFlussoRendicontazione to ${flow.receiver.organizationId}")
-              }
-            }
-          } yield ()
+          inviaFlussoRendicontazioneToNexi(nifr2Str)
         } else {
           log.debug(s"Forwarding to Nexi not expected for the domain ${flow.receiver.organizationId}")
           Future.successful(())
@@ -289,6 +264,35 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         case Failure(e) => Failure(RestException("Error during request content read: " + e.getMessage, "", StatusCodes.BadRequest.intValue, e))
       }
     }
+  }
+
+  private def inviaFlussoRendicontazioneToNexi(nifr2Str: String) = {
+    HttpSoapServiceManagement.createRequestSoapAction(
+      sessionId = req.sessionId,
+      testCaseId = req.testCaseId,
+      action = "nodoInviaFlussoRendicontazione",
+      receiver = SoapReceiverType.NEXI.toString,
+      payload = nifr2Str,
+      actorProps = actorProps,
+      re = reFlow.get
+    ).recoverWith({
+      case e => Future.failed(RestException("Failed to send nodoInviaFlussoRendicontazione: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e))
+    }).flatMap(response => {
+      if (response.payload.isDefined) {
+        parseResponseNexi(response.payload.get) match {
+          case Success(v) =>
+            if (v.get.esito.equals("OK")) {
+              Future.successful()
+            } else {
+              Future.failed(RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + v.get.esito, "", StatusCodes.InternalServerError.intValue))
+            }
+          case Failure(e) =>
+            Future.failed(RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e))
+        }
+      } else {
+        Future.failed(RestException("No SOAP payload returned for nodoInviaFlussoRendicontazione", "", StatusCodes.InternalServerError.intValue))
+      }
+    })
   }
 
   override def actorError(dpe: DigitPaException): Unit = {
