@@ -41,58 +41,18 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         )
       )
     }
-    "not forward to Nexi when reportingFtpEnabled is false" in {
+    "ok with forward to Nexi when reportingFtp is true" in {
       val date = Instant.now()
       val random = RandomStringUtils.randomNumeric(9)
       val idFlusso = s"${date}${TestItems.PSP}-$random"
       val regulation = "1234567890"
 
-      val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation)
+      val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation, pa = TestItems.PA_FTP)
       val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
       val payload = s"""{
          |  "payload": "$encodedCompressedFlow",
          |  "encoding": "base64"
       }""".stripMargin
-
-      val ddataMap: ConfigData = ConfigDataV1(
-        version = "1.0",
-        creditorInstitutions = Map("dominioTest" -> CreditorInstitution(
-          creditorInstitutionCode = "dominioTest",
-          enabled = true,
-          businessName = Some("Test Business"),
-          description = Some("Test Description"),
-          address = None, // o Some(CreditorInstitutionAddress(...)) se hai questa case class
-          pspPayment = false,
-          reportingFtp = false,
-          reportingZip = false
-        )),
-        creditorInstitutionBrokers = Map.empty,
-        stations = Map.empty,
-        creditorInstitutionStations = Map.empty,
-        encodings = Map.empty,
-        creditorInstitutionEncodings = Map.empty,
-        ibans = Map.empty,
-        creditorInstitutionInformations = Map.empty,
-        psps = Map.empty,
-        pspBrokers = Map.empty,
-        paymentTypes = Map.empty,
-        pspChannelPaymentTypes = Map.empty,
-        plugins = Map.empty,
-        pspInformationTemplates = Map.empty,
-        pspInformations = Map.empty,
-        channels = Map.empty,
-        cdsServices = Map.empty,
-        cdsSubjects = Map.empty,
-        cdsSubjectServices = Map.empty,
-        cdsCategories = Map.empty,
-        configurations = Map(
-          "GLOBAL-validate_input" -> ConfigurationKey("", "", "false", None)
-        ),
-        ftpServers = Map.empty,
-        languages = Map.empty,
-        gdeConfigurations = Map.empty,
-        metadataDict = Map.empty
-      )
 
       await(
         convertFlussoRendicontazioneActorPerRequest(
@@ -101,8 +61,7 @@ class RestRendicontazioniTests() extends BaseUnitTest {
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.OK.intValue)
             assert(resp.contains("{\"message\":\"OK\"}"))
-          },
-          newdata = Some(ddataMap)
+          }
         )
       )
     }
