@@ -89,6 +89,30 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         )
       )
     }
+    "ko with error in forwarding to Nexi when reportingFtp is true not valid response" in {
+      val date = Instant.now()
+      val random = RandomStringUtils.randomNumeric(9)
+      val idFlusso = s"${date}${TestItems.PSP}-$random"
+      val regulation = "1234567890"
+
+      val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation, pa = TestItems.PA_FTP)
+      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
+      val payload = s"""{
+         |  "payload": "$encodedCompressedFlow",
+         |  "encoding": "base64"
+      }""".stripMargin
+
+      await(
+        convertFlussoRendicontazioneActorPerRequest(
+          Some(payload),
+          testCase = Some("NOT_VALID"),
+          responseAssert = (resp, status) => {
+            assert(status == StatusCodes.INTERNAL_SERVER_ERROR.intValue)
+            assert(resp.contains("{\"error\":\"Failed to parse nodoInviaFlussoRendicontazione response: Errore validazione XML [esito] - cvc-elt.1.a: Cannot find the declaration of element 'esito'.\"}"))
+          }
+        )
+      )
+    }
     "ko fdr fase3 error in date format" in {
       val date = Instant.now()
       val random = RandomStringUtils.randomNumeric(9)
