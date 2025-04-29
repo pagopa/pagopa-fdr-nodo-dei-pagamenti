@@ -65,6 +65,30 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         )
       )
     }
+    "ko with error in forwarding to Nexi when reportingFtp is true" in {
+      val date = Instant.now()
+      val random = RandomStringUtils.randomNumeric(9)
+      val idFlusso = s"${date}${TestItems.PSP}-$random"
+      val regulation = "1234567890"
+
+      val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation, pa = TestItems.PA_FTP)
+      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
+      val payload = s"""{
+         |  "payload": "$encodedCompressedFlow",
+         |  "encoding": "base64"
+      }""".stripMargin
+
+      await(
+        convertFlussoRendicontazioneActorPerRequest(
+          Some(payload),
+          testCase = Some("KO"),
+          responseAssert = (resp, status) => {
+            assert(status == StatusCodes.INTERNAL_SERVER_ERROR.intValue)
+            assert(resp.contains("{\"error\":\"Response for nodoInviaFlussoRendicontazione was not successfully: KO\"}"))
+          }
+        )
+      )
+    }
     "ko fdr fase3 error in date format" in {
       val date = Instant.now()
       val random = RandomStringUtils.randomNumeric(9)

@@ -159,7 +159,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         reportingFtpEnabled = ddataMap.creditorInstitutions
           .get(flow.receiver.organizationId)
           .exists(_.reportingFtp)
-        _ = if (reportingFtpEnabled) {
+        _ <- if (reportingFtpEnabled) {
 
           // forward NodoInviaFlussoRendicontazione also to nexi
           inviaFlussoRendicontazioneToNexi(nifr2Str)
@@ -266,6 +266,17 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
     }
   }
 
+  override def actorError(dpe: DigitPaException): Unit = {
+    actorError(replyTo, req, dpe, reFlow)
+  }
+
+  def actorError(replyTo: ActorRef, req: RestRequest, dpe: DigitPaException, re: Option[Re]): Unit = {
+    MDC.put(Constant.MDCKey.SESSION_ID, req.sessionId)
+    val dpa = RestException(dpe.getMessage, StatusCodes.InternalServerError.intValue, dpe)
+    val response = makeFailureResponse(req.sessionId, req.testCaseId, dpa, re)
+    replyTo ! response
+  }
+
   private def inviaFlussoRendicontazioneToNexi(nifr2Str: String) = {
     HttpSoapServiceManagement.createRequestSoapAction(
       sessionId = req.sessionId,
@@ -284,26 +295,15 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             if (v.get.esito.equals("OK")) {
               Future.successful()
             } else {
-              Future.failed(RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + v.get.esito, "", StatusCodes.InternalServerError.intValue))
+              throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + v.get.esito, "", StatusCodes.InternalServerError.intValue)
             }
           case Failure(e) =>
-            Future.failed(RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e))
+            throw RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e)
         }
       } else {
-        Future.failed(RestException("No SOAP payload returned for nodoInviaFlussoRendicontazione", "", StatusCodes.InternalServerError.intValue))
+        throw RestException("No SOAP payload returned for nodoInviaFlussoRendicontazione", "", StatusCodes.InternalServerError.intValue)
       }
     })
-  }
-
-  override def actorError(dpe: DigitPaException): Unit = {
-    actorError(replyTo, req, dpe, reFlow)
-  }
-
-  def actorError(replyTo: ActorRef, req: RestRequest, dpe: DigitPaException, re: Option[Re]): Unit = {
-    MDC.put(Constant.MDCKey.SESSION_ID, req.sessionId)
-    val dpa = RestException(dpe.getMessage, StatusCodes.InternalServerError.intValue, dpe)
-    val response = makeFailureResponse(req.sessionId, req.testCaseId, dpa, re)
-    replyTo ! response
   }
 
   private def makeFailureResponse(sessionId: String, tcid: Option[String], restException: RestException, re: Option[Re]): RestResponse = {
