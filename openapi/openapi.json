@@ -4,7 +4,7 @@
     "title": "FDR - Flussi di rendicontazione FASE 1",
     "description": "FDR - Flussi di rendicontazione FASE 1",
     "termsOfService": "https://www.pagopa.gov.it/",
-    "version": "2.2.7-217-PAGOPA-3000-SFTP-scenario"
+    "version": "2.2.7-223-PAGOPA-3000-SFTP-scenario"
   },
   "servers": [
     {
