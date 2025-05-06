@@ -14,7 +14,7 @@ object FlowPayment extends DefaultJsonProtocol {
         map("iur").asInstanceOf[JsString].value,
         map("index").asInstanceOf[JsNumber].value.intValue,
         map("pay").asInstanceOf[JsNumber].value.toDouble,
-        map("payDate").asInstanceOf[JsString].value,
+        map("payDate").asInstanceOf[JsString].value.split("T").head,
         PayStatusEnum.withName(map("payStatus").asInstanceOf[JsString].value),
         map("idTransfer").asInstanceOf[JsNumber].value.toInt,
       )
