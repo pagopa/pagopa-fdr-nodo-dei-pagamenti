@@ -53,7 +53,7 @@ lazy val azureStorageBlob = "12.22.2"
 lazy val azureIdentity = "1.9.0"
 
 lazy val applicationinsightsagentName = "applicationinsights-agent"
-lazy val applicationinsightsagentVersion = "3.4.10"
+lazy val applicationinsightsagentVersion = "3.6.0"
 val lightbendKey = sys.env("LIGHTBEND_KEY")
 
 ThisBuild / organization := "eu.sia.pagopa"
