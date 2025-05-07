@@ -260,6 +260,12 @@ lazy val `fdr` = (project in file("fdr"))
     dockerUpdateLatest := true,
 //    dockerUsername := sys.props.get("docker.username"),
     dockerRepository := sys.props.get("docker.registry"),
+    Compile / resourceGenerators += Def.task {
+      val sourceFile = baseDirectory.value.getParentFile / "agent" / "applicationinsights.json"
+      val targetFile = (Compile / resourceManaged).value / s"""$applicationinsightsagentName/applicationinsights.json"""
+      IO.copyFile(sourceFile, targetFile)
+      Seq(targetFile)
+    },
     Compile / resourceDirectories += baseDirectory.value / "fe" / "build",
     libraryDependencies ++= {
       Seq(
