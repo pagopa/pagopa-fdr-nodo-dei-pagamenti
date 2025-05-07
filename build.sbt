@@ -213,12 +213,6 @@ lazy val `fdr` = (project in file("fdr"))
   .dependsOn(`common-xml`)
   .enablePlugins(Cinnamon, JavaAppPackaging, DockerPlugin, JavaAgent, OpenApiSchema)
   .settings(
-    Compile / resourceGenerators += Def.task {
-      val sourceFile = baseDirectory.value / "applicationinsights.json"
-      val targetFile = (Compile / resourceManaged).value / applicationinsightsagentName/"applicationinsights.json"
-      IO.copyFile(sourceFile, targetFile)
-      Seq(targetFile)
-    },
     javaAgents += "com.microsoft.azure" % applicationinsightsagentName % applicationinsightsagentVersion,
     bashScriptExtraDefines := bashScriptExtraDefines.value.filterNot(_.contains("applicationinsights-agent")) :+
       s"""
