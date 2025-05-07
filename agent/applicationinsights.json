@@ -35,7 +35,12 @@
         "attributes": [
           {
             "key": "http.url",
-            "value": ".*/actuator/health/.*",
+            "value": ".*/alive/.*",
+            "matchType": "regexp"
+          },
+          {
+            "key": "http.url",
+            "value": ".*/ready/.*",
             "matchType": "regexp"
           }
         ]
