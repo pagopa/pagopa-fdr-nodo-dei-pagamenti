@@ -89,7 +89,7 @@ xmlFlusso = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
                             <tipoIdentificativoUnivoco>B</tipoIdentificativoUnivoco>
                             <codiceIdentificativoUnivoco>${istitutoMittente}</codiceIdentificativoUnivoco>
                         </identificativoUnivocoMittente>
-                        <denominazioneMittente>AGID</denominazioneMittente>
+                        <!--<denominazioneMittente>AGID</denominazioneMittente>-->
                     </istitutoMittente>
                     <istitutoRicevente>
                         <identificativoUnivocoRicevente>

@@ -53,7 +53,7 @@ lazy val azureStorageBlob = "12.22.2"
 lazy val azureIdentity = "1.9.0"
 
 lazy val applicationinsightsagentName = "applicationinsights-agent"
-lazy val applicationinsightsagentVersion = "3.4.10"
+lazy val applicationinsightsagentVersion = "3.6.0"
 val lightbendKey = sys.env("LIGHTBEND_KEY")
 
 ThisBuild / organization := "eu.sia.pagopa"
@@ -254,6 +254,7 @@ lazy val `fdr` = (project in file("fdr"))
     test / cinnamon := true,
     cinnamonLogLevel := "INFO",
     Compile / mainClass := Some("eu.sia.pagopa.Main"),
+    Universal / mappings += file(s"""${baseDirectory.value.getParentFile}/agent/applicationinsights.json""") -> s"""$applicationinsightsagentName/applicationinsights.json""",
     Docker / packageName := "nodo-dei-pagamenti",
     dockerBaseImage := "adoptopenjdk:11-jdk-hotspot",
     dockerExposedPorts := Seq(8080, 8558, 2552),
