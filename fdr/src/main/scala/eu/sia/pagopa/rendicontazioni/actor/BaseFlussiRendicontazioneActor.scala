@@ -86,16 +86,16 @@ trait BaseFlussiRendicontazioneActor { this: NodoLogging =>
   }
 
   def saveRendicontazione(
-                          identificativoFlusso: String,
-                          identificativoPSP: String,
-                          identificativoIntermediarioPSP: String,
-                          identificativoCanale: String,
-                          identificativoDominio: String,
-                          dataOraFlusso: javax.xml.datatype.XMLGregorianCalendar,
-                          xmlRendicontazione: scalaxb.Base64Binary,
-                          checkUTF8: Boolean,
-                          flussoRiversamento: CtFlussoRiversamento,
-                          fdrRepository: FdrRepository)(implicit log: NodoLogger, ec: ExecutionContext) = {
+                           identificativoFlusso: String,
+                           identificativoPSP: String,
+                           identificativoIntermediarioPSP: String,
+                           identificativoCanale: String,
+                           identificativoDominio: String,
+                           dataOraFlusso: javax.xml.datatype.XMLGregorianCalendar,
+                           xmlRendicontazione: scalaxb.Base64Binary,
+                           checkUTF8: Boolean,
+                           flussoRiversamento: CtFlussoRiversamento,
+                           fdrRepository: FdrRepository)(implicit log: NodoLogger, ec: ExecutionContext) = {
 
     for {
       r <- {

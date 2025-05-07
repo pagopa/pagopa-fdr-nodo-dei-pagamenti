@@ -104,6 +104,9 @@ abstract class BaseUnitTest()
             nodoChiediFlussoRendicontazione {
               url="http://localhost:8080/webservices/input"
             }
+            nodoInviaFlussoRendicontazione {
+              url="http://localhost:8080/webservices/input"
+            }
             timeoutSeconds=60
         }
         fdr{
@@ -444,6 +447,9 @@ abstract class BaseUnitTest()
            url="http://localhost:8080/webservices/input"
          }
          nodoChiediFlussoRendicontazione {
+           url="http://localhost:8080/webservices/input"
+         }
+         nodoInviaFlussoRendicontazione {
            url="http://localhost:8080/webservices/input"
          }
          timeoutSeconds=60

@@ -1,8 +1,8 @@
 package eu.sia.pagopa.rendicontazioni.actor.rest
 
-import akka.actor.ActorRef
+import akka.actor.{ActorRef, ActorSystem}
 import akka.http.scaladsl.model.StatusCodes
-import eu.sia.pagopa.common.actor.PerRequestActor
+import eu.sia.pagopa.common.actor.{HttpSoapServiceManagement, PerRequestActor}
 import eu.sia.pagopa.common.enums.EsitoRE
 import eu.sia.pagopa.common.exception.{DigitPaErrorCodes, DigitPaException, RestException}
 import eu.sia.pagopa.common.json.model.rendicontazione._
@@ -15,7 +15,7 @@ import eu.sia.pagopa.common.repo.fdr.model.Rendicontazione
 import eu.sia.pagopa.common.repo.re.model.Re
 import eu.sia.pagopa.common.util.Util.ungzipContent
 import eu.sia.pagopa.common.util._
-import eu.sia.pagopa.common.util.xml.XmlUtil
+import eu.sia.pagopa.common.util.xml.{XmlUtil, XsdValid}
 import eu.sia.pagopa.commonxml.XmlEnum
 import eu.sia.pagopa.config.actor.{FdRMetadataActor, ReActor}
 import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
@@ -23,13 +23,14 @@ import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import org.slf4j.MDC
 import scalaxbmodel.flussoriversamento.{CtDatiSingoliPagamenti, CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number1u461}
 import scalaxbmodel.nodeforpsp.NodoInviaFlussoRendicontazioneRequest
-import scalaxbmodel.nodoperpsp.NodoInviaFlussoRendicontazione
+import scalaxbmodel.nodoperpa.NodoChiediElencoFlussiRendicontazioneRisposta
+import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
 import spray.json._
 
 import java.nio.charset.StandardCharsets
 import java.util.Base64
 import javax.xml.datatype.DatatypeFactory
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
@@ -44,6 +45,9 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
   val reActor = actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[ReActor])))
 
   val checkUTF8: Boolean = context.system.settings.config.getBoolean("bundle.checkUTF8")
+
+  val RESPONSE_NAME = "nodoInviaFlussoRendicontazioneRisposta"
+  val inputXsdValid: Boolean = DDataChecks.getConfigurationKeys(ddataMap, "validate_input").toBoolean
 
   override def receive: Receive = {
     case restRequest: RestRequest =>
@@ -151,6 +155,18 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         )
 
         nifr2Str <- Future.fromTry(XmlEnum.nodoInviaFlussoRendicontazione2Str_nodoperpsp(nifr))
+
+        reportingFtpEnabled = ddataMap.creditorInstitutions
+          .get(flow.receiver.organizationId)
+          .exists(_.reportingFtp)
+        _ <- if (reportingFtpEnabled) {
+
+          // forward NodoInviaFlussoRendicontazione also to nexi
+          inviaFlussoRendicontazioneToNexi(nifr2Str)
+        } else {
+          log.debug(s"Forwarding to Nexi not expected for the domain ${flow.receiver.organizationId}")
+          Future.successful(())
+        }
 
         (_, rendicontazioneSaved, _, _) <- saveRendicontazione(
           flow.name,
@@ -261,6 +277,35 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
     replyTo ! response
   }
 
+  private def inviaFlussoRendicontazioneToNexi(nifr2Str: String) = {
+    HttpSoapServiceManagement.createRequestSoapAction(
+      sessionId = req.sessionId,
+      testCaseId = req.testCaseId,
+      action = "nodoInviaFlussoRendicontazione",
+      receiver = SoapReceiverType.NEXI.toString,
+      payload = nifr2Str,
+      actorProps = actorProps,
+      re = reFlow.get
+    ).recoverWith({
+      case e => Future.failed(RestException("Failed to send nodoInviaFlussoRendicontazione: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e))
+    }).flatMap(response => {
+      if (response.payload.isDefined) {
+        parseResponseNexi(response.payload.get) match {
+          case Success(v) =>
+            if (v.get.esito.equals("OK")) {
+              Future.successful()
+            } else {
+              throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + v.get.esito, "", StatusCodes.InternalServerError.intValue)
+            }
+          case Failure(e) =>
+            throw RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e)
+        }
+      } else {
+        throw RestException("No SOAP payload returned for nodoInviaFlussoRendicontazione", "", StatusCodes.InternalServerError.intValue)
+      }
+    })
+  }
+
   private def makeFailureResponse(sessionId: String, tcid: Option[String], restException: RestException, re: Option[Re]): RestResponse = {
     import spray.json._
     log.error(restException, s"Errore generico: ${restException.message}")
@@ -276,4 +321,13 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
     RestResponse(req.sessionId, payload, httpStatusCode, reFlow, req.testCaseId, exception)
   }
 
+  private def parseResponseNexi(payloadResponse: String): Try[Option[NodoInviaFlussoRendicontazioneRisposta]] = {
+    log.debug(FdrLogConstant.logSintattico(s"${SoapReceiverType.NEXI.toString} $RESPONSE_NAME"))
+    (for {
+      _ <- XsdValid.checkOnly(payloadResponse, XmlEnum.NODO_INVIA_FLUSSO_RENDICONTAZIONE_RISPOSTA_NODOPERPSP, inputXsdValid)
+      body <- XmlEnum.str2nodoInviaFlussoRendicontazioneResponse_nodoperpsp(payloadResponse)
+    } yield Some(body)) recoverWith { case e =>
+      Failure(e)
+    }
+  }
 }
