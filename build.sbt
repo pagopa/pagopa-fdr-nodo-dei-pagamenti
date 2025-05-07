@@ -254,18 +254,13 @@ lazy val `fdr` = (project in file("fdr"))
     test / cinnamon := true,
     cinnamonLogLevel := "INFO",
     Compile / mainClass := Some("eu.sia.pagopa.Main"),
+    Universal / mappings += file(s"""${baseDirectory.value.getParentFile}/agent/applicationinsights.json""") -> s"""$applicationinsightsagentName/applicationinsights.json""",
     Docker / packageName := "nodo-dei-pagamenti",
     dockerBaseImage := "adoptopenjdk:11-jdk-hotspot",
     dockerExposedPorts := Seq(8080, 8558, 2552),
     dockerUpdateLatest := true,
 //    dockerUsername := sys.props.get("docker.username"),
     dockerRepository := sys.props.get("docker.registry"),
-    Compile / resourceGenerators += Def.task {
-      val sourceFile = baseDirectory.value.getParentFile / "agent" / "applicationinsights.json"
-      val targetFile = (Compile / resourceManaged).value / s"""$applicationinsightsagentName/applicationinsights.json"""
-      IO.copyFile(sourceFile, targetFile)
-      Seq(targetFile)
-    },
     Compile / resourceDirectories += baseDirectory.value / "fe" / "build",
     libraryDependencies ++= {
       Seq(
