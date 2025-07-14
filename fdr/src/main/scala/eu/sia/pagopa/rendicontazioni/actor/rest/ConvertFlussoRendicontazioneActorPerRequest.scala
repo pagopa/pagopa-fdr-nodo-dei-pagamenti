@@ -147,7 +147,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
           flow.sender.pspId,
           flow.sender.pspBrokerId,
           flow.sender.channelId,
-          flow.sender.password.getOrElse("PLACEHOLDER"),
+          ddataMap.channels(flow.sender.channelId).password,
           flow.receiver.organizationId,
           flow.name,
           DatatypeFactory.newInstance().newXMLGregorianCalendar(flow.date),
