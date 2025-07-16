@@ -143,11 +143,13 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
         flussoRiversamentoBase64 = XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
 
+        channel = ddataMap.channels(flow.sender.channelId)
+
         nifr = NodoInviaFlussoRendicontazione(
           flow.sender.pspId,
           flow.sender.pspBrokerId,
           flow.sender.channelId,
-          flow.sender.password.getOrElse("PLACEHOLDER"),
+          if (channel != null) channel.password  else "PLACEHOLDER",
           flow.receiver.organizationId,
           flow.name,
           DatatypeFactory.newInstance().newXMLGregorianCalendar(flow.date),
@@ -295,7 +297,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             if (v.get.esito.equals("OK")) {
               Future.successful()
             } else {
-              throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + v.get.esito, "", StatusCodes.InternalServerError.intValue)
+              throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + v.get.esito + "; " + v.get.fault, StatusCodes.InternalServerError.intValue)
             }
           case Failure(e) =>
             throw RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e)
