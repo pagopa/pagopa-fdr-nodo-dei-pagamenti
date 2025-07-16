@@ -143,11 +143,13 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         flussoRiversamentoEncoded <- Future.fromTry(XmlEnum.FlussoRiversamento2Str_flussoriversamento(flussoRiversamento))
         flussoRiversamentoBase64 = XmlUtil.StringBase64Binary.encodeBase64(flussoRiversamentoEncoded)
 
+        channel = ddataMap.channels(flow.sender.channelId)
+
         nifr = NodoInviaFlussoRendicontazione(
           flow.sender.pspId,
           flow.sender.pspBrokerId,
           flow.sender.channelId,
-          ddataMap.channels(flow.sender.channelId).password,
+          if (channel != null) channel.password  else "PLACEHOLDER",
           flow.receiver.organizationId,
           flow.name,
           DatatypeFactory.newInstance().newXMLGregorianCalendar(flow.date),
