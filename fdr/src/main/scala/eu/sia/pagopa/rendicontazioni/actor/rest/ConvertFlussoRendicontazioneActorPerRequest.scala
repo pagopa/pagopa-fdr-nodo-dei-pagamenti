@@ -28,8 +28,10 @@ import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoR
 import spray.json._
 
 import java.nio.charset.StandardCharsets
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import java.util.Base64
-import javax.xml.datatype.DatatypeFactory
+import javax.xml.datatype.{DatatypeConstants, DatatypeFactory, XMLGregorianCalendar}
 import scala.concurrent.{ExecutionContext, Future}
 import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
@@ -101,7 +103,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
           flow.name,
           DatatypeFactory.newInstance().newXMLGregorianCalendar(flow.date),
           flow.regulation,
-          DatatypeFactory.newInstance().newXMLGregorianCalendar(flow.regulationDate),
+          toXmlGregorianCalendarDate(flow.regulationDate),
           CtIstitutoMittente(
             CtIdentificativoUnivoco(
               flow.sender._type match {
@@ -266,6 +268,18 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         case Failure(e) => Failure(RestException("Error during request content read: " + e.getMessage, "", StatusCodes.BadRequest.intValue, e))
       }
     }
+  }
+
+  private def toXmlGregorianCalendarDate(dateAsString: String): XMLGregorianCalendar = {
+    val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    val localDate = LocalDate.parse(dateAsString, formatter)
+    val factory = DatatypeFactory.newInstance()
+    factory.newXMLGregorianCalendarDate(
+      localDate.getYear,
+      localDate.getMonthValue,
+      localDate.getDayOfMonth,
+      DatatypeConstants.FIELD_UNDEFINED // no timezone
+    )
   }
 
   override def actorError(dpe: DigitPaException): Unit = {
