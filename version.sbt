@@ -1,1 +1,1 @@
-ThisBuild / version := "2.2.10-245-GHISS-1066"
+ThisBuild / version := "2.2.10-246-GHISS-1066"
