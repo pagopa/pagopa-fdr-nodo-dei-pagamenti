@@ -272,7 +272,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
 
   private def toXmlGregorianCalendarDate(dateAsString: String): XMLGregorianCalendar = {
     val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
-    val localDate = LocalDate.parse(dateAsString, formatter)
+    val localDate = LocalDate.parse(dateAsString.trim.take(10), formatter)
     val factory = DatatypeFactory.newInstance()
     factory.newXMLGregorianCalendarDate(
       localDate.getYear,
