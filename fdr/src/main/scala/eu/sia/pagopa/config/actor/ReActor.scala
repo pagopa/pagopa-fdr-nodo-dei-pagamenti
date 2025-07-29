@@ -9,6 +9,7 @@ import eu.sia.pagopa.common.message.{BlobBodyRef, CategoriaEvento, CategoriaEven
 import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.util.{Constant, Util}
 import eu.sia.pagopa.ActorProps
+import eu.sia.pagopa.common.util.Constant.SAVE_CHIEDIELENCO_ON_RE_KEY
 
 import java.time.temporal.{ChronoUnit, TemporalField}
 import scala.jdk.CollectionConverters._
@@ -20,6 +21,12 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
   private def saveRe(request: ReRequest): Unit = {
     // save on pagopaweufdrsa.re-payload as gzip
     // save on fdr-re.events
+
+    // Skip logging nodoChiediElencoFlussiRendicontazione due to continuous polling
+    val saveElencoFlussiOnRE = sys.env.get(SAVE_CHIEDIELENCO_ON_RE_KEY).getOrElse(false)
+    if (request.re.flowAction.getOrElse("ND").equals("nodoChiediElencoFlussiRendicontazione") && !saveElencoFlussiOnRE) {
+      return
+    }
 
     val maxRetry = 3
     if (request.retry < maxRetry) {
