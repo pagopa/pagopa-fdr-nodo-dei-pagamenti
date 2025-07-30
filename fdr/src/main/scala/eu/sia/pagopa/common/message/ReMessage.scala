@@ -3,8 +3,7 @@ package eu.sia.pagopa.common.message
 import eu.sia.pagopa.common.repo.re.model.Re
 import org.mongodb.scala.bson.{BsonArray, BsonInt32, BsonString, Document}
 
-import java.time.{LocalDateTime, ZoneId}
-import java.util.Date
+import java.time.LocalDateTime
 
 object CategoriaEvento extends Enumeration {
   val INTERNO, INTERFACCIA = Value

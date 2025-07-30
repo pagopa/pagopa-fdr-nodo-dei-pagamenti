@@ -121,7 +121,7 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
 
   override def receive: Receive = {
     case reRequest: ReRequest =>
-      val reEnabled = true//system.settings.config.getBoolean("reEnabled")
+      val reEnabled = system.settings.config.getBoolean("reEnabled")
       if (reEnabled) {
         saveRe(reRequest)
         context.become(idle) // clear reference after processing
