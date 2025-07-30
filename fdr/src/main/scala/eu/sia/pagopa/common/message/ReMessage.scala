@@ -51,8 +51,7 @@ case class ReEventHub(
                        httpMethod: Option[String],
                        httpUrl: Option[String] = None,
                        blobBodyRef: Option[BlobBodyRef] = None,
-                       header: Map[String, Seq[String]],
-                       _ts: java.util.Date,
+                       header: Map[String, Seq[String]]
                      ) {
   def toDocument: Document = {
     Document(
