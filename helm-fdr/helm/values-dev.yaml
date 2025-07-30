@@ -2,7 +2,7 @@ microservice-chart: &microservice-chart
   namespace: "fdr"
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.2.10-249-PIDM-859
+    tag: 2.2.10-250-PIDM-859
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
