@@ -78,7 +78,7 @@ case class ReEventHub(
       "header" -> Document(header.map { case (key, values) =>
         key -> BsonArray.fromIterable(values.map(v => BsonString(v)))
       }),
-      "_ts" -> Date.from(created.atZone(ZoneId.of("Europe/Rome")).toInstant),
+      "_ts" -> Date.from(created.atZone(ZoneId.systemDefault()).toInstant),
     )
   }
 }
