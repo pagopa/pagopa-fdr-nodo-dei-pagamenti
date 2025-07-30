@@ -37,6 +37,9 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
 
       val httpMethod: String = request.reExtra.flatMap(_.httpMethod).getOrElse("")
 
+      val flowName = request.re.flowName.getOrElse("0000-00-00ND-000")
+      val pspId = Option(flowName.substring(10, flowName.indexOf("-", 10)))
+
       val reEventHub = ReEventHub(
         Constant.FDR_VERSION,
         request.re.uniqueId,
@@ -45,7 +48,7 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
         eventType.toString,
         request.re.status,
         request.re.flowName,
-        request.re.psp,
+        pspId,
         request.re.idDominio,
         request.re.flowAction,
         request.re.sottoTipoEvento,
@@ -118,7 +121,7 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
 
   override def receive: Receive = {
     case reRequest: ReRequest =>
-      val reEnabled = system.settings.config.getBoolean("reEnabled")
+      val reEnabled = true//system.settings.config.getBoolean("reEnabled")
       if (reEnabled) {
         saveRe(reRequest)
         context.become(idle) // clear reference after processing

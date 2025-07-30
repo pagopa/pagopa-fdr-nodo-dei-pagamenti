@@ -3,7 +3,8 @@ package eu.sia.pagopa.common.message
 import eu.sia.pagopa.common.repo.re.model.Re
 import org.mongodb.scala.bson.{BsonArray, BsonInt32, BsonString, Document}
 
-import java.time.LocalDateTime
+import java.time.{LocalDateTime, ZoneId}
+import java.util.Date
 
 object CategoriaEvento extends Enumeration {
   val INTERNO, INTERFACCIA = Value
@@ -50,7 +51,8 @@ case class ReEventHub(
                        httpMethod: Option[String],
                        httpUrl: Option[String] = None,
                        blobBodyRef: Option[BlobBodyRef] = None,
-                       header: Map[String, Seq[String]]
+                       header: Map[String, Seq[String]],
+                       _ts: java.util.Date,
                      ) {
   def toDocument: Document = {
     Document(
@@ -76,7 +78,8 @@ case class ReEventHub(
       )),
       "header" -> Document(header.map { case (key, values) =>
         key -> BsonArray.fromIterable(values.map(v => BsonString(v)))
-      })
+      }),
+      "_ts" -> Date.from(created.atZone(ZoneId.of("Europe/Rome")).toInstant),
     )
   }
 }
