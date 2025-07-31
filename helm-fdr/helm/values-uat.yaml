@@ -90,6 +90,7 @@ microservice-chart: &microservice-chart
     MONGO_EVENTS_DOCUMENT_NAME: "events"
     ADDITIONAL_FDR_VALIDATIONS: "true"
     SERVICE_IDENTIFIER: "FDR001UAT"
+    SAVE_CHIEDIELENCO_ON_RE: "false"
   envSecret:
     APPLICATIONINSIGHTS_CONNECTION_STRING: "ai-connection-string"
     AZURE_STORAGE_BLOB_CONNECTION_STRING: "fdr-sa-connection-string"
