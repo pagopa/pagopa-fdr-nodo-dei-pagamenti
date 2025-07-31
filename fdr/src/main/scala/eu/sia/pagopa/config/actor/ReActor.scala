@@ -23,7 +23,7 @@ final case class ReActor(repositories: Repositories, actorProps: ActorProps) ext
     // save on fdr-re.events
 
     // Skip logging nodoChiediElencoFlussiRendicontazione due to continuous polling
-    val saveElencoFlussiOnRE = sys.env.get(SAVE_CHIEDIELENCO_ON_RE_KEY).getOrElse(false)
+    val saveElencoFlussiOnRE = sys.env.get(SAVE_CHIEDIELENCO_ON_RE_KEY).exists(_.toBooleanOption.getOrElse(false))
     if (request.re.flowAction.getOrElse("ND").equals("nodoChiediElencoFlussiRendicontazione") && !saveElencoFlussiOnRE) {
       return
     }
