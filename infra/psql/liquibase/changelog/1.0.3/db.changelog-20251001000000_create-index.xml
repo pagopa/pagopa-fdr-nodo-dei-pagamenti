@@ -9,7 +9,7 @@
         </createIndex>
 
         <createIndex indexName="rend_elenco_flussi_pd" tableName="rendicontazione">
-            <column name="psp "/>
+            <column name="psp"/>
             <column name="data_ora_flusso"/>
         </createIndex>
 
