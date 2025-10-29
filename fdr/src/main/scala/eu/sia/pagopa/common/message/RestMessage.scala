@@ -13,7 +13,8 @@ case class RestRequest(
     primitive: String,
     timestamp: LocalDateTime,
     reExtra: ReExtra,
-    override val testCaseId: Option[String] = None
+    override val testCaseId: Option[String] = None,
+    file: Option[Array[Byte]] = None
 ) extends BaseMessage
 
 case class RestResponse(override val sessionId: String, payload: Option[String], statusCode: Int, re: Option[Re], override val testCaseId: Option[String] = None, throwable: Option[Throwable])

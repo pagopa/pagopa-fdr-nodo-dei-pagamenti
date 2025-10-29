@@ -108,9 +108,13 @@ case class NodoRoute(
   }
 
   val methods: Map[String, String] = Map(
-    "convertFlussoRendicontazione" -> "POST",
+//    "convertFlussoRendicontazione" -> "POST",
     "nodoInviaFlussoRendicontazioneFTP" -> "POST",
     "registerFdrForValidation" -> "POST"
+  )
+
+  val methodsFile: Map[String, String] = Map(
+    "convertFlussoRendicontazione" -> "POST"
   )
 
   val methodsInternal: Map[String, String] = Map(
@@ -589,6 +593,22 @@ case class NodoRoute(
       .fold(RouteDirectives.reject)(_ ~ _)
   }
 
+  def restFileFunction(actorProps: ActorProps): Route = {
+    Primitive.restFile
+      .map(primi => {
+        val primitiva = primi._1
+        val httppath = primi._2._1
+        val pathMatcher = PathMatchers.separateOnSlashes(httppath)
+        val httpmethod = methodsFile(primitiva)
+
+        path(pathMatcher) {
+          restFileRoute(primitiva, httpmethod, Map())
+        }
+
+      })
+      .fold(RouteDirectives.reject)(_ ~ _)
+  }
+
   def restFunctionInternal(actorProps: ActorProps): Route = {
     Primitive.restInternal
       .map(primi => {
@@ -646,6 +666,68 @@ case class NodoRoute(
                             Some(httpmethod),
                             originalRequestAddresOpt.flatMap(_.split(",").headOption).orElse(remoteAddress.toIP.map(_.ip.getHostAddress)),
                             primitiva
+                          )
+
+                          val p: Promise[RouteResult] = Promise[RouteResult]()
+                          createSystemActorPerRequestAndTell[RestRouterRequest](
+                            restRouterRequest,
+                            Constant.KeyName.REST_INPUT,
+                            Props(classOf[RestActorPerRequest], ctx, p, routers, actorProps)
+                          )(log, system)
+                          _ => p.future
+                        case Failure(_) =>
+                          complete(akkaErrorEncoding(sessionId, cs.value))
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  private def restFileRoute(primitiva: String, httpmethod: String, pathParams: Map[String, String]) = {
+    val sessionId = UUID.randomUUID().toString
+    MDC.put(Constant.MDCKey.SESSION_ID, sessionId)
+    log.debug(s"Ricevuta request [$sessionId] @ ${LocalDateTime.now()} : [$primitiva]")
+    MDC.put(Constant.MDCKey.ACTOR_CLASS_ID, primitiva)
+    val httpSeverRequestTimeout = FiniteDuration(httpSeverRequestTimeoutParam, SECONDS)
+    withRequestTimeout(httpSeverRequestTimeout, _ => akkaHttpTimeout(sessionId)) {
+      method(HttpMethods.getForKey(httpmethod).get) {
+        extractRequest { req =>
+          extractClientIP { remoteAddress =>
+            optionalHeaderValueByName(X_PDD_HEADER) { originalRequestAddresOpt =>
+              log.debug(s"Request headers:\n${req.headers.map(s => s"${s.name()} => ${s.value()}").mkString("\n")}")
+              extractRequestContext { ctx =>
+                entity(as[ByteString]) { bs =>
+                  parameterSeq { params =>
+                    optionalHeaderValueByName("testCaseId") { headerTestCaseId =>
+                      val cs = req.entity.contentType.charsetOption.getOrElse(HttpCharsets.`UTF-8`)
+                      val payloadTry = Try(
+                        bs.toArray
+                      )
+                      payloadTry match {
+                        case Success(payload) =>
+                          log.debug(FdrLogConstant.logStart(if (primitiva != null) primitiva else Constant.KeyName.REST_INPUT))
+                          val request = ctx.request
+                          log.debug(s"Content-Type [${request.entity.contentType}]")
+
+                          val restRouterRequest: RestRouterRequest = RestRouterRequest(
+                            sessionId,
+                            Some("File payload"),
+                            Util.now(),
+                            headerTestCaseId,
+                            Some(req.uri.toString()),
+                            req.headers.map(h => (h.name(), h.value())),
+                            params,
+                            pathParams,
+                            Some(httpmethod),
+                            originalRequestAddresOpt.flatMap(_.split(",").headOption).orElse(remoteAddress.toIP.map(_.ip.getHostAddress)),
+                            primitiva,
+                            file=Some(payload)
                           )
 
                           val p: Promise[RouteResult] = Promise[RouteResult]()

@@ -1,6 +1,6 @@
 package eu.sia.pagopa.rendicontazioni.actor.rest
 
-import akka.actor.{ActorRef, ActorSystem}
+import akka.actor.ActorRef
 import akka.http.scaladsl.model.StatusCodes
 import eu.sia.pagopa.common.actor.{HttpSoapServiceManagement, PerRequestActor}
 import eu.sia.pagopa.common.enums.EsitoRE
@@ -22,12 +22,11 @@ import eu.sia.pagopa.rendicontazioni.actor.BaseFlussiRendicontazioneActor
 import eu.sia.pagopa.{ActorProps, BootstrapUtil}
 import org.slf4j.MDC
 import scalaxbmodel.flussoriversamento.{CtDatiSingoliPagamenti, CtFlussoRiversamento, CtIdentificativoUnivoco, CtIdentificativoUnivocoPersonaG, CtIstitutoMittente, CtIstitutoRicevente, Number1u461}
-import scalaxbmodel.nodeforpsp.NodoInviaFlussoRendicontazioneRequest
-import scalaxbmodel.nodoperpa.NodoChiediElencoFlussiRendicontazioneRisposta
 import scalaxbmodel.nodoperpsp.{NodoInviaFlussoRendicontazione, NodoInviaFlussoRendicontazioneRisposta}
 import spray.json._
 
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Base64
@@ -76,7 +75,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
       (for {
         _ <- Future.successful(())
         _ = log.debug(FdrLogConstant.logStart(actorClassId))
-        flow <- Future.fromTry(decodeInput(req))
+        flow <- Future.fromTry(parseFile(req))
 
         re_ = Re(
           psp = Some(flow.sender.pspId),
@@ -253,6 +252,10 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         }
       case Failure(e) => Failure(RestException("Error during request content unzip: " + e.getMessage, "", StatusCodes.BadRequest.intValue, e))
     }
+  }
+
+  private def parseFile(fileRequest: RestRequest) = {
+    parseInput(fileRequest.file.get)
   }
 
   private def decodeInput(restRequest: RestRequest) = {
