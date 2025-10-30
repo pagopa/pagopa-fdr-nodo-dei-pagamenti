@@ -10,7 +10,7 @@ microservice-chart: &microservice-chart
         maxSurge: 1
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.3.0
+    tag: 2.3.0-255-convert-fdr3
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
