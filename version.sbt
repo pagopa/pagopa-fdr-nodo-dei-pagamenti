@@ -1,1 +1,1 @@
-ThisBuild / version := "2.3.0-255-convert-fdr3"
+ThisBuild / version := "2.3.1"
