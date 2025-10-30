@@ -524,6 +524,40 @@ abstract class BaseUnitTest()
     p.future.map(_ => restResponse.payload.get)
   }
 
+  def convertFlussoRendicontazioneActorPerRequestFile(
+                                                   payload: Option[String],
+                                                   file: Option[Array[Byte]],
+                                                   testCase: Option[String] = Some("OK"),
+                                                   responseAssert: (String, Int) => Assertion = (_, _) => assert(true),
+                                                   newdata: Option[ConfigData] = None
+                                                 ): Future[String] = {
+    val p = Promise[Boolean]()
+    val convertFlussoRendicontazioneActorPerRequest =
+      system.actorOf(
+        Props.create(classOf[ConvertFlussoRendicontazioneActorPerRequestTest], p, repositories, props.copy(actorClassId = "convertFlussoRendicontazione", routers = mockRouters, ddataMap = newdata.getOrElse(TestDData.ddataMap))),
+        s"convertFlussoRendicontazione${Util.now()}"
+      )
+
+    val restResponse = askActor(
+      convertFlussoRendicontazioneActorPerRequest,
+      RestRequest(
+        UUID.randomUUID().toString,
+        payload,
+        Nil,
+        Map(),
+        TestItems.testPDD,
+        "convertFlussoRendicontazione",
+        Util.now(),
+        ReExtra(),
+        testCase,
+        file=file
+      )
+    )
+    assert(restResponse.payload.isDefined)
+    responseAssert(restResponse.payload.get, restResponse.statusCode)
+    p.future.map(_ => restResponse.payload.get)
+  }
+
   def registerFdrForValidation(
                                    payload: Option[String],
                                    testCase: Option[String] = Some("OK"),

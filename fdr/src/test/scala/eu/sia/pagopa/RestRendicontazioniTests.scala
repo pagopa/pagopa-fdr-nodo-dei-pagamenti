@@ -23,16 +23,12 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       val regulation = "1234567890"
 
       val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation)
-      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
-      val payload =
-        s"""{
-           |  "payload": "$encodedCompressedFlow",
-           |  "encoding": "base64"
-      }""".stripMargin
+      val byteArrayFlow = gzipContent(jsonContent.getBytes)
 
       await(
-        convertFlussoRendicontazioneActorPerRequest(
-          Some(payload),
+        convertFlussoRendicontazioneActorPerRequestFile(
+          payload=Some("File payload"),
+          file=Some(byteArrayFlow),
           testCase = Some("OK"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.OK.intValue)
@@ -48,15 +44,12 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       val regulation = "1234567890"
 
       val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation, pa = TestItems.PA_FTP)
-      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
-      val payload = s"""{
-         |  "payload": "$encodedCompressedFlow",
-         |  "encoding": "base64"
-      }""".stripMargin
+      val byteArrayFlow = gzipContent(jsonContent.getBytes)
 
       await(
-        convertFlussoRendicontazioneActorPerRequest(
-          Some(payload),
+        convertFlussoRendicontazioneActorPerRequestFile(
+          payload=Some("File payload"),
+          file=Some(byteArrayFlow),
           testCase = Some("OK"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.OK.intValue)
@@ -72,19 +65,16 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       val regulation = "1234567890"
 
       val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation, pa = TestItems.PA_FTP)
-      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
-      val payload = s"""{
-         |  "payload": "$encodedCompressedFlow",
-         |  "encoding": "base64"
-      }""".stripMargin
+      val byteArrayFlow = gzipContent(jsonContent.getBytes)
 
       await(
-        convertFlussoRendicontazioneActorPerRequest(
-          Some(payload),
+        convertFlussoRendicontazioneActorPerRequestFile(
+          payload=Some("File payload"),
+          file=Some(byteArrayFlow),
           testCase = Some("NOT_VALID"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.INTERNAL_SERVER_ERROR.intValue)
-            assert(resp.contains("{\"error\":\"Failed to parse nodoInviaFlussoRendicontazione response: Errore validazione XML [esito] - cvc-elt.1.a: Cannot find the declaration of element 'esito'.\"}"))
+            assert(resp.contains("[esito] - cvc-elt.1.a:"))
           }
         )
       )
@@ -121,15 +111,17 @@ class RestRendicontazioniTests() extends BaseUnitTest {
       val regulation = "1234567890"
 
       val jsonContent = convertFlussoRendicontazionePayload(idFlusso, String.valueOf(date.getEpochSecond), date.toString, regulation)
-      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
-      val payload =
-        s"""{
-           |  "payload": "$encodedCompressedFlow"
-      }""".stripMargin
+      val byteArrayFlow = gzipContent(jsonContent.getBytes)
+//      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
+//      val payload =
+//        s"""{
+//           |  "payload": "$encodedCompressedFlow"
+//      }""".stripMargin
 
       await(
-        convertFlussoRendicontazioneActorPerRequest(
-          Some(payload),
+        convertFlussoRendicontazioneActorPerRequestFile(
+          payload=Some("File payload"),
+          file=Some(byteArrayFlow),
           testCase = Some("OK"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.OK.intValue)
@@ -147,15 +139,12 @@ class RestRendicontazioniTests() extends BaseUnitTest {
         s"""{
            |  "fdr": "$idFlusso",
       }""".stripMargin
-      val encodedCompressedFlow = new String(Base64.getEncoder.encode(gzipContent(jsonContent.getBytes)))
-      val payload =
-        s"""{
-           |  "payload": "$encodedCompressedFlow"
-      }""".stripMargin
+      val byteArrayFlow = gzipContent(jsonContent.getBytes)
 
       await(
-        convertFlussoRendicontazioneActorPerRequest(
-          Some(payload),
+        convertFlussoRendicontazioneActorPerRequestFile(
+          payload=Some("File payload"),
+          file=Some(byteArrayFlow),
           testCase = Some("KO"),
           responseAssert = (resp, status) => {
             assert(status == StatusCodes.BAD_REQUEST.intValue())

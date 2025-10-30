@@ -6,7 +6,7 @@
       <env name="INSTANCE" value="local" />
     </envs>
     <option name="MAIN_CLASS_NAME" value="eu.sia.pagopa.mains.MainTest" />
-    <module name="fdr" />
+    <module name="pagopa-fdr.fdr.test" />
     <option name="VM_PARAMETERS" value="-javaagent:./agent/cinnamon-agent-2.16.2.jar" />
     <extension name="coverage">
       <pattern>
