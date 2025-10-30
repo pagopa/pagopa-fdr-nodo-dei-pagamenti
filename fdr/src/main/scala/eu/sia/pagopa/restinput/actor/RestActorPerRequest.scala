@@ -161,7 +161,7 @@ class RestActorPerRequest(
     allRouters.get(BootstrapUtil.actorRouter(message.primitiva)) match {
       case Some(router) =>
         val restRequest =
-          RestRequest(message.sessionId, message.payload, message.queryParams, message.pathParams, message.callRemoteAddress.getOrElse(""), message.primitiva, message.timestamp, reExtra(message), message.testCaseId)
+          RestRequest(message.sessionId, message.payload, message.queryParams, message.pathParams, message.callRemoteAddress.getOrElse(""), message.primitiva, message.timestamp, reExtra(message), message.testCaseId, message.file)
         log.debug(FdrLogConstant.callBundle(router.path.name))
         router ! restRequest
       case None =>

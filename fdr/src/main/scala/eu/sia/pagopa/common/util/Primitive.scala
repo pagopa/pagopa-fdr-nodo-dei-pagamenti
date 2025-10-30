@@ -13,8 +13,12 @@ object Primitive {
     "nodoChiediElencoFlussiRendicontazione" -> ("Body/_/identificativoStazioneIntermediarioPA", _ => classOf[NodoChiediElencoFlussiRendicontazioneActorPerRequest])
   )
 
-  val rest: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
+  val restFile: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
     "convertFlussoRendicontazione" -> ("convert/fdr3", _ => classOf[ConvertFlussoRendicontazioneActorPerRequest]),
+  )
+
+  val rest: Map[String, (String, Boolean => Class[_ <: PerRequestActor])] = Map(
+//    "convertFlussoRendicontazione" -> ("convert/fdr3", _ => classOf[ConvertFlussoRendicontazioneActorPerRequest]),
     "nodoInviaFlussoRendicontazioneFTP" -> ("nodoInviaFlussoRendicontazioneFTP", _ => classOf[NodoInviaFlussoRendicontazioneFTPActorPerRequest]),
     "registerFdrForValidation" -> ("register-for-validation/fdr", _ => classOf[RegisterFdrForValidationActorPerRequest])
   )
@@ -27,7 +31,7 @@ object Primitive {
     "ftpUpload" -> ("ftpUpload", _ => classOf[FtpRetryActorPerRequest])
   )
 
-  private val allPrimitives = Primitive.soap ++ Primitive.rest ++ Primitive.restInternal ++ Primitive.jobs
+  private val allPrimitives = Primitive.soap ++ Primitive.rest ++ Primitive.restFile ++ Primitive.restInternal ++ Primitive.jobs
 
   def getActorClass(primitive: String): Class[_ <: PerRequestActor] = {
     allPrimitives(primitive)._2(false)
