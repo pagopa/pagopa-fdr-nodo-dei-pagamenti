@@ -1,5 +1,13 @@
 microservice-chart: &microservice-chart
   namespace: "fdr"
+  deployment:
+    create: true
+    replicas: 3 # same as HPA minReplica
+    strategy:
+      type: RollingUpdate
+      rollingUpdate:
+        maxUnavailable: 0
+        maxSurge: 1
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
     tag: 2.3.0
