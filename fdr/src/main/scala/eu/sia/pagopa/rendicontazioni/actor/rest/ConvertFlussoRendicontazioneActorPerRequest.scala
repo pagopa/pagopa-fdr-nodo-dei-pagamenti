@@ -314,11 +314,11 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             if (v.get.esito.equals("OK")) {
               Future.successful()
             } else {
-              log.warn("DEBUG SUCCESS", v);
+              log.warn(s"DEBUG SUCCESS ${v}");
               throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + v.get.esito + "; " + v.get.fault, StatusCodes.InternalServerError.intValue)
             }
           case Failure(e) =>
-            log.warn("DEBUG FAILURE", e);
+            log.warn(s"DEBUG FAILURE ${e}");
             throw RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e)
         }
       } else {
