@@ -318,11 +318,11 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
               throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + v.get.esito + "; " + v.get.fault, StatusCodes.InternalServerError.intValue)
             }
           case Failure(e) =>
-            log.warn("DEBUG FAILURE", v);
+            log.warn("DEBUG FAILURE", e);
             throw RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e)
         }
       } else {
-        log.warn("DEBUG CRITICAL", v);
+        log.warn("DEBUG CRITICAL");
         throw RestException("No SOAP payload returned for nodoInviaFlussoRendicontazione", "", StatusCodes.InternalServerError.intValue)
       }
     })
