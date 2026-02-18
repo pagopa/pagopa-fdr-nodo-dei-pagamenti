@@ -314,6 +314,9 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             if (v.get.esito.equals("OK")) {
               Future.successful()
             } else {
+              if (v.get.fault.get.faultCode.equals("PPT_SEMANTICA")) {
+                Future.failed(e);
+              }
               throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + v.get.esito + "; " + v.get.fault, StatusCodes.InternalServerError.intValue)
             }
           case Failure(e) =>
