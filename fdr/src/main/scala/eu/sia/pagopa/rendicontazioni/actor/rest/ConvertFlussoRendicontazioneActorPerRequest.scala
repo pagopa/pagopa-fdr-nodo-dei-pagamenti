@@ -311,7 +311,8 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
       if (response.payload.isDefined) {
         parseResponseNexi(response.payload.get) match {
           case Success(v) =>
-            if (v.get.esito.equals("OK")) {
+            val responseBody = v.get
+            if (responseBody.esito.equals("OK")) {
               Future.successful()
             } else {
               log.warn(s"DEBUG SUCCESS ${responseBody.fault.exists(_.faultCode == "PPT_SEMANTICA")}")
@@ -320,7 +321,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
                   StatusCodes.UnprocessableEntity.intValue
                 } else
                   StatusCodes.InternalServerError.intValue
-              throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + v.get.esito + "; " + v.get.fault, errorCode)
+              throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + responseBody.esito + "; " + responseBody.fault, errorCode)
             }
           case Failure(e) =>
             throw RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e)
