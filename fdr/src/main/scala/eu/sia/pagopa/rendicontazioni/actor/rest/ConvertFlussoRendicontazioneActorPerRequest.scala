@@ -314,15 +314,15 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             if (v.get.esito.equals("OK")) {
               Future.successful()
             } else {
-              if (v.get.fault.get.faultCode.equals("PPT_SEMANTICA")) {
-                Future.failed(e);
-              }
+              log.warn("DEBUG SUCCESS", v);
               throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + v.get.esito + "; " + v.get.fault, StatusCodes.InternalServerError.intValue)
             }
           case Failure(e) =>
+            log.warn("DEBUG FAILURE", v);
             throw RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e)
         }
       } else {
+        log.warn("DEBUG CRITICAL", v);
         throw RestException("No SOAP payload returned for nodoInviaFlussoRendicontazione", "", StatusCodes.InternalServerError.intValue)
       }
     })
