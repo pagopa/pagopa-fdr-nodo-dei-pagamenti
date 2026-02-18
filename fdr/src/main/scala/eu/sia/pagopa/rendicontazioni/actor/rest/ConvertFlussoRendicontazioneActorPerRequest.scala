@@ -315,7 +315,6 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             if (responseBody.esito.equals("OK")) {
               Future.successful()
             } else {
-              log.warn(s"DEBUG SUCCESS ${responseBody.fault.exists(_.faultCode == "PPT_SEMANTICA")}")
               val errorCode =
                 if (responseBody.fault.exists(_.faultCode == "PPT_SEMANTICA")) {
                   StatusCodes.UnprocessableEntity.intValue
