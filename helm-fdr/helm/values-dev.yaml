@@ -10,7 +10,7 @@ microservice-chart: &microservice-chart
         maxSurge: 1
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.3.1
+    tag: 2.3.1-261-PIDM-1482-nodo-non-blocking-fault-code
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
