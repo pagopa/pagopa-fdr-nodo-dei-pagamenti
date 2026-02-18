@@ -1,1 +1,1 @@
-ThisBuild / version := "2.3.1-265-PIDM-1482-nodo-non-blocking-fault-code"
+ThisBuild / version := "2.3.1-266-PIDM-1482-nodo-non-blocking-fault-code"
