@@ -74,6 +74,7 @@ microservice-chart: &microservice-chart
   envConfig:
     AZURE_INSIGHTS_ENABLED: "true"
     APPLICATIONINSIGHTS_ROLE_NAME: "fdr-nodo"
+    APP_LOGGING_LEVEL: "DEBUG"
     MANAGEMENT_HTTP_PORT: "8558"
     MANAGEMENT_HTTP_BIND_HOST: "0.0.0.0"
     MANAGEMENT_HTTP_BIND_PORT: "8558"
