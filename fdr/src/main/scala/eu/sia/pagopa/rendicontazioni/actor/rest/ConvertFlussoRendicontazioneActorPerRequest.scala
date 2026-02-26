@@ -315,12 +315,11 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             if (responseBody.esito.equals("OK")) {
               Future.successful()
             } else {
-              val errorCode =
-                if (responseBody.fault.exists(_.faultCode == "PPT_SEMANTICA")) {
-                  StatusCodes.UnprocessableEntity.intValue
-                } else
-                  StatusCodes.InternalServerError.intValue
-              throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + responseBody.esito + "; " + responseBody.fault, errorCode)
+              log.warn(s"RESPONSE ${responseBody.fault}");
+              if (responseBody.fault.exists(_.faultCode == "PPT_SEMANTICA") ) {
+                Future.successful()
+              }
+              throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + responseBody.esito + "; " + responseBody.fault, StatusCodes.InternalServerError.intValue)
             }
           case Failure(e) =>
             throw RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e)
