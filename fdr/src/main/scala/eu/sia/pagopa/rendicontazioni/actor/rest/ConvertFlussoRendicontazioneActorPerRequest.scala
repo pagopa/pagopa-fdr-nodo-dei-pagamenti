@@ -312,23 +312,15 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
         parseResponseNexi(response.payload.get) match {
           case Success(v) =>
             val responseBody = v.get
-            if (responseBody.esito.equals("OK")) {
+            if (
+              responseBody.esito.equals("OK") ||
+              responseBody.fault.exists(f =>
+                f.faultCode == "PPT_SEMANTICA" &&
+                  f.description.exists(_.contains("flusso di rendicontazione gia' presente")))
+            ) {
               Future.successful()
             } else {
-              responseBody.fault.foreach { f =>
-                log.warn(s"faultCode: ${f.faultCode}")
-                log.warn(s"faultString: ${f.faultString}")
-                log.warn(s"description: ${f.description}")
-              }
-              if (
-                responseBody.fault.exists(f =>
-                    f.faultCode == "PPT_SEMANTICA" &&
-                      f.description.exists(_.contains("flusso di rendicontazione gia' presente")))
-              ) {
-                Future.successful()
-              } else {
-                throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + responseBody.esito + "; " + responseBody.fault, StatusCodes.InternalServerError.intValue)
-              }
+              throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + responseBody.esito + "; " + responseBody.fault, StatusCodes.InternalServerError.intValue)
             }
           case Failure(e) =>
             throw RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e)
