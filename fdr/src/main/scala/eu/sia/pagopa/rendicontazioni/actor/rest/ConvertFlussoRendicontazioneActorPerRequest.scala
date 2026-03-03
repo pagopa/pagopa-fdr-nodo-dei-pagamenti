@@ -150,7 +150,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
           flow.sender.pspId,
           flow.sender.pspBrokerId,
           flow.sender.channelId,
-          if (channel != null) channel.password  else "PLACEHOLDER",
+          if (channel != null) channel.password else "PLACEHOLDER",
           flow.receiver.organizationId,
           flow.name,
           DatatypeFactory.newInstance().newXMLGregorianCalendar(flow.date),
@@ -198,34 +198,34 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             val pmae = RestException(DigitPaErrorCodes.description(DigitPaErrorCodes.PPT_SYSTEM_ERROR), StatusCodes.InternalServerError.intValue, cause)
             Future.successful(generateErrorResponse(Some(pmae)))
         }).map {
-          case sr: RestResponse =>
-            callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
-            logEndProcess(sr)
-            replyTo ! sr
-            complete()
-          case (sr: RestResponse, nifr: NodoInviaFlussoRendicontazione, nifr2str: String, rendicontazioneSaved: Rendicontazione) =>
-            callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
-            logEndProcess(sr)
+        case sr: RestResponse =>
+          callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
+          logEndProcess(sr)
+          replyTo ! sr
+          complete()
+        case (sr: RestResponse, nifr: NodoInviaFlussoRendicontazione, nifr2str: String, rendicontazioneSaved: Rendicontazione) =>
+          callTrace(traceInterfaceRequest, reActor, req, reFlow.get, req.reExtra)
+          logEndProcess(sr)
 
-            Future {
-              if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
-                // send data to history
-                actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
-                  .tell(
-                    FdREventToHistory(
-                      sessionId = req.sessionId,
-                      nifr = nifr,
-                      soapRequest = nifr2str,
-                      insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
-                      elaborate = false,
-                      retry = 0
-                    ),
-                    null)
-              }
+          Future {
+            if (rendicontazioneSaved.stato.equals(RendicontazioneStatus.VALID)) {
+              // send data to history
+              actorProps.routers(BootstrapUtil.actorRouter(BootstrapUtil.actorClassId(classOf[FdRMetadataActor])))
+                .tell(
+                  FdREventToHistory(
+                    sessionId = req.sessionId,
+                    nifr = nifr,
+                    soapRequest = nifr2str,
+                    insertedTimestamp = rendicontazioneSaved.insertedTimestamp,
+                    elaborate = false,
+                    retry = 0
+                  ),
+                  null)
             }
-            replyTo ! sr
-            complete()
-        }
+          }
+          replyTo ! sr
+          complete()
+      }
   }
 
   private def callTrace(callback: (ActorRef, RestRequest, Re, ReExtra) => Unit,
@@ -315,9 +315,11 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             if (responseBody.esito.equals("OK")) {
               Future.successful()
             } else {
-              log.warn(s"RESPONSE ${responseBody.fault}");
-              val fault = responseBody.fault.get
-              if (fault.exists(_.faultCode == "PPT_SEMANTICA") && fault.exists(_.description.contains("flusso di rendicontazione gia' presente"))) {
+              if (
+                responseBody.fault.exists(f =>
+                    f.faultCode == "PPT_SEMANTICA" &&
+                    f.description.contains("flusso di rendicontazione gia' presente"))
+              ) {
                 Future.successful()
               }
               throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + responseBody.esito + "; " + responseBody.fault, StatusCodes.InternalServerError.intValue)
