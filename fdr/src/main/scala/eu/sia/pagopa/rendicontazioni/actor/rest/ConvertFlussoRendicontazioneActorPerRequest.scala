@@ -316,7 +316,8 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
               Future.successful()
             } else {
               log.warn(s"RESPONSE ${responseBody.fault}");
-              if (responseBody.fault.exists(_.faultCode == "PPT_SEMANTICA") ) {
+              val fault = responseBody.fault.get
+              if (fault.exists(_.faultCode == "PPT_SEMANTICA") && fault.exists(_.description.contains("flusso di rendicontazione gia' presente"))) {
                 Future.successful()
               }
               throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + responseBody.esito + "; " + responseBody.fault, StatusCodes.InternalServerError.intValue)
