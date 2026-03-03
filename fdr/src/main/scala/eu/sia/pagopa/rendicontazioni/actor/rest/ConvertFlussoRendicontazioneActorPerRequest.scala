@@ -315,6 +315,12 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             if (responseBody.esito.equals("OK")) {
               Future.successful()
             } else {
+              responseBody.fault.foreach { f =>
+                log.warn(s"faultCode: ${f.faultCode}")
+                log.warn(s"faultString: ${f.faultString}")
+                log.warn(s"description: ${f.description}")
+                log.warn(s"detail: ${f.detail}")
+              }
               if (
                 responseBody.fault.exists(f =>
                     f.faultCode == "PPT_SEMANTICA" &&
