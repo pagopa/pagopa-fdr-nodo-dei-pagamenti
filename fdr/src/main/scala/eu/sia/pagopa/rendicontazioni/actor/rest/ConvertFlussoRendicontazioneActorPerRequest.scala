@@ -319,7 +319,6 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
                 log.warn(s"faultCode: ${f.faultCode}")
                 log.warn(s"faultString: ${f.faultString}")
                 log.warn(s"description: ${f.description}")
-                log.warn(s"detail: ${f.detail}")
               }
               if (
                 responseBody.fault.exists(f =>
