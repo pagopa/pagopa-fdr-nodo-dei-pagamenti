@@ -326,8 +326,9 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
                       f.description.exists(_.contains("flusso di rendicontazione gia' presente")))
               ) {
                 Future.successful()
+              } else {
+                throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + responseBody.esito + "; " + responseBody.fault, StatusCodes.InternalServerError.intValue)
               }
-              throw RestException("Response for nodoInviaFlussoRendicontazione was not successfully: " + responseBody.esito + "; " + responseBody.fault, StatusCodes.InternalServerError.intValue)
             }
           case Failure(e) =>
             throw RestException("Failed to parse nodoInviaFlussoRendicontazione response: " + e.getMessage, "", StatusCodes.InternalServerError.intValue, e)
