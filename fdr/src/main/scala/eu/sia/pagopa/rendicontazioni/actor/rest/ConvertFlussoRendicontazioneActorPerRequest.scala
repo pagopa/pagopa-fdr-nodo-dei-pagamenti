@@ -318,7 +318,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
               if (
                 responseBody.fault.exists(f =>
                     f.faultCode == "PPT_SEMANTICA" &&
-                    f.description.contains("flusso di rendicontazione gia' presente"))
+                      f.description.exists(_.contains("flusso di rendicontazione gia' presente"))
               ) {
                 Future.successful()
               }
