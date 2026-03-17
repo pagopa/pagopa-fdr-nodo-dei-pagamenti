@@ -316,7 +316,7 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
               responseBody.esito.equals("OK") ||
                 responseBody.fault.exists(f =>
                   f.faultCode == "PPT_SEMANTICA" &&
-                    f.description.exists(desc => desc.contains("gia' presente") || desc.contains("già aggiornato con dataOraFlusso"))
+                    f.description.exists(desc => desc.contains("gia' presente") || desc.contains("più aggiornato con dataOraFlusso"))
                 )
             ) {
               Future.successful()
