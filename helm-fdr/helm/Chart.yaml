@@ -2,8 +2,8 @@ apiVersion: v2
 name: fdr-chart
 description: Flussi di rendicontazione
 type: application
-version: 0.72.0
-appVersion: 2.3.3-282-PIDM-1482-fix-non-blocking-error
+version: 0.73.0
+appVersion: 2.3.3-283-PIDM-1482-fix-non-blocking-error
 dependencies:
   - name: microservice-chart
     version: 8.0.2
