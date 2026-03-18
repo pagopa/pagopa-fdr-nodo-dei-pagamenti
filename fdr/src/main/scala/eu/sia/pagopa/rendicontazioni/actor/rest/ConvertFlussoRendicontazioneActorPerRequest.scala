@@ -314,9 +314,10 @@ case class ConvertFlussoRendicontazioneActorPerRequest(repositories: Repositorie
             val responseBody = v.get
             if (
               responseBody.esito.equals("OK") ||
-              responseBody.fault.exists(f =>
-                f.faultCode == "PPT_SEMANTICA" &&
-                  f.description.exists(_.contains("flusso di rendicontazione gia' presente")))
+                responseBody.fault.exists(f =>
+                  f.faultCode == "PPT_SEMANTICA" &&
+                    f.description.exists(desc => desc.contains("gia' presente") || desc.contains("più aggiornato con dataOraFlusso"))
+                )
             ) {
               Future.successful()
             } else {
