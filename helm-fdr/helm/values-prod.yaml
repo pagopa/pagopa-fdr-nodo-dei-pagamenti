@@ -47,7 +47,27 @@ microservice-chart: &microservice-chart
     minReplica: 3
     maxReplica: 10
     pollingInterval: 10 # seconds
+    cooldownPeriod: 60 # keep additional replicas for a while after the traffic burst
     triggers:
+      # Scheduled pre-scaling window for the midnight UTC traffic peak.
+      - type: cron
+        metadata:
+          timezone: UTC
+          # Start pre-scaling 10 minutes before the expected midnight UTC burst.
+          start: "50 23 * * *"
+          # Keep the higher replica count until 00:20 UTC to cover the burst and its tail.
+          end: "20 0 * * *"
+          desiredReplicas: "5"
+      # Scheduled pre-scaling window for the midday UTC traffic peak
+      - type: cron
+        metadata:
+          timezone: UTC
+          # Start pre-scaling 10 minutes before the expected noon UTC burst.
+          start: "50 11 * * *"
+          # Keep the higher replica count until 12:20 UTC to absorb the post-peak tail.
+          end: "20 12 * * *"
+          desiredReplicas: "5"
+
       - type: cpu
         metricType: Utilization
         metadata:
@@ -57,15 +77,20 @@ microservice-chart: &microservice-chart
           #   metadata:
           #     value: "85"
     advanced:
+      # Do not immediately force the deployment back to the original replica count when a cron trigger ends
+      restoreToOriginalReplicaCount: false
       horizontalPodAutoscalerConfig:
         behavior:
           scaleDown:
+            # This avoids aggressive downscaling after a burst and reduces oscillations.
             stabilizationWindowSeconds: 300
             policies:
+              # Reduce replicas gradually: at most 1 pod every 20 seconds.
               - type: Pods
                 value: 1
                 periodSeconds: 20
           scaleUp:
+            # react immediately when triggers require more capacity.
             stabilizationWindowSeconds: 0
             policies:
               - type: Percent
