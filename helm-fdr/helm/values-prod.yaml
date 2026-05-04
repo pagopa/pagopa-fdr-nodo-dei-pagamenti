@@ -10,7 +10,7 @@ microservice-chart: &microservice-chart
         maxSurge: 1
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.3.5
+    tag: 2.3.6
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
@@ -67,7 +67,6 @@ microservice-chart: &microservice-chart
           # Keep the higher replica count until 13:00 UTC to absorb the post-peak tail.
           end: "0 13 * * *"
           desiredReplicas: "5"
-
       - type: cpu
         metricType: Utilization
         metadata:
