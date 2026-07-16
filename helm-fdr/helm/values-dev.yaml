@@ -10,7 +10,7 @@ microservice-chart: &microservice-chart
         maxSurge: 1
   image:
     repository: ghcr.io/pagopa/pagopa-fdr-nodo-dei-pagamenti
-    tag: 2.3.6
+    tag: 2.3.3
   canaryDelivery:
     create: false
   terminationGracePeriodSeconds: 140
@@ -37,11 +37,11 @@ microservice-chart: &microservice-chart
     create: true
   resources:
     requests:
-      memory: "1500Mi"
-      cpu: "200m"
+      memory: "640M"
+      cpu: "512m"
     limits:
       memory: "3Gi"
-      cpu: "500m"
+      cpu: "1Gi"
   autoscaling:
     enable: true
     minReplica: 1
