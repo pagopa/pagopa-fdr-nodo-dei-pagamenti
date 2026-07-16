@@ -37,11 +37,11 @@ microservice-chart: &microservice-chart
     create: true
   resources:
     requests:
-      memory: "640M"
-      cpu: "512m"
+      memory: "512Mi"
+      cpu: "200m"
     limits:
-      memory: "8Gi"
-      cpu: "2560m"
+      memory: "3Gi"
+      cpu: "500m"
   autoscaling:
     enable: true
     minReplica: 1
