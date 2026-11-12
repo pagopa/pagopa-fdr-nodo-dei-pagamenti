@@ -80,14 +80,7 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
       "serviceIdentifier" -> Constant.FDR_VERSION
     )
 
-    val tags: Map[String, String] = Map(
-      "processingStatus" -> "DA_ELABORARE",
-      "processingAttempt" -> "0",
-      "processingUpdatedAt" ->
-        java.time.Instant.now()
-          .truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
-          .toString
-    )
+
 
     val compressedBytes: Array[Byte] = Util.gzipContent(event.soapRequest.getBytes("UTF-8"))
 
@@ -95,10 +88,21 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
 
     val options = new BlobParallelUploadOptions(binaryData)
       .setMetadata(metadata.asJava)
-      .setTags(tags.asJava)
       .setRequestConditions(
         new BlobRequestConditions().setIfNoneMatch("*")
       )
+
+    if(event.elaborate) {
+      val tags: Map[String, String] = Map(
+        "processingStatus" -> "DA_ELABORARE",
+        "processingAttempt" -> "0",
+        "processingUpdatedAt" ->
+          java.time.Instant.now()
+            .truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+            .toString
+      )
+      options.setTags(tags.asJava);
+    }
 
     blobAsyncClient.uploadWithResponse(options)
       .subscribe(
