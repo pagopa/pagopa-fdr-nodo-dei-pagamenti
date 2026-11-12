@@ -11,6 +11,8 @@ import eu.sia.pagopa.common.repo.Repositories
 import eu.sia.pagopa.common.repo.re.model.Fdr1Metadata
 import eu.sia.pagopa.common.util.{Constant, Util}
 import eu.sia.pagopa.ActorProps
+import com.azure.storage.blob.options.BlobParallelUploadOptions
+import com.azure.storage.blob.models.BlobRequestConditions
 
 import scala.jdk.CollectionConverters._
 import java.util.UUID
@@ -100,8 +102,8 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
 
     blobAsyncClient.uploadWithResponse(options)
       .subscribe(
-        _ => log.info(s"FDR1 blob uploaded successfully: $filename, tags: $tags"),
-        error => log.error(s"Error uploading FDR1 blob: $filename", error)
+        _ => log.info(s"FDR1 blob uploaded successfully: $filename"),
+        error => log.error(error, s"Error uploading FDR1 blob: $filename")
       )
 
     Some(
