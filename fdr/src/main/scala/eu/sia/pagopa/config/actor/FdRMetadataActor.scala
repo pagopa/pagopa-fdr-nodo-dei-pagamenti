@@ -65,39 +65,53 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
 
     val filename = s"${event.nifr.identificativoFlusso}_${UUID.randomUUID().toString}.xml.zip"
 
-    val blobAsyncClient = Some(new BlobClientBuilder()
+    val blobAsyncClient = new BlobClientBuilder()
       .connectionString(connectionString)
-      .blobName(filename).containerName(containerName)
-      .buildAsyncClient())
-    if (blobAsyncClient.isDefined) {
+      .blobName(filename)
+      .containerName(containerName)
+      .buildAsyncClient()
 
-      val metadata: Map[String, String] = Map(
-        "elaborate" -> event.elaborate.toString,
-        "sessionId" -> event.sessionId,
-        "insertedTimestamp" -> event.insertedTimestamp.toString,
-        "serviceIdentifier" -> Constant.FDR_VERSION
+    val metadata: Map[String, String] = Map(
+      "elaborate" -> event.elaborate.toString,
+      "sessionId" -> event.sessionId,
+      "insertedTimestamp" -> event.insertedTimestamp.toString,
+      "serviceIdentifier" -> Constant.FDR_VERSION
+    )
+
+    val tags: Map[String, String] = Map(
+      "processingStatus" -> "DA_ELABORARE",
+      "processingAttempt" -> "0",
+      "processingUpdatedAt" ->
+        java.time.Instant.now()
+          .truncatedTo(java.time.temporal.ChronoUnit.SECONDS)
+          .toString
+    )
+
+    val compressedBytes: Array[Byte] = Util.gzipContent(event.soapRequest.getBytes("UTF-8"))
+
+    val binaryData: BinaryData = BinaryData.fromBytes(compressedBytes)
+
+    val options = new BlobParallelUploadOptions(binaryData)
+      .setMetadata(metadata.asJava)
+      .setTags(tags.asJava)
+      .setRequestConditions(
+        new BlobRequestConditions().setIfNoneMatch("*")
       )
 
-      var compressedBytes: Array[Byte] = Util.gzipContent(event.soapRequest.getBytes("UTF-8"))
+    blobAsyncClient.uploadWithResponse(options)
+      .subscribe(
+        _ => log.info(s"FDR1 blob uploaded successfully: $filename, tags: $tags"),
+        error => log.error(s"Error uploading FDR1 blob: $filename", error)
+      )
 
-      val binaryData: BinaryData = BinaryData.fromBytes(compressedBytes)
-      blobAsyncClient.get.upload(binaryData, true)
-        .flatMap(_ => blobAsyncClient.get.setMetadata(metadata.asJava))
-        .subscribe()
-
-      val blobBodyRef = blobAsyncClient.map(bc => {
-        BlobBodyRef(Some(bc.getAccountName), Some(bc.getContainerName), Some(filename), compressedBytes.length)
-      })
-
-      // clear memory
-      compressedBytes = Array.empty[Byte]
-
-      blobBodyRef
-    }
-    else {
-      log.debug("Reschedule save fdr1-flow blob - problem to initialize blob async client")
-      Option.empty
-    }
+    Some(
+      BlobBodyRef(
+        Some(blobAsyncClient.getAccountName),
+        Some(blobAsyncClient.getContainerName),
+        Some(filename),
+        compressedBytes.length
+      )
+    )
   }
 
   override def receive: Receive = {
