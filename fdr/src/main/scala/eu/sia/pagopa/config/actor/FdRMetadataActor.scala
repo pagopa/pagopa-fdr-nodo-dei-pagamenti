@@ -94,7 +94,7 @@ final case class FdRMetadataActor(repositories: Repositories, actorProps: ActorP
 
     if(event.elaborate) {
       val tags: Map[String, String] = Map(
-        "processingStatus" -> "DA_ELABORARE",
+        "processingStatus" -> "PENDING",
         "processingAttempt" -> "0",
         "processingUpdatedAt" ->
           java.time.Instant.now()
