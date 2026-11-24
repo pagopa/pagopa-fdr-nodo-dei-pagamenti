@@ -18,6 +18,7 @@ class StaticUnitTests() extends AnyFlatSpec with should.Matchers {
     val now = Util.now().truncatedTo(ChronoUnit.SECONDS)
 
     val testDTF: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS")
+    val jsonDTF: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     val created = LocalDateTime.parse(testDTF.format(now))
     val sessionIdOriginal = UUID.randomUUID().toString
     val sessionId = UUID.randomUUID().toString
@@ -68,7 +69,7 @@ class StaticUnitTests() extends AnyFlatSpec with should.Matchers {
          |{
          |  "serviceIdentifier": "FDR001",
          |  "uniqueId": "$uniqueId",
-         |  "created": "${created.toString}",
+         |  "created": "${created.format(jsonDTF)}",
          |  "sessionId": "$sessionId",
          |  "eventType": "INTERFACE",
          |  "fdrStatus": null,
