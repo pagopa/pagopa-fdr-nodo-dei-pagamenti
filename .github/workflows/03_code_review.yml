@@ -75,6 +75,7 @@ jobs:
       - name: Sonar
         env:
           LIGHTBEND_KEY: ${{ secrets.LIGHTBEND_KEY }}
+          JAVA_TOOL_OPTIONS: "-Djava.security.manager=allow"
         run: |
           sbt "project fdr" \
           -Dsonar.organization="pagopa" \
